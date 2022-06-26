@@ -1,0 +1,21 @@
+{
+  "id": "readCsv",
+  "runnerId": "JsRunner",
+  "config": {
+    "jsFile": "lib/main.js",
+    "methodName": "readCsvFile"
+  },
+  "args": [
+    {
+      "id": "location",
+      "type": "string"
+    },
+    {
+      "id": "writer",
+      "type": "streamWriter",
+      "targetIds": [
+        "data"
+      ]
+    }
+  ]
+}

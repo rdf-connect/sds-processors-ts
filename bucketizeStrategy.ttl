@@ -1,0 +1,10 @@
+
+@prefix ex: <http://example.org/ns#> .
+@prefix ldes: <https://w3id.org/ldes#> .
+@prefix tree: <https://w3id.org/tree#> .
+
+ex:BucketizeStrategy a ldes:BucketizeStrategy;
+    ldes:bucketType ldes:subject;
+    ldes:bucketProperty ldes:bucket2;
+    tree:path ex:x;
+    ldes:pageSize 50.
