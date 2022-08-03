@@ -1,8 +1,10 @@
-import { XSD } from "@treecg/types";
+import { SDS, XSD } from "@treecg/types";
 import { parse } from "csv-parse";
 import { createReadStream } from "fs";
-import { DataFactory, Quad } from "n3";
-import { SW } from "./core";
+import { DataFactory, Quad, Term, Writer } from "n3";
+import { blankNode, SW } from "./core";
+
+import * as jsonld from 'jsonld';
 
 const { namedNode, literal, quad } = DataFactory;
 
@@ -37,13 +39,17 @@ export function readCsvAsRDF(location: string, sw: SW<Data>): Promise<void> {
 
     createTimedOutPusher(things, sw, (things: Quad[]) => [...things, new Quad(things[0].subject, namedNode("http://example.org/ns#time"), literal(new Date().toISOString(), XSD.terms.dateTime))]);
 
-    const handler = (data: any[]) => {
+    const handler = async (data: any[]) => {
         const out: Quad[] = [];
         const id = namedNode("http://example.org/id/" + Math.random());
 
         for (let i = 0; i < Math.min(data.length, headers.length); i++) {
             out.push(new Quad(id, namedNode("http://example.org/ns#" + headers[i]), literal(data[i])))
         }
+
+        const newId = blankNode();
+        out.push(quad(newId, SDS.terms.payload, id));
+        out.push(quad(newId, SDS.terms.stream, namedNode("http://me#csvStream")));
 
         things.push(out);
     };
@@ -68,3 +74,4 @@ export function readCsvFile(location: string, sw: SW<Data>): Promise<void> {
 
     return readCsv(location, handler);
 }
+

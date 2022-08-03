@@ -1,5 +1,5 @@
 import { Stream, Writer } from "@treecg/connector-types";
-import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term } from "n3";
+import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term, Writer as NWriter  } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 
 
@@ -8,7 +8,7 @@ export const { namedNode, blankNode, literal } = DataFactory;
 
 export type NBNode = NamedNode | BlankNode;
 
-export type ShapeTransform = (id: NBNode | undefined, store: Store) => NBNode;
+export type ShapeTransform = (id: NBNode | undefined, store: Store) => NBNode | undefined;
 export type AddProcess = (used: NBNode | undefined, store: Store) => NBNode;
 export type DatasetTransform = (used: NBNode | undefined, store: Store) => NBNode;
 
@@ -57,17 +57,19 @@ function getLatestDataset(streamId: Term, store: Store): NBNode | undefined {
     return <NBNode>datasets[0];
 }
 
-export function transformMetadata(shT: ShapeTransform, gp: AddProcess, itemType: string, datasetT?: DatasetTransform): QuadsTransform {
+export function transformMetadata(streamId: NBNode, sourceStream: NamedNode | undefined, itemType: string, gp: AddProcess, shT?: ShapeTransform, datasetT?: DatasetTransform): QuadsTransform {
     return (quads: Quad[]) => {
         const store = new Store();
+        console.log("handling metadata transform");
+        console.log(new NWriter().quadsToString(quads));
         store.addQuads(quads);
 
-        const latest = getLatestStream(store);
+        const latest = sourceStream || getLatestStream(store);
         const latestShape = !!latest ? getLatestShape(latest, store) : undefined;
 
         const activityId = gp(latest, store);
 
-        const newShape = shT(latestShape, store);
+        const newShape = shT && shT(latestShape, store) || undefined;
 
         let datasetId = !!latest ? getLatestDataset(latest, store) : undefined;
         if (datasetId && datasetT) {
@@ -76,7 +78,6 @@ export function transformMetadata(shT: ShapeTransform, gp: AddProcess, itemType:
 
 
         const blank = store.createBlankNode();
-        const streamId = store.createBlankNode();
 
         store.addQuad(streamId, RDF.terms.type, SDS.terms.Stream);
         if (datasetId) {
@@ -86,7 +87,9 @@ export function transformMetadata(shT: ShapeTransform, gp: AddProcess, itemType:
         store.addQuad(streamId, PROV.terms.wasGeneratedBy, activityId);
 
         store.addQuad(blank, RDF.terms.type, namedNode(itemType));
-        store.addQuad(blank, SDS.terms.shape, newShape);
+
+        if (newShape)
+            store.addQuad(blank, SDS.terms.shape, newShape);
 
 
         const out: Quad[] = [];
@@ -121,3 +124,4 @@ export type SR<T> = {
 export type SW<T> = {
     [P in keyof T]: Writer<T[P]>;
 }
+

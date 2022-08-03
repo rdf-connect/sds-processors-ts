@@ -6,5 +6,7 @@
 ex:BucketizeStrategy a ldes:BucketizeStrategy;
     ldes:bucketType ldes:subject;
     ldes:bucketProperty ldes:bucket2;
+    ldes:bucketBase <subject->;
     tree:path ex:x;
-    ldes:pageSize 50.
+    ldes:pageSize 2.
+

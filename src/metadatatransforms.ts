@@ -1,7 +1,8 @@
-import { BlankNode, NamedNode, Quad, Store, Term } from "n3";
+import { BlankNode, NamedNode, Quad, Store, Term, DataFactory } from "n3";
 import { createProperty, literal, NBNode, SR, SW, transformMetadata } from "./core";
 import { EX, PPLAN, PROV, RDF, SHACL, XSD } from "@treecg/types";
 
+const { namedNode } = DataFactory;
 
 function shapeTransform(id: Term | undefined, store: Store): BlankNode | NamedNode {
     const newId = store.createBlankNode();
@@ -38,8 +39,10 @@ function addProcess(id: NBNode | undefined, store: Store): NBNode {
 }
 
 type Data = { "metadata": Quad[] };
-export function updateMetadata(sr: SR<Data>, sw: SW<Data>) {
-    const f = transformMetadata(shapeTransform, addProcess, "sds:Member");
+export function updateMetadata(sr: SR<Data>, sw: SW<Data>, sourceStream: string | undefined, newStream: string) {
+    const sourceStreamName = sourceStream ? namedNode(sourceStream) : undefined;
+    const newStreamName = namedNode(newStream);
+    const f = transformMetadata(newStreamName, sourceStreamName, "sds:Member", addProcess, shapeTransform);
 
     sr.metadata.data(
         quads => sw.metadata.push(f(quads))
