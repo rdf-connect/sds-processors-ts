@@ -1,10 +1,12 @@
 import { createBucketizerLD } from "@treecg/bucketizers";
 import { writeFileSync } from "fs";
 import { readFile } from "fs/promises";
-import { Quad, Parser, Store, DataFactory, Writer } from "n3";
+import { Quad, Parser, Store, DataFactory } from "n3";
+import * as N3 from "n3";
 import { literal, NBNode, SR, SW, transformMetadata } from "./core";
 import { Cleanup } from './exitHandler';
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
+import { Stream, Writer } from "@treecg/connector-types";
 
 type Data = { "data": Quad[], "metadata": Quad[] };
 const { namedNode, quad } = DataFactory;
@@ -20,8 +22,10 @@ async function readState(path: string): Promise<any | undefined> {
 }
 
 async function writeState(path: string, content: any): Promise<void> {
-    const str = JSON.stringify(content);
-    writeFileSync(path, str, { encoding: "utf-8" })
+    if (path) {
+        const str = JSON.stringify(content);
+        writeFileSync(path, str, { encoding: "utf-8" })
+    }
 }
 
 function addProcess(id: NBNode | undefined, store: Store, strategyId: NBNode, bucketizeConfig: Quad[]): NBNode {
@@ -40,19 +44,29 @@ function addProcess(id: NBNode | undefined, store: Store, strategyId: NBNode, bu
 
     return newId;
 }
+function parseQuads(quads: string): Quad[] {
+    console.log("Parsing quads!");
+    const parser = new N3.Parser();
+    return parser.parse(quads);
+}
 
 export async function doTheBucketization(
-    sr: SR<Data>,
-    sw: SW<Data>,
+    dataReader: Stream<Quad[]>,
+    metadataReader: Stream<string>,
+    dataWriter: Writer<Quad[]>,
+    metadataWriter: Writer<Quad[]>,
     location: string,
     savePath: string,
     sourceStream: string | undefined,
     resultingStream: string
 ) {
-    console.error("location");
-    console.error(location)
+    const sr = { metadata: metadataReader, data: dataReader };
+    const sw = { metadata: metadataWriter, data: dataWriter };
+
+    console.log("Reader", sr); console.log("Writer", sw);
+    console.log("location", location, "savePath", savePath, "sourceStream", sourceStream, "resultingStream", resultingStream);
+
     const content = await readFile(location, { encoding: "utf-8" });
-    console.error(content)
     const quads = new Parser().parse(content);
 
     const quadMemberId = <NBNode>quads.find(quad =>
@@ -66,11 +80,11 @@ export async function doTheBucketization(
         (x, y) => addProcess(x, y, quadMemberId, quads)
     );
     sr.metadata.data(
-        quads => sw.metadata.push(f(quads))
+        quads => sw.metadata.push(f(parseQuads(quads)))
     );
 
     if (sr.metadata.lastElement) {
-        sw.metadata.push(f(sr.metadata.lastElement));
+        sw.metadata.push(f(parseQuads(sr.metadata.lastElement)));
     }
 
     const state = await readState(savePath);
@@ -79,10 +93,10 @@ export async function doTheBucketization(
     if (state)
         bucketizer.importState(state);
 
-    Cleanup(async () => {
-        const state = bucketizer.exportState()
-        await writeState(savePath, state);
-    })
+    // Cleanup(async () => {
+    //     const state = bucketizer.exportState()
+    //     await writeState(savePath, state);
+    // })
 
     sr.data.data(async (t: Quad[]) => {
         if (!t.length) return;
@@ -91,10 +105,12 @@ export async function doTheBucketization(
         if (members.length > 1) {
             console.error("Detected more members ids than expected");
         }
+
         if (members.length === 0) return;
 
         const sub = members[0].value;
         const extras = <Quad[]><unknown>bucketizer.bucketize(t, sub);
+
 
         const recordId = extras.find(q => q.predicate.equals(SDS.terms.payload))!.subject;
 
@@ -103,7 +119,6 @@ export async function doTheBucketization(
         t.push(quad(recordId, RDF.terms.type, SDS.terms.Member));
 
         console.log("Pushing thing bucketized!")
-        console.log(new Writer().quadsToString(t));
         await sw.data.push(t);
     });
 }

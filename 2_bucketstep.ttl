@@ -1,0 +1,80 @@
+@prefix js: <https://w3id.org/conn/js#> .
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <https://w3id.org/conn#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+
+js:Bucketize a js:JsProcess;
+  js:file "./lib/main.js";
+  js:function "doTheBucketization";
+  js:location <./>;
+  js:mapping [
+    a fno:Mapping;
+    fno:parameterMapping [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:dataInput;
+      fnom:implementationParameterPosition "0"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:metadataInput ;
+      fnom:implementationParameterPosition "1"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:dataOutput ;
+      fnom:implementationParameterPosition "2"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:metadataOutput ;
+      fnom:implementationParameterPosition "3"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:bucketizeStrategy ;
+      fnom:implementationParameterPosition "4"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:savePath ;
+      fnom:implementationParameterPosition "5"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:inputStreamId ;
+      fnom:implementationParameterPosition "6"^^xsd:int
+    ], [
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:outputStreamId ;
+      fnom:implementationParameterPosition "7"^^xsd:int
+    ]
+  ].
+
+[] a sh:NodeShape;
+  sh:targetClass js:Bucketize;
+  sh:property [
+    sh:class :ReaderChannel;
+    sh:path js:dataInput;
+    sh:name "Data input channel";
+  ], [
+    sh:class :ReaderChannel;
+    sh:path js:metadataInput;
+    sh:name "Metadata input channel";
+  ], [
+    sh:class :WriterChannel;
+    sh:path js:dataOutput;
+    sh:name "Data output channel";
+  ], [
+    sh:class :WriterChannel;
+    sh:path js:metadataOutput;
+    sh:name "Metadata output channel";
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:bucketizeStrategy;
+    sh:name "Location of bucketization strategy file";
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:inputStreamId;
+    sh:name "ID of Stream to transform";
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:outputStreamId;
+    sh:name "ID of Stream to produce";
+  ].
+

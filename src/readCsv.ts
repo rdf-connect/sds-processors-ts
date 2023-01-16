@@ -1,10 +1,11 @@
 import { SDS, XSD } from "@treecg/types";
 import { parse } from "csv-parse";
 import { createReadStream } from "fs";
-import { DataFactory, Quad, Term, Writer } from "n3";
+import { DataFactory, Quad, Term } from "n3";
 import { blankNode, SW } from "./core";
 
-import * as jsonld from 'jsonld';
+import { Writer } from "@treecg/connector-types";
+import { join } from "path";
 
 const { namedNode, literal, quad } = DataFactory;
 
@@ -12,19 +13,21 @@ type Data<T = Quad[]> = { data: T };
 
 function createTimedOutPusher<T extends Quad[]>(things: T[], sw: SW<Data<T>>, onSend?: (item: T) => T) {
     return setTimeout(() => {
-        setInterval(() => {
+        setInterval(async () => {
             const thing = things.shift()
             if (thing) {
                 const foobar = onSend ? onSend(thing) : thing
-                sw.data.push(foobar);
+                await sw.data.push(foobar);
             }
         }, 1000)
     }, 2000);
 }
 
 function readCsv(location: string, handler: (item: any[]) => void): Promise<void> {
+    const cwd = process.cwd();
+
     return new Promise(res => {
-        createReadStream(location)
+        createReadStream(join(cwd, location))
             .pipe(parse({ delimiter: ",", fromLine: 2 }))
             .on("data", handler)
             .on("close", () => {
@@ -33,7 +36,8 @@ function readCsv(location: string, handler: (item: any[]) => void): Promise<void
     });
 }
 
-export function readCsvAsRDF(location: string, sw: SW<Data>): Promise<void> {
+export function readCsvAsRDF(location: string, data: Writer<Quad[]>): Promise<void> {
+    const sw = { data };
     let headers: string[] = ["x", "y"];
     const things: Quad[][] = [];
 
@@ -57,7 +61,8 @@ export function readCsvAsRDF(location: string, sw: SW<Data>): Promise<void> {
     return readCsv(location, handler);
 }
 
-export function readCsvFile(location: string, sw: SW<Data>): Promise<void> {
+export function readCsvFile(location: string, data: Writer<Quad[]>): Promise<void> {
+    const sw = { data };
     let headers: string[] = ["x", "y"];
     const things: any[] = [];
 

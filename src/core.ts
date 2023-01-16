@@ -1,5 +1,5 @@
 import { Stream, Writer } from "@treecg/connector-types";
-import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term, Writer as NWriter  } from "n3";
+import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term, Writer as NWriter } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 
 
@@ -27,6 +27,9 @@ function getLatestStream(store: Store): NBNode | undefined {
 }
 
 function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
+    console.log("Found predicates for stream", streamId,
+        store.getPredicates(streamId, null, null)
+    )
     const shapes = store.getObjects(streamId, SDS.terms.carries, new DefaultGraph());
 
     if (shapes.length !== 1) {
@@ -43,6 +46,7 @@ function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
         return
     }
 
+    console.log("Found valid stream", shapeIds[0]);
     return <NBNode>shapeIds[0]
 }
 
@@ -61,7 +65,6 @@ export function transformMetadata(streamId: NBNode, sourceStream: NamedNode | un
     return (quads: Quad[]) => {
         const store = new Store();
         console.log("handling metadata transform");
-        console.log(new NWriter().quadsToString(quads));
         store.addQuads(quads);
 
         const latest = sourceStream || getLatestStream(store);
@@ -95,6 +98,7 @@ export function transformMetadata(streamId: NBNode, sourceStream: NamedNode | un
         const out: Quad[] = [];
         for (let q of store) out.push(<any>q);
 
+        console.log("returning new metadata");
         return out;
     }
 }
