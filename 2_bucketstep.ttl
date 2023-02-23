@@ -5,6 +5,13 @@
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 
+<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
+<> :install [
+  a :GitInstall;
+  :url <https://github.com/ajuvercr/sds-processors.git>;
+  :build "npm install; npm run build";
+].
+
 js:Bucketize a js:JsProcess;
   js:file "./lib/main.js";
   js:function "doTheBucketization";

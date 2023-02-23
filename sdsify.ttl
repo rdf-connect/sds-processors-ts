@@ -4,6 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
 <> :install [
@@ -12,31 +13,48 @@
   :build "npm install; npm run build";
 ].
 
-js:ReadRDFCsv a js:JsProcess;
-  js:file "./lib/main.js";
-  js:function "readCsvAsRDF";
+js:Sdsify a js:JsProcess;
+  js:file <./lib/sdsify.js>;
+  js:function "sdsify";
   js:location <./>;
   js:mapping [
     a fno:Mapping;
     fno:parameterMapping [
       a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:csvLocation;
+      fnom:functionParameter js:input;
       fnom:implementationParameterPosition "0"^^xsd:int
     ],[
       a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:dataOutput;
+      fnom:functionParameter js:output;
       fnom:implementationParameterPosition "1"^^xsd:int
+    ],[
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:stream;
+      fnom:implementationParameterPosition "2"^^xsd:int
+    ],[
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:objectType;
+      fnom:implementationParameterPosition "3"^^xsd:int
     ]
   ].
 
 [] a sh:NodeShape;
-  sh:targetClass js:ReadRDFCsv;
+  sh:targetClass js:Sdsify;
   sh:property [
-    sh:class :WriterChannel;
-    sh:path js:dataOutput;
+    sh:class :ReaderChannel;
+    sh:path js:input;
     sh:name "Data input channel";
   ], [
+    sh:class :WriterChannel;
+    sh:path js:output;
+    sh:name "Data output channel";
+  ], [
     sh:datatype xsd:string;
-    sh:path js:csvLocation;
-    sh:name "Location of the csv file";
+    sh:path js:stream;
+    sh:name "Stream to add these members to";
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:objectType;
+    sh:name "Convert only these objects";
   ].
+

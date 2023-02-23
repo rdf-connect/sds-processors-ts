@@ -3,7 +3,7 @@ import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term, Wri
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 
 
-export const { namedNode, blankNode, literal } = DataFactory;
+export const { namedNode, blankNode, literal, quad } = DataFactory;
 
 
 export type NBNode = NamedNode | BlankNode;
