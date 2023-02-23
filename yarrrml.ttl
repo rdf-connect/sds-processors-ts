@@ -1,0 +1,49 @@
+@prefix js: <https://w3id.org/conn/js#> .
+@prefix fno: <https://w3id.org/function/ontology#> .
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+@prefix : <https://w3id.org/conn#> .
+@prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/4a417b156e3d2471ef91e7f8da0db6a93f0e0c1d/ontology.ttl>. 
+<> :install [
+  a :GitInstall;
+  :url <https://github.com/ajuvercr/sds-processors.git>;
+  :build "npm install; npm run build";
+].
+
+<inputProperty> 
+    sh:class :ReaderChannel;
+    sh:path js:input;
+    sh:name "Data input channel".
+
+<inputMapping> 
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:input;
+      fnom:implementationParameterPosition "0"^^xsd:int.
+
+<outputProperty>
+    sh:class :WriterChannel;
+    sh:path js:output;
+    sh:name "Data output channel".
+
+<outputMapping> 
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:output;
+      fnom:implementationParameterPosition "1"^^xsd:int.
+
+
+js:Y2R a js:JsProcess;
+  js:file <./js/yarrrml.js>;
+  js:function "yarrml";
+  js:location <./>;
+  js:mapping [
+    a fno:Mapping;
+    fno:parameterMapping <inputMapping>, <outputMapping>;
+  ].
+
+[] a sh:NodeShape;
+  sh:targetClass js:Y2R;
+  sh:property <inputProperty>, <outputProperty>.
+

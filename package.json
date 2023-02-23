@@ -3,6 +3,7 @@
     "build": "tsc"
   },
   "dependencies": {
+    "@rmlio/yarrrml-parser": "^1.4.0",
     "@treecg/bucketizers": "^2.1.1",
     "@treecg/connector-types": "^1.1.1",
     "@treecg/types": "^0.4.0",
