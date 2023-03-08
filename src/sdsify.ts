@@ -39,19 +39,25 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
 
   input.data(async input => {
     const quads = maybe_parse(input);
-    console.log("Got input", quads.length, "quads");
+    console.log("sdsify: Got input", quads.length, "quads");
     const per_subject: {[id: string]: RDF.Quad[]} = {};
-    const tracker = new Tracker(quads.length);
     for(let quad of quads) {
       if(!per_subject[quad.subject.value]) {
         per_subject[quad.subject.value] = [];
       }
       per_subject[quad.subject.value].push(quad);
-      tracker.inc();
     }
+
+    let members = 0;
+
+    let first = true;
 
     for(let key of Object.keys(per_subject)) {
       const quads = per_subject[key];
+      if (first) {
+        first = false;
+        console.log("predicates", quads.map(q => q.predicate.value));
+      }
         const blank = blankNode();
         quads.push(
           DataFactory.quad(
@@ -68,7 +74,10 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
 
       const str = new NWriter().quadsToString(quads);
       await output.push(str);
+      members += 1;
     }
+
+    console.log("sdsify: pushed ", members, "members");
 
   });
 }

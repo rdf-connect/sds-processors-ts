@@ -1,12 +1,17 @@
-
 @prefix ex: <http://example.org/ns#> .
 @prefix ldes: <https://w3id.org/ldes#> .
 @prefix tree: <https://w3id.org/tree#> .
 
-ex:BucketizeStrategy a ldes:BucketizeStrategy;
+ex:MultiBucketizeStrategy a ldes:BucketizeStrategy;
+  ldes:bucketType ldes:multi;
+  ldes:configs (
+    ex:BucketizeStrategy
+    ex:BucketizeStrategy
+  ) .
+
+ex:BucketizeStrategy
     ldes:bucketType ldes:subject;
     ldes:bucketProperty ldes:bucket2;
-    ldes:bucketBase <subject->;
     tree:path ex:x;
     ldes:pageSize 2.
 
