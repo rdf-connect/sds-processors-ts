@@ -4,6 +4,7 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
 <> :install [
@@ -13,7 +14,7 @@
 ].
 
 js:Bucketize a js:JsProcess;
-  js:file "./lib/main.js";
+  js:file <./lib/main.js>;
   js:function "doTheBucketization";
   js:location <./>;
   js:mapping [

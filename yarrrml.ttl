@@ -13,25 +13,26 @@
   :build "npm install; npm run build";
 ].
 
-<inputProperty> 
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Data input channel".
 
 <inputMapping> 
       a fnom:PositionParameterMapping ;
       fnom:functionParameter js:input;
       fnom:implementationParameterPosition "0"^^xsd:int.
 
+<outputMapping> 
+      a fnom:PositionParameterMapping ;
+      fnom:functionParameter js:output;
+      fnom:implementationParameterPosition "1"^^xsd:int.
+
 <outputProperty>
     sh:class :WriterChannel;
     sh:path js:output;
     sh:name "Data output channel".
 
-<outputMapping> 
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:output;
-      fnom:implementationParameterPosition "1"^^xsd:int.
+<inputProperty> 
+    sh:class :ReaderChannel;
+    sh:path js:input;
+    sh:name "Data input channel".
 
 
 js:Y2R a js:JsProcess;
@@ -46,4 +47,5 @@ js:Y2R a js:JsProcess;
 [] a sh:NodeShape;
   sh:targetClass js:Y2R;
   sh:property <inputProperty>, <outputProperty>.
+
 
