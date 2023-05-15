@@ -5,6 +5,7 @@
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc: <http://purl.org/dc/terms/>.
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
 <> :install [
@@ -14,6 +15,8 @@
 ].
 
 js:Sdsify a js:JsProcess;
+  dc:title "Sdsify processor";
+  dc:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
   js:file <./lib/sdsify.js>;
   js:function "sdsify";
   js:location <./>;

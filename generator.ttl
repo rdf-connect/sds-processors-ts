@@ -5,6 +5,7 @@
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc: <http://purl.org/dc/terms/>.
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/4a417b156e3d2471ef91e7f8da0db6a93f0e0c1d/ontology.ttl>. 
 
@@ -26,6 +27,8 @@
 
 
 js:Generate a js:JsProcess;
+  dc:title "Simple Data Generator";
+  dc:description "Simple RDF data generator used for testing. This processor will peridically generate RDF objects with 3 to 4 predicates.";
   js:file <./lib/generator.js>;
   js:function "generate";
   js:location <./>;

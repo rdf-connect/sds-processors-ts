@@ -5,6 +5,7 @@
 @prefix : <https://w3id.org/conn#> .
 @prefix sh: <http://www.w3.org/ns/shacl#> .
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix dc: <http://purl.org/dc/terms/>.
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/4a417b156e3d2471ef91e7f8da0db6a93f0e0c1d/ontology.ttl>. 
 
@@ -36,6 +37,8 @@
 
 
 js:Substitute a js:JsProcess;
+  dc:title "String substitute processor";
+  dc:description "Simple string manipulation processor. Transform a stream by applying the string substituation on the messages. The matching string can be a regex.";
   js:file <./lib/textManipulators.js>;
   js:function "substitute";
   js:location <./>;
@@ -76,6 +79,8 @@ js:Substitute a js:JsProcess;
 
 
 js:Envsub a js:JsProcess;
+  dc:title "Environment substitute processor";
+  dc:description "Substitutes all declared environment variables to their respective values.";
   js:file <./lib/textManipulators.js>;
   js:function "envsub";
   js:location <./>;
