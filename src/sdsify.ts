@@ -104,6 +104,6 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
     }
 
     console.log("sdsify: pushed ", membersCount, "members");
-
   });
+  input.on("end", () => output.disconnect());
 }

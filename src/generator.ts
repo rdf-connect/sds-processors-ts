@@ -38,8 +38,7 @@ function generateMember(i: number, includeT: boolean) {
 
 
 export async function generate(writer: Writer<string>, countstr?: string, waitstr?: string, withTimestamp?: string) {
-  // const withT = withTimestamp ? withTimestamp.toLowerCase() === "true" : false;
-  const withT = true;
+  const withT = withTimestamp ? withTimestamp.toLowerCase() === "true" : false;
 
   (async function() {
     console.log(`generate starting`);

@@ -36,7 +36,7 @@ function readCsv(location: string, handler: (item: any[]) => void): Promise<void
     });
 }
 
-export function readCsvAsRDF(location: string, data: Writer<Quad[]>): Promise<void> {
+export function readCsvAsRDF(location: string, data: Writer<Quad[]>) {
     const sw = { data };
     let headers: string[] = ["x", "y"];
     const things: Quad[][] = [];
@@ -58,10 +58,10 @@ export function readCsvAsRDF(location: string, data: Writer<Quad[]>): Promise<vo
         things.push(out);
     };
 
-    return readCsv(location, handler);
+    readCsv(location, handler);
 }
 
-export function readCsvFile(location: string, data: Writer<Quad[]>): Promise<void> {
+export function readCsvFile(location: string, data: Writer<Quad[]>) {
     const sw = { data };
     let headers: string[] = ["x", "y"];
     const things: any[] = [];
@@ -77,6 +77,6 @@ export function readCsvFile(location: string, data: Writer<Quad[]>): Promise<voi
         things.push(out);
     };
 
-    return readCsv(location, handler);
+    readCsv(location, handler);
 }
 

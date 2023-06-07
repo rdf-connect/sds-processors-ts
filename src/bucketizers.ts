@@ -60,6 +60,9 @@ export async function doTheBucketization(
   sourceStream: string | undefined,
   resultingStream: string
 ) {
+  dataReader.on("end", () => dataWriter.disconnect());
+  metadataReader.on("end", () => metadataWriter.disconnect());
+
   const sr = { metadata: metadataReader, data: dataReader };
   const sw = { metadata: metadataWriter, data: dataWriter };
 
