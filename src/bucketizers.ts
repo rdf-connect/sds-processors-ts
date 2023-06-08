@@ -60,8 +60,11 @@ export async function doTheBucketization(
   sourceStream: string | undefined,
   resultingStream: string
 ) {
-  dataReader.on("end", () => dataWriter.disconnect());
-  metadataReader.on("end", () => metadataWriter.disconnect());
+  dataReader.on("end", () => {
+    console.log("bucketize data closed");
+    dataWriter.end()
+  });
+  metadataReader.on("end", () => { console.log("buckeitze index closed"); metadataWriter.end() });
 
   const sr = { metadata: metadataReader, data: dataReader };
   const sw = { metadata: metadataWriter, data: dataWriter };

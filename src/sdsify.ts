@@ -39,8 +39,8 @@ function extractMember(store: Store, subject: string): RDF.Quad[] {
   // Extract forward relations recursively
   // TODO: deal with backwards relations
   // TODO: deal with cycles
-  for(const quad of store.getQuads(subject, null, null, null)) {
-    if(quad.object.termType === "NamedNode") {
+  for (const quad of store.getQuads(subject, null, null, null)) {
+    if (quad.object.termType === "NamedNode") {
       subGraph.push(...extractMember(store, quad.object.id));
     }
     subGraph.push(quad);
@@ -60,7 +60,7 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
     if (type) {
       // Group quads based on given member type
       const store = new Store(quads);
-      for(const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
+      for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
         members[quad.subject.value] = extractMember(store, quad.subject.value);
       }
     } else {
@@ -105,5 +105,8 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
 
     console.log("sdsify: pushed ", membersCount, "members");
   });
-  input.on("end", () => output.disconnect());
+  input.on("end", () => {
+    console.log("sdsify closed down");
+    output.end();
+  });
 }
