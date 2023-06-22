@@ -1,8 +1,10 @@
 import { Stream, Writer } from "@treecg/connector-types";
-import { RDF as RDFT, SDS } from "@treecg/types";
+import { Logger, RDF as RDFT, SDS } from "@treecg/types";
 import type * as RDF from '@rdfjs/types';
-import { blankNode, namedNode } from "./core";
+import { blankNode, namedNode } from "./core.js";
 import { Writer as NWriter, Parser, DataFactory, Store } from "n3";
+
+const logger = new Logger("info", "info");
 
 class Tracker {
   max: number;
@@ -34,14 +36,14 @@ function maybe_parse(data: RDF.Quad[] | string): RDF.Quad[] {
   }
 }
 
-function extractMember(store: Store, subject: string): RDF.Quad[] {
+function extractMember(store: Store, subject: RDF.Term): RDF.Quad[] {
   const subGraph: RDF.Quad[] = [];
   // Extract forward relations recursively
   // TODO: deal with backwards relations
   // TODO: deal with cycles
   for (const quad of store.getQuads(subject, null, null, null)) {
-    if (quad.object.termType === "NamedNode") {
-      subGraph.push(...extractMember(store, quad.object.id));
+    if (quad.object.termType === "NamedNode" || quad.object.termType === "BlankNode") {
+      subGraph.push(...extractMember(store, quad.object));
     }
     subGraph.push(quad);
   }
@@ -54,14 +56,22 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
   input.data(async input => {
     const quads = maybe_parse(input);
     console.log("sdsify: Got input", quads.length, "quads");
+    logger.info("sdsisfy got input!");
+
+    const types = quads.filter(x => x.predicate.equals((RDFT.terms.type))).map(x => x.object.value).join(", ");
+    logger.info("Found types " + types);
+
 
     const members: { [id: string]: RDF.Quad[] } = {};
 
     if (type) {
+      logger.info("Extracting with type " + type);
       // Group quads based on given member type
       const store = new Store(quads);
-      for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
-        members[quad.subject.value] = extractMember(store, quad.subject.value);
+      for (const quad of store.getQuads(null, RDFT.terms.type, namedNode(type), null)) {
+        logger.info("Found one!");
+        console.log("Found one!");
+        members[quad.subject.value] = extractMember(store, quad.subject);
       }
     } else {
       // Group quads based on Subject IRI

@@ -1,5 +1,5 @@
-const Y2R = require('@rmlio/yarrrml-parser/lib/rml-generator.js');
-const N3 = require('n3');
+import Y2R from '@rmlio/yarrrml-parser/lib/rml-generator.js';
+import { Writer } from 'n3';
 
 function yarrml(reader, writer) {
 
@@ -7,7 +7,7 @@ function yarrml(reader, writer) {
     const y2r = new Y2R();
     const triples = y2r.convert(x);
 
-    const str = new N3.Writer().quadsToString(triples);
+    const str = new Writer().quadsToString(triples);
     return writer.push(str);
   }
 
@@ -18,4 +18,5 @@ function yarrml(reader, writer) {
 
 }
 
-module.exports.yarrml = yarrml;
+const _yarrml = yarrml;
+export { _yarrml as yarrml };

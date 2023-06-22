@@ -3,8 +3,8 @@ import { writeFileSync } from "fs";
 import { readFile } from "fs/promises";
 import { Quad, Parser, Store, DataFactory } from "n3";
 import * as N3 from "n3";
-import { literal, NBNode, SR, SW, transformMetadata } from "./core";
-import { Cleanup } from './exitHandler';
+import { literal, NBNode, SR, SW, transformMetadata } from "./core.js";
+import { Cleanup } from './exitHandler.js';
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import { Stream, Writer } from "@treecg/connector-types";
 
@@ -44,17 +44,24 @@ function addProcess(id: NBNode | undefined, store: Store, strategyId: NBNode, bu
 
   return newId;
 }
-function parseQuads(quads: string): Quad[] {
-  console.log("Parsing quads!");
+
+function parseQuads(quads: string | Quad[]): Quad[] {
+  if (quads instanceof Array) return <Quad[]><any>quads;
+  console.log("Parsing quads!", quads);
   const parser = new N3.Parser();
   return parser.parse(quads);
 }
 
+function serializeQuads(quads: Quad[]): string {
+  const writer = new N3.Writer();
+  return writer.quadsToString(quads);
+}
+
 export async function doTheBucketization(
-  dataReader: Stream<Quad[]>,
+  dataReader: Stream<string>,
   metadataReader: Stream<string>,
-  dataWriter: Writer<Quad[]>,
-  metadataWriter: Writer<Quad[]>,
+  dataWriter: Writer<string>,
+  metadataWriter: Writer<string>,
   location: string,
   savePath: string,
   sourceStream: string | undefined,
@@ -70,6 +77,7 @@ export async function doTheBucketization(
   const sw = { metadata: metadataWriter, data: dataWriter };
 
   const content = await readFile(location, { encoding: "utf-8" });
+  console.log("content", content);
   const quads = new Parser().parse(content);
 
   const quadMemberId = <NBNode>quads.find(quad =>
@@ -84,11 +92,11 @@ export async function doTheBucketization(
     (x, y) => addProcess(x, y, quadMemberId, quads)
   );
   sr.metadata.data(
-    quads => sw.metadata.push(f(parseQuads(quads)))
+    quads => sw.metadata.push(serializeQuads(f(parseQuads(quads))))
   );
 
   if (sr.metadata.lastElement) {
-    sw.metadata.push(f(parseQuads(sr.metadata.lastElement)));
+    sw.metadata.push(serializeQuads(f(parseQuads(sr.metadata.lastElement))));
   }
 
   const state = await readState(savePath);
@@ -104,11 +112,13 @@ export async function doTheBucketization(
   // })
 
   sr.data.data(async (data: Quad[] | string) => {
-    const t = new Parser().parse(<string>data);
+    const t = parseQuads(data);
     console.log("Bucketizing member")
     if (!t.length) return;
 
-    const members = [...new Set(t.filter(q => q.predicate.equals(SDS.terms.custom("payload"))).map(q => q.object))];
+    const checkStream = sourceStream ? (q: Quad) => t.some(q2 => q2.subject.equals(q.subject) && q2.predicate.equals(SDS.terms.stream) && q2.object.value === sourceStream) : (_: Quad) => true;
+
+    const members = [...new Set(t.filter(q => q.predicate.equals(SDS.terms.custom("payload")) && checkStream(q)).map(q => q.object))];
     if (members.length > 1) {
       console.error("Detected more members ids than expected");
     }
@@ -119,15 +129,12 @@ export async function doTheBucketization(
     const extras = <Quad[]><unknown>bucketizer.bucketize(t, sub);
 
     const recordId = extras.find(q => q.predicate.equals(SDS.terms.payload))!.subject;
-    const extraStr = new N3.Writer().quadsToString(extras);
-    console.log("Extras \n", extraStr);
-
     t.push(...<Quad[]>extras);
     t.push(quad(recordId, SDS.terms.stream, namedNode(resultingStream)));
     t.push(quad(recordId, RDF.terms.type, SDS.terms.Member));
 
     console.log("Pushing thing bucketized!")
-    await sw.data.push(t);
+    await sw.data.push(serializeQuads(t));
   });
 }
 

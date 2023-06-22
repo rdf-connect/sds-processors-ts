@@ -1,5 +1,5 @@
 import { BlankNode, NamedNode, Quad, Store, Term, DataFactory } from "n3";
-import { createProperty, literal, NBNode, SR, SW, transformMetadata } from "./core";
+import { createProperty, literal, NBNode, SR, SW, transformMetadata } from "./core.js";
 import { EX, PPLAN, PROV, RDF, SHACL, XSD } from "@treecg/types";
 
 const { namedNode } = DataFactory;

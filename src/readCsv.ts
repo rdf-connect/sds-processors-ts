@@ -2,7 +2,7 @@ import { SDS, XSD } from "@treecg/types";
 import { parse } from "csv-parse";
 import { createReadStream } from "fs";
 import { DataFactory, Quad, Term } from "n3";
-import { blankNode, SW } from "./core";
+import { blankNode, SW } from "./core.js";
 
 import { Writer } from "@treecg/connector-types";
 import { join } from "path";
