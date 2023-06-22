@@ -39,7 +39,7 @@
 js:Y2R a js:JsProcess;
   dc:title "yarrml processor";
   dc:description "The Yarrml processor transforms YARRML documents into RML mapping documents.";
-  js:file <./js/yarrrml.js>;
+  js:file <../js/yarrrml.js>;
   js:function "yarrml";
   js:location <./>;
   js:mapping [

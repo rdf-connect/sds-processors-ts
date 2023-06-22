@@ -17,7 +17,7 @@
 js:Sdsify a js:JsProcess;
   dc:title "Sdsify processor";
   dc:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
-  js:file <./lib/sdsify.js>;
+  js:file <../lib/sdsify.js>;
   js:function "sdsify";
   js:location <./>;
   js:mapping [

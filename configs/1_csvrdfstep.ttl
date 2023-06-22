@@ -13,7 +13,7 @@
 ].
 
 js:ReadRDFCsv a js:JsProcess;
-  js:file "./lib/main.js";
+  js:file <../lib/main.js>;
   js:function "readCsvAsRDF";
   js:location <./>;
   js:mapping [
