@@ -1,4 +1,4 @@
-import { Writer } from "@treecg/connector-types";
+import type { Writer } from "@ajuvercr/js-runner";
 import { randomInt } from "crypto";
 
 import { DataFactory } from 'n3';

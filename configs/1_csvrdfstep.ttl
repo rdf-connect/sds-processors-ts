@@ -8,25 +8,20 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 
 <> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
-<> :install [
-  a :GitInstall;
-  :url <https://github.com/ajuvercr/sds-processors.git>;
-  :build "npm install; npm run build";
-].
 
 js:ReadRDFCsv a js:JsProcess;
   js:file <../lib/main.js>;
   js:function "readCsvAsRDF";
-  js:location <./>;
+  js:location <../>;
   js:mapping [
     a fno:Mapping;
     fno:parameterMapping [
       a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:csvLocation;
+      fnom:functionParameter "Data input channel";
       fnom:implementationParameterPosition "0"^^xsd:int
     ],[
       a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:dataOutput;
+      fnom:functionParameter "Csv file location";
       fnom:implementationParameterPosition "1"^^xsd:int
     ]
   ].
@@ -36,9 +31,13 @@ js:ReadRDFCsv a js:JsProcess;
   sh:property [
     sh:class :WriterChannel;
     sh:path js:dataOutput;
+    sh:maxCount 1;
+    sh:minCount 1;
     sh:name "Data input channel";
   ], [
     sh:datatype xsd:string;
     sh:path js:csvLocation;
-    sh:name "Location of the csv file";
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:name "Csv file location";
   ].

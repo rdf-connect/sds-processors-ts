@@ -1,55 +1,55 @@
-@prefix js: <https://w3id.org/conn/js#> .
-@prefix fno: <https://w3id.org/function/ontology#> .
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix : <https://w3id.org/conn#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix fno: <https://w3id.org/function/ontology#>.
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
-<> :install [
-  a :GitInstall;
-  :url <https://github.com/ajuvercr/sds-processors.git>;
-  :build "npm install; npm run build";
-].
+<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
 
 js:Ldesify a js:JsProcess;
   dc:title "Ldesify processor";
   dc:description "";
-  js:file <./lib/ldesify.js>;
+  js:file <../lib/ldesify.js>;
   js:function "ldesify";
-  js:location <./>;
+  js:location <../>;
   js:mapping [
     a fno:Mapping;
     fno:parameterMapping [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:input;
-      fnom:implementationParameterPosition "0"^^xsd:int
-    ],[
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:output;
-      fnom:implementationParameterPosition "1"^^xsd:int
-    ],[
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:path;
-      fnom:implementationParameterPosition "2"^^xsd:int
-    ] 
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data input channel";
+      fnom:implementationParameterPosition "0"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data output channel";
+      fnom:implementationParameterPosition "1"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "State file path";
+      fnom:implementationParameterPosition "2"^^xsd:int;
+    ];
   ].
 
-[] a sh:NodeShape;
+[ ] a sh:NodeShape;
   sh:targetClass js:Ldesify;
   sh:property [
     sh:class :ReaderChannel;
     sh:path js:input;
     sh:name "Data input channel";
+    sh:maxCount 1;
+    sh:minCount 1;
   ], [
     sh:class :WriterChannel;
     sh:path js:output;
     sh:name "Data output channel";
+    sh:maxCount 1;
+    sh:minCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:path;
-    sh:name "path to save state file";
+    sh:name "State file path";
+    sh:maxCount 1;
   ].
 

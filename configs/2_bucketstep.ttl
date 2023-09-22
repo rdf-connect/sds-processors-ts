@@ -1,95 +1,103 @@
-@prefix js: <https://w3id.org/conn/js#> .
-@prefix fno: <https://w3id.org/function/ontology#> .
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix : <https://w3id.org/conn#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix fno: <https://w3id.org/function/ontology#>.
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>. 
-<> :install [
-  a :GitInstall;
-  :url <https://github.com/ajuvercr/sds-processors.git>;
-  :build "npm install; npm run build";
-].
-
+<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
 js:Bucketize a js:JsProcess;
   dc:title "Bucketizer processor";
   dc:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
   js:file <../lib/main.js>;
   js:function "doTheBucketization";
-  js:location <./>;
+  js:location <../>;
   js:mapping [
     a fno:Mapping;
     fno:parameterMapping [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:dataInput;
-      fnom:implementationParameterPosition "0"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data input channel";
+      fnom:implementationParameterPosition "0"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:metadataInput ;
-      fnom:implementationParameterPosition "1"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Metadata input channel";
+      fnom:implementationParameterPosition "1"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:dataOutput ;
-      fnom:implementationParameterPosition "2"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data output channel";
+      fnom:implementationParameterPosition "2"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:metadataOutput ;
-      fnom:implementationParameterPosition "3"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Metadata output channel";
+      fnom:implementationParameterPosition "3"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:bucketizeStrategy ;
-      fnom:implementationParameterPosition "4"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Location of bucketization strategy file";
+      fnom:implementationParameterPosition "4"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:savePath ;
-      fnom:implementationParameterPosition "5"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Path to use to save state files";
+      fnom:implementationParameterPosition "5"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:inputStreamId ;
-      fnom:implementationParameterPosition "6"^^xsd:int
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "ID of Stream to transform";
+      fnom:implementationParameterPosition "6"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:outputStreamId ;
-      fnom:implementationParameterPosition "7"^^xsd:int
-    ]
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "ID of Stream to produce";
+      fnom:implementationParameterPosition "7"^^xsd:int;
+    ];
   ].
 
-[] a sh:NodeShape;
+[ ] a sh:NodeShape;
   sh:targetClass js:Bucketize;
   sh:property [
     sh:class :ReaderChannel;
     sh:path js:dataInput;
     sh:name "Data input channel";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:class :ReaderChannel;
     sh:path js:metadataInput;
     sh:name "Metadata input channel";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:class :WriterChannel;
     sh:path js:dataOutput;
     sh:name "Data output channel";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:class :WriterChannel;
     sh:path js:metadataOutput;
     sh:name "Metadata output channel";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:bucketizeStrategy;
     sh:name "Location of bucketization strategy file";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:inputStreamId;
     sh:name "ID of Stream to transform";
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:outputStreamId;
     sh:name "ID of Stream to produce";
+    sh:minCount 1;
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:savePath;
     sh:name "Path to use to save state files";
+    sh:maxCount 1;
   ].
 

@@ -1,61 +1,55 @@
-@prefix js: <https://w3id.org/conn/js#> .
-@prefix fno: <https://w3id.org/function/ontology#> .
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#> .
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
-@prefix : <https://w3id.org/conn#> .
-@prefix sh: <http://www.w3.org/ns/shacl#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix fno: <https://w3id.org/function/ontology#>.
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/4a417b156e3d2471ef91e7f8da0db6a93f0e0c1d/ontology.ttl>. 
+<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
 
-<> :install [
-  a :GitInstall;
-  :url <https://github.com/ajuvercr/sds-processors.git>;
-  :build "npm install; npm run build";
-].
+<outputProperty> sh:class :WriterChannel;
+  sh:path js:output;
+  sh:maxCount 1;
+  sh:name "Data output channel".
 
-<outputProperty>
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Data output channel".
-
-<outputMapping> 
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:output;
-      fnom:implementationParameterPosition "0"^^xsd:int.
-
+<outputMapping> a fnom:PositionParameterMapping;
+  fnom:functionParameter "Data output channel";
+  fnom:implementationParameterPosition "0"^^xsd:int.
 
 js:Generate a js:JsProcess;
   dc:title "Simple Data Generator";
   dc:description "Simple RDF data generator used for testing. This processor will peridically generate RDF objects with 3 to 4 predicates.";
   js:file <../lib/generator.js>;
   js:function "generate";
-  js:location <./>;
+  js:location <../>;
   js:mapping [
     a fno:Mapping;
     fno:parameterMapping <outputMapping>;
     fno:parameterMapping [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:count;
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Count";
       fnom:implementationParameterPosition "1"^^xsd:int;
     ], [
-      a fnom:PositionParameterMapping ;
-      fnom:functionParameter js:waitMS;
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Wait duration";
       fnom:implementationParameterPosition "2"^^xsd:int;
-    ]
+    ];
   ].
 
-[] a sh:NodeShape;
+[ ] a sh:NodeShape;
   sh:targetClass js:Generate;
   sh:property <outputProperty>;
   sh:property [
     sh:datatype xsd:number;
     sh:path js:count;
-    sh:name "count";
+    sh:name "Count";
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:waitMS;
-    sh:name "How fast you wanne go?";
+    sh:name "Wait duration";
+    sh:maxCount 1;
   ].
 
