@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@treecg/connector-types";
+import type { Stream, Writer } from "@ajuvercr/js-runner";
 
 
 export function substitute(reader: Stream<string>, writer: Writer<string>, source: string, replace: string, regexp = false) {

@@ -1,34 +1,37 @@
-import { createBucketizerLD, FACTORY } from "@treecg/bucketizers";
+import { FACTORY } from "@treecg/bucketizers";
 import { writeFileSync } from "fs";
 import { readFile } from "fs/promises";
-import { Quad, Parser, Store, DataFactory } from "n3";
+import { DataFactory, Parser, Quad, Store } from "n3";
 import * as N3 from "n3";
 import { literal, NBNode, SR, SW, transformMetadata } from "./core.js";
-import { Cleanup } from './exitHandler.js';
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
-import { Stream, Writer } from "@treecg/connector-types";
+import type { Stream, Writer } from "@ajuvercr/js-runner";
 
-type Data = { "data": Quad[], "metadata": Quad[] };
+type Data = { data: Quad[]; metadata: Quad[] };
 const { namedNode, quad } = DataFactory;
-
 
 async function readState(path: string): Promise<any | undefined> {
   try {
-    const str = await readFile(path, { "encoding": "utf-8" });
+    const str = await readFile(path, { encoding: "utf-8" });
     return JSON.parse(str);
   } catch (e) {
-    return
+    return;
   }
 }
 
 async function writeState(path: string, content: any): Promise<void> {
   if (path) {
     const str = JSON.stringify(content);
-    writeFileSync(path, str, { encoding: "utf-8" })
+    writeFileSync(path, str, { encoding: "utf-8" });
   }
 }
 
-function addProcess(id: NBNode | undefined, store: Store, strategyId: NBNode, bucketizeConfig: Quad[]): NBNode {
+function addProcess(
+  id: NBNode | undefined,
+  store: Store,
+  strategyId: NBNode,
+  bucketizeConfig: Quad[],
+): NBNode {
   const newId = store.createBlankNode();
   const time = new Date().getTime();
 
@@ -39,14 +42,15 @@ function addProcess(id: NBNode | undefined, store: Store, strategyId: NBNode, bu
 
   store.addQuad(newId, PROV.terms.startedAtTime, literal(time));
   store.addQuad(newId, PROV.terms.used, strategyId);
-  if (id)
+  if (id) {
     store.addQuad(newId, PROV.terms.used, id);
+  }
 
   return newId;
 }
 
 function parseQuads(quads: string | Quad[]): Quad[] {
-  if (quads instanceof Array) return <Quad[]><any>quads;
+  if (quads instanceof Array) return <Quad[]>(<any>quads);
   console.log("Parsing quads!", quads);
   const parser = new N3.Parser();
   return parser.parse(quads);
@@ -65,13 +69,16 @@ export async function doTheBucketization(
   location: string,
   savePath: string,
   sourceStream: string | undefined,
-  resultingStream: string
+  resultingStream: string,
 ) {
   dataReader.on("end", () => {
     console.log("bucketize data closed");
-    dataWriter.end()
+    dataWriter.end();
   });
-  metadataReader.on("end", () => { console.log("buckeitze index closed"); metadataWriter.end() });
+  metadataReader.on("end", () => {
+    console.log("buckeitze index closed");
+    metadataWriter.end();
+  });
 
   const sr = { metadata: metadataReader, data: dataReader };
   const sw = { metadata: metadataWriter, data: dataWriter };
@@ -80,19 +87,23 @@ export async function doTheBucketization(
   console.log("content", content);
   const quads = new Parser().parse(content);
 
-  const quadMemberId = <NBNode>quads.find(quad =>
-    quad.predicate.equals(RDF.terms.type) && quad.object.equals(LDES.terms.BucketizeStrategy)
-  )!.subject;
+  const quadMemberId = <NBNode>(
+    quads.find(
+      (quad) =>
+        quad.predicate.equals(RDF.terms.type) &&
+        quad.object.equals(LDES.terms.BucketizeStrategy),
+    )!.subject
+  );
   console.log("Do bucketization", quadMemberId);
 
   const f = transformMetadata(
     namedNode(resultingStream),
     sourceStream ? namedNode(sourceStream) : undefined,
     "sds:Member",
-    (x, y) => addProcess(x, y, quadMemberId, quads)
+    (x, y) => addProcess(x, y, quadMemberId, quads),
   );
-  sr.metadata.data(
-    quads => sw.metadata.push(serializeQuads(f(parseQuads(quads))))
+  sr.metadata.data((quads) =>
+    sw.metadata.push(serializeQuads(f(parseQuads(quads)))),
   );
 
   if (sr.metadata.lastElement) {
@@ -103,8 +114,9 @@ export async function doTheBucketization(
 
   const bucketizer = FACTORY.buildLD(quads, quadMemberId, state);
 
-  if (state)
+  if (state) {
     bucketizer.importState(state);
+  }
 
   // Cleanup(async () => {
   //     const state = bucketizer.exportState()
@@ -113,12 +125,29 @@ export async function doTheBucketization(
 
   sr.data.data(async (data: Quad[] | string) => {
     const t = parseQuads(data);
-    console.log("Bucketizing member")
+    console.log("Bucketizing member");
     if (!t.length) return;
 
-    const checkStream = sourceStream ? (q: Quad) => t.some(q2 => q2.subject.equals(q.subject) && q2.predicate.equals(SDS.terms.stream) && q2.object.value === sourceStream) : (_: Quad) => true;
+    const checkStream = sourceStream
+      ? (q: Quad) =>
+          t.some(
+            (q2) =>
+              q2.subject.equals(q.subject) &&
+              q2.predicate.equals(SDS.terms.stream) &&
+              q2.object.value === sourceStream,
+          )
+      : (_: Quad) => true;
 
-    const members = [...new Set(t.filter(q => q.predicate.equals(SDS.terms.custom("payload")) && checkStream(q)).map(q => q.object))];
+    const members = [
+      ...new Set(
+        t
+          .filter(
+            (q) =>
+              q.predicate.equals(SDS.terms.custom("payload")) && checkStream(q),
+          )
+          .map((q) => q.object),
+      ),
+    ];
     if (members.length > 1) {
       console.error("Detected more members ids than expected");
     }
@@ -126,15 +155,16 @@ export async function doTheBucketization(
     if (members.length === 0) return;
 
     const sub = members[0].value;
-    const extras = <Quad[]><unknown>bucketizer.bucketize(t, sub);
+    const extras = <Quad[]>(<unknown>bucketizer.bucketize(t, sub));
 
-    const recordId = extras.find(q => q.predicate.equals(SDS.terms.payload))!.subject;
-    t.push(...<Quad[]>extras);
+    const recordId = extras.find((q) =>
+      q.predicate.equals(SDS.terms.payload),
+    )!.subject;
+    t.push(...(<Quad[]>extras));
     t.push(quad(recordId, SDS.terms.stream, namedNode(resultingStream)));
     t.push(quad(recordId, RDF.terms.type, SDS.terms.Member));
 
-    console.log("Pushing thing bucketized!")
+    console.log("Pushing thing bucketized!");
     await sw.data.push(serializeQuads(t));
   });
 }
-

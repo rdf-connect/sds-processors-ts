@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@treecg/connector-types";
+import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { Logger, RDF as RDFT, SDS } from "@treecg/types";
 import type * as RDF from '@rdfjs/types';
 import { blankNode, namedNode } from "./core.js";

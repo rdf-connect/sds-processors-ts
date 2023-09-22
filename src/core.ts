@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@treecg/connector-types";
+import type { Writer, Stream } from "@ajuvercr/js-runner";
 import { BlankNode, DataFactory, DefaultGraph, NamedNode, Quad, Store, Term, Writer as NWriter } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 

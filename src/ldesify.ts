@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@treecg/connector-types";
+import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { readFileSync, writeFileSync } from "fs";
 import * as n3 from "n3";
 
