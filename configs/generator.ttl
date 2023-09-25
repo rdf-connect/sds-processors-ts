@@ -7,8 +7,6 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
-
 <outputProperty> sh:class :WriterChannel;
   sh:path js:output;
   sh:maxCount 1;
@@ -35,6 +33,10 @@ js:Generate a js:JsProcess;
       a fnom:PositionParameterMapping;
       fnom:functionParameter "Wait duration";
       fnom:implementationParameterPosition "2"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Timestamp path";
+      fnom:implementationParameterPosition "3"^^xsd:int;
     ];
   ].
 
@@ -42,14 +44,19 @@ js:Generate a js:JsProcess;
   sh:targetClass js:Generate;
   sh:property <outputProperty>;
   sh:property [
-    sh:datatype xsd:number;
+    sh:datatype xsd:integer;
     sh:path js:count;
     sh:name "Count";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:datatype xsd:integer;
     sh:path js:waitMS;
     sh:name "Wait duration";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:timestampPath;
+    sh:name "Timestamp path";
     sh:maxCount 1;
   ].
 

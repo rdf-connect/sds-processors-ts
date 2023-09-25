@@ -1,8 +1,10 @@
 import type { Writer } from "@ajuvercr/js-runner";
 import { randomInt } from "crypto";
 
-import { DataFactory } from 'n3';
-import * as N3 from 'n3';
+import { DataFactory } from "n3";
+import * as N3 from "n3";
+
+import { Term } from "@rdfjs/types";
 
 const { namedNode, literal, quad } = DataFactory;
 const NS = "http://time.is/ns#";
@@ -17,7 +19,7 @@ const types = [
   { x: 6, y: 6 },
 ];
 
-function generateMember(i: number, includeT: boolean) {
+function generateMember(i: number, timestampPath?: Term) {
   const id = namedNode(NS + i);
   const q = (p: string, o: string) => quad(id, namedNode(p), literal(o));
 
@@ -29,26 +31,31 @@ function generateMember(i: number, includeT: boolean) {
     q(NS + "v", randomInt(100) + ""),
   ];
 
-  if(includeT) {
-    quads.push(q(NS+"time", Date.now() + ""));
+  if (timestampPath) {
+    quads.push(
+      quad(id, <N3.Quad_Predicate>timestampPath, literal(Date.now() + "")),
+    );
   }
 
   return new N3.Writer().quadsToString(quads);
 }
 
+export async function generate(
+  writer: Writer<string>,
+  mCount?: number,
+  mWait?: number,
+  timestampPath?: Term,
+) {
+  const count = mCount ?? 100000;
+  const wait = mWait ?? 50.0;
 
-export async function generate(writer: Writer<string>, countstr?: string, waitstr?: string, withTimestamp?: string) {
-  const withT = withTimestamp ? withTimestamp.toLowerCase() === "true" : false;
-
-  (async function() {
+  return async function () {
     console.log(`generate starting`);
-    const count = countstr ? parseInt(countstr) : 100000;
-    const wait = waitstr ? parseFloat(waitstr) : 50.0;
 
     for (let i = 0; i < count; i++) {
       console.log(`${i}/${count}`);
-      await writer.push(generateMember(i, withT));
-      await new Promise(res => setTimeout(res, wait));
+      await writer.push(generateMember(i, timestampPath));
+      await new Promise((res) => setTimeout(res, wait));
     }
-  })();
+  };
 }
