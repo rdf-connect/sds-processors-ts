@@ -7,8 +7,6 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
-
 js:Ldesify a js:JsProcess;
   dc:title "Ldesify processor";
   dc:description "";

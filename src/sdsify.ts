@@ -1,38 +1,18 @@
 import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { Logger, RDF as RDFT, SDS } from "@treecg/types";
-import type * as RDF from '@rdfjs/types';
+import type * as RDF from "@rdfjs/types";
 import { blankNode, namedNode } from "./core.js";
-import { Writer as NWriter, Parser, DataFactory, Store } from "n3";
+import { DataFactory, Parser, Quad_Object, Store, Writer as NWriter } from "n3";
+import { Term } from "@rdfjs/types";
 
 const logger = new Logger("info", "info");
 
-class Tracker {
-  max: number;
-  at: number = 0;
-  logged: number = 0;
-
-  constructor(max: number) {
-    this.max = max;
-  }
-
-  inc() {
-    this.at += 1;
-
-    let at = Math.round(this.at * 100 / this.max);
-    if (at > this.logged) {
-      console.log(at, "%");
-      this.logged = at;
-    }
-
-  }
-}
-
 function maybe_parse(data: RDF.Quad[] | string): RDF.Quad[] {
-  if (typeof data === 'string' || data instanceof String) {
+  if (typeof data === "string" || data instanceof String) {
     const parse = new Parser();
     return parse.parse(<string>data);
   } else {
-    return data
+    return data;
   }
 }
 
@@ -42,7 +22,10 @@ function extractMember(store: Store, subject: RDF.Term): RDF.Quad[] {
   // TODO: deal with backwards relations
   // TODO: deal with cycles
   for (const quad of store.getQuads(subject, null, null, null)) {
-    if (quad.object.termType === "NamedNode" || quad.object.termType === "BlankNode") {
+    if (
+      quad.object.termType === "NamedNode" ||
+      quad.object.termType === "BlankNode"
+    ) {
       subGraph.push(...extractMember(store, quad.object));
     }
     subGraph.push(quad);
@@ -50,17 +33,22 @@ function extractMember(store: Store, subject: RDF.Term): RDF.Quad[] {
   return subGraph;
 }
 
-export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string>, stream: string, type?: string) {
-  const streamNode = namedNode(stream);
-
-  input.data(async input => {
+export function sdsify(
+  input: Stream<string | RDF.Quad[]>,
+  output: Writer<string>,
+  streamNode: Term,
+  type?: Term,
+) {
+  input.data(async (input) => {
     const quads = maybe_parse(input);
     console.log("sdsify: Got input", quads.length, "quads");
     logger.info("sdsisfy got input!");
 
-    const types = quads.filter(x => x.predicate.equals((RDFT.terms.type))).map(x => x.object.value).join(", ");
+    const types = quads
+      .filter((x) => x.predicate.equals(RDFT.terms.type))
+      .map((x) => x.object.value)
+      .join(", ");
     logger.info("Found types " + types);
-
 
     const members: { [id: string]: RDF.Quad[] } = {};
 
@@ -68,7 +56,7 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
       logger.info("Extracting with type " + type);
       // Group quads based on given member type
       const store = new Store(quads);
-      for (const quad of store.getQuads(null, RDFT.terms.type, namedNode(type), null)) {
+      for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
         logger.info("Found one!");
         console.log("Found one!");
         members[quad.subject.value] = extractMember(store, quad.subject);
@@ -83,7 +71,6 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
       }
     }
 
-
     let membersCount = 0;
 
     let first = true;
@@ -92,20 +79,15 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
       const quads = members[key];
       if (first) {
         first = false;
-        console.log("predicates", quads.map(q => q.predicate.value));
+        console.log(
+          "predicates",
+          quads.map((q) => q.predicate.value),
+        );
       }
       const blank = blankNode();
       quads.push(
-        DataFactory.quad(
-          blank,
-          SDS.terms.payload,
-          namedNode(key),
-        ),
-        DataFactory.quad(
-          blank,
-          SDS.terms.stream,
-          streamNode,
-        ),
+        DataFactory.quad(blank, SDS.terms.payload, namedNode(key)),
+        DataFactory.quad(blank, SDS.terms.stream, <Quad_Object> streamNode),
       );
 
       const str = new NWriter().quadsToString(quads);
@@ -115,6 +97,7 @@ export function sdsify(input: Stream<string | RDF.Quad[]>, output: Writer<string
 
     console.log("sdsify: pushed ", membersCount, "members");
   });
+
   input.on("end", () => {
     console.log("sdsify closed down");
     output.end();

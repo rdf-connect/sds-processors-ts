@@ -51,13 +51,13 @@ js:Sdsify a js:JsProcess;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:datatype xsd:iri;
     sh:path js:stream;
     sh:name "Target stream";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:datatype xsd:iri;
     sh:path js:objectType;
     sh:name "Type filter";
     sh:maxCount 1;

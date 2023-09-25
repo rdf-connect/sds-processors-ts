@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "test": "bun test"
   },
   "files": [
     "lib/**/*",
@@ -21,7 +22,9 @@
     "n3": "^1.16.2"
   },
   "devDependencies": {
-    "@ajuvercr/js-runner": "^0.1.5",
+    "@ajuvercr/js-runner": "^0.1.7",
+    "@jest/globals": "^29.7.0",
+    "@rdfjs/types": "^1.1.0",
     "@types/node": "^16.0.0",
     "typescript": "^4.7.4"
   }
