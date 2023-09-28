@@ -3,7 +3,7 @@ import type { Stream, Writer } from "@ajuvercr/js-runner";
 
 export function substitute(reader: Stream<string>, writer: Writer<string>, source: string, replace: string, regexp = false) {
   const reg = regexp ? new RegExp(source) : source;
-  reader.data(x => writer.push(x.replace(reg, replace)));
+  reader.data(x => writer.push(x.replaceAll(reg, replace)));
 }
 
 export function envsub(reader: Stream<string>, writer: Writer<string> ) {
