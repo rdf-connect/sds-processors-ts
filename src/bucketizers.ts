@@ -51,7 +51,6 @@ function addProcess(
 
 function parseQuads(quads: string | Quad[]): Quad[] {
   if (quads instanceof Array) return <Quad[]>(<any>quads);
-  console.log("Parsing quads!", quads);
   const parser = new N3.Parser();
   return parser.parse(quads);
 }
