@@ -7,8 +7,6 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-<> owl:imports <https://raw.githubusercontent.com/ajuvercr/js-runner/master/ontology.ttl>.
-
 js:Sdsify a js:JsProcess;
   dc:title "Sdsify processor";
   dc:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
