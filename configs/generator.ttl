@@ -18,7 +18,7 @@
 
 js:Generate a js:JsProcess;
   dc:title "Simple Data Generator";
-  dc:description "Simple RDF data generator used for testing. This processor will peridically generate RDF objects with 3 to 4 predicates.";
+  dc:description "Simple RDF data generator used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.";
   js:file <../lib/generator.js>;
   js:function "generate";
   js:location <../>;
