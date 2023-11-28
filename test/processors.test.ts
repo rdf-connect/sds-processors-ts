@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import { extractProcessors, extractSteps, Source } from "@ajuvercr/js-runner";
+import { Parser } from "n3";
 
 describe("SDS processors tests", async () => {
   const pipeline = `
@@ -137,7 +138,13 @@ describe("SDS processors tests", async () => {
       js:input <jr>;
       js:output <jw>;
       js:stream <http://me.com/stream>;
-      js:objectType <http://myType.com>.
+      js:shapeFilter """
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+          sh:targetClass ex:SomeClass.
+      """.
     `;
 
     const source: Source = {
@@ -155,11 +162,11 @@ describe("SDS processors tests", async () => {
     expect(argss.length).toBe(1);
     expect(argss[0].length).toBe(4);
 
-    const [[input, output, stream, ty]] = argss;
+    const [[input, output, stream, shapeFilters]] = argss;
     testReader(input);
     testWriter(output);
     expect(stream.value).toBe("http://me.com/stream");
-    expect(ty.value).toBe("http://myType.com");
+    expect(new Parser().parse(shapeFilters[0]).length).toBe(2);
 
     await checkProc(proc.file, proc.func);
   });

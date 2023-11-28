@@ -29,7 +29,7 @@ js:Sdsify a js:JsProcess;
       fnom:implementationParameterPosition "2"^^xsd:int;
     ], [
       a fnom:PositionParameterMapping;
-      fnom:functionParameter "Type filter";
+      fnom:functionParameter "Shape filters";
       fnom:implementationParameterPosition "3"^^xsd:int;
     ];
   ].
@@ -55,9 +55,9 @@ js:Sdsify a js:JsProcess;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:iri;
-    sh:path js:objectType;
-    sh:name "Type filter";
-    sh:maxCount 1;
+    sh:datatype xsd:string;
+    sh:path js:shapeFilter;
+    sh:name "Shape filters";
+    sh:minCount 0;
   ].
 
