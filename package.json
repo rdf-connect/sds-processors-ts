@@ -4,6 +4,7 @@
   "type": "module",
   "scripts": {
     "build": "tsc",
+    "prepublishOnly": "tsc",
     "test": "bun test"
   },
   "files": [
