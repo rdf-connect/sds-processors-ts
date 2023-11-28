@@ -26,10 +26,13 @@ function extractMainNodeShape(store: Store): Quad_Subject {
    if (nodeShapes && nodeShapes.length > 0) {
       for (const ns of nodeShapes) {
          const isNotReferenced = store.getSubjects(null, ns, null).length === 0;
-         if (isNotReferenced && !mainNodeShape) {
-            mainNodeShape = ns;
-         } else {
-            throw new Error("There are multiple main node shapes in a given shape. Unrelated shapes must be given as separate shape filters");
+         
+         if(isNotReferenced) {
+            if(!mainNodeShape) {
+               mainNodeShape = ns;
+            } else {
+               throw new Error("There are multiple main node shapes in a given shape. Unrelated shapes must be given as separate shape filters");
+            }
          }
       }
       if (mainNodeShape) {

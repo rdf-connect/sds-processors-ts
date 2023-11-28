@@ -2,12 +2,13 @@ import { describe, test, expect } from "@jest/globals";
 import { SimpleStream } from "@ajuvercr/js-runner";
 import { DataFactory, Parser, Store } from "n3";
 import { sdsify } from "../src/sdsify";
-import { SDS } from "@treecg/types";
-import { literal } from "../src/core";
+import { RDF, SDS } from "@treecg/types";
+
+const { namedNode, literal } = DataFactory;
 
 describe("Functional tests for the sdsify function", () => {
 
-    const STREAM_ID = DataFactory.namedNode("http://ex.org/myStream");
+    const STREAM_ID = namedNode("http://ex.org/myStream");
     const INPUT_1 = `
         @prefix ex: <http://ex.org/>.
 
@@ -22,6 +23,16 @@ describe("Functional tests for the sdsify function", () => {
         <B> a ex:SomeOtherClass;
             ex:prop4 "some value";
             ex:prop5 15.
+    `;
+    const INPUT_2 = `
+        @prefix ex: <http://ex.org/>.
+
+        <A> a ex:SomeClass;
+            ex:prop1 "some value";
+            ex:prop2 <B>.
+        
+        <B> a ex:SomeOtherClass;
+            ex:prop3 "another value".
     `;
     const SHAPE_1 = `
         @prefix sh: <http://www.w3.org/ns/shacl#>.
@@ -44,6 +55,27 @@ describe("Functional tests for the sdsify function", () => {
             sh:closed true;
             sh:property [
                 sh:path ex:prop2
+            ].
+    `;
+    const SHAPE_3 = `
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+
+        [ ] a sh:NodeShape;
+            sh:targetClass ex:SomeClass;
+            sh:closed true;
+            sh:property [
+                sh:path rdf:type
+            ], [
+                sh:path ex:prop2;
+                sh:node [
+                    a sh:NodeShape;
+                    sh:targetClass ex:SomeOtherClass;
+                    sh:property [
+                        sh:path ex:prop3
+                    ]
+                ]
             ].
     `;
     const BAD_SHAPE_1 = `
@@ -135,6 +167,33 @@ describe("Functional tests for the sdsify function", () => {
 
         // Push some data in
         await input.push(INPUT_1);
+        await input.end();
+    });
+
+    test("Partial extraction of particular entity type with a nested SHACL shape", async () => {
+        const input = new SimpleStream<string>();
+        const output = new SimpleStream<string>();
+
+        const store = new Store();
+
+        output.data(data => {
+            store.addQuads(new Parser().parse(data));
+        }).on("end", () => {
+            // Check there number of members
+            expect(store.getObjects(null, SDS.payload, null).length).toBe(1);
+
+            // Check all properties are extracted for members
+            expect(store.getQuads(null, RDF.type, namedNode("http://ex.org/SomeClass"), null).length).toBe(1);
+            expect(store.getQuads(null, "http://ex.org/prop2", namedNode("B"), null).length).toBe(1);
+            expect(store.getQuads(null, RDF.type, namedNode("http://ex.org/SomeOtherClass"), null).length).toBe(1);
+            expect(store.getQuads(null, "http://ex.org/prop3", literal("another value"), null).length).toBe(1);
+        });
+
+        // Execute function
+        sdsify(input, output, STREAM_ID, [SHAPE_3]);
+
+        // Push some data in
+        await input.push(INPUT_2);
         await input.end();
     });
 
