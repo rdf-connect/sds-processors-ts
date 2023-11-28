@@ -6,7 +6,38 @@
 
 ### [`js:Sdsify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/sdsify.ttl#L10)
 
-This processor takes as input a stream non SDS entities (members) and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.
+This processor takes as input a stream of (batched) RDF data entities and wraps as individual SDS records to be further processed downstream. By default, it will extract individual entities by taking every single named node subject and extracting a [Concise Bounded Description](https://www.w3.org/Submission/CBD/) (CBD) of that entity with respect to the input RDF graph.
+
+Alternatively, a set of SHACL shapes can be given to concretely define and filter the type of entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
+
+An example of how to use this processor within a Connector Architecture pipeline definition is shown next:
+
+```turtle
+@prefix : <https://w3id.org/conn#>.
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+
+[ ] a js:Sdsify;
+    js:input <inputChannelReader>;
+    js:output <outputChannerWriter>;
+    js:stream <http://ex.org/myStream>;
+    js:shapeFilter """
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+            sh:targetClass ex:SomeClass;
+            sh:property [ sh:path ex:someProperty ].
+    """,
+    """
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+            sh:targetClass ex:SomeOtherClass;
+            sh:property [ sh:path ex:someOtherProperty ].
+    """.
+```
 
 ### [`js:Bucketize`](https://github.com/ajuvercr/sds-processors/blob/master/configs/bucketizer.ttl#L10)
 
