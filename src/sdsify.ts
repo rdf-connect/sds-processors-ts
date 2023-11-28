@@ -1,9 +1,10 @@
 import type { Stream, Writer } from "@ajuvercr/js-runner";
-import { RDF, SDS, SHACL } from "@treecg/types";
+import { LDES, RDF, SDS, SHACL } from "@treecg/types";
 import type { Quad, Term } from "@rdfjs/types";
 import { blankNode, namedNode } from "./core.js";
 import { DataFactory, Parser, Quad_Object, Store, Writer as NWriter, Quad_Subject, NamedNode } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
+import { createHash } from "crypto";
 
 function maybe_parse(data: Quad[] | string): Quad[] {
    if (typeof data === "string" || data instanceof String) {
@@ -85,6 +86,12 @@ export function sdsify(
 
       let membersCount = 0;
 
+      // Create a unique transaction ID based on the data content and the current system time
+      const hash = createHash("md5");
+      const TRANSACTION_ID = hash.update(new NWriter()
+         .quadsToString(dataStore.getQuads(null, null, null, null)))
+         .digest("hex") + "_" + new Date().toISOString();
+
       for (const key of Object.keys(members)) {
          const quads = members[key];
          const blank = blankNode();
@@ -92,6 +99,8 @@ export function sdsify(
          quads.push(
             DataFactory.quad(blank, SDS.terms.payload, namedNode(key)),
             DataFactory.quad(blank, SDS.terms.stream, <Quad_Object>streamNode),
+            // This is not standardized (yet)
+            DataFactory.quad(namedNode(key), LDES.terms.custom("transactionId"), DataFactory.literal(TRANSACTION_ID))
          );
 
          await output.push(new NWriter().quadsToString(quads));
