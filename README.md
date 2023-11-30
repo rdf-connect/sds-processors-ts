@@ -2,7 +2,7 @@
 
 [![Bun CI](https://github.com/ajuvercr/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/ajuvercr/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/sds-processors.svg?style=popout)](https://npmjs.com/package/sds-processors)
 
-[Connector Architecture](https://the-connector-architecture.github.io/site/docs/1_Home) Typescript processors for handling operations over [SDS streams](https://treecg.github.io/SmartDataStreams-Spec/). It currently exposes 4 functions:
+[Connector Architecture](https://the-connector-architecture.github.io/site/docs/1_Home) Typescript processors for handling operations over [SDS streams](https://treecg.github.io/SmartDataStreams-Spec/). It currently exposes 5 functions:
 
 ### [`js:Sdsify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/sdsify.ttl#L10)
 
@@ -48,6 +48,10 @@ This processor relies on the bucketizer implementations available in the [TREEcg
 ### [`js:Ldesify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/ldesify.ttl#L10)
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
+
+### [`js:StreamJoin`](https://github.com/ajuvercr/sds-processors/blob/master/configs/stream_join.ttl#L10)
+
+This processor can be used to join multiple input streams or Reader Channels (`js:input`) and pipe their data flow into a single output stream or Writer Channel (`js:output`). The processor will guarantee that all data elements are delivered downstream and will close the output if all inputs are closed.
 
 ### [`js:Generate`](https://github.com/ajuvercr/sds-processors/blob/be7134a295eb63e17034b2e3ceea0eaf6ad01770/configs/generator.ttl#L19)
 
