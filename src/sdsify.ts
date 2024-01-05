@@ -49,7 +49,7 @@ export function sdsify(
    input: Stream<string | Quad[]>,
    output: Writer<string>,
    streamNode: Term,
-   timestampPath?: string,
+   timestampPath?: Term,
    shapeFilters?: string[],
 ) {
    input.data(async (input) => {

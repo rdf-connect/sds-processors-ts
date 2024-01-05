@@ -143,6 +143,7 @@ describe("SDS processors tests", async () => {
       js:input <jr>;
       js:output <jw>;
       js:stream <http://me.com/stream>;
+      js:timestampPath <http://ex.org/timestamp>;
       js:shapeFilter """
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
@@ -165,12 +166,14 @@ describe("SDS processors tests", async () => {
 
       const argss = extractSteps(proc, quads, config);
       expect(argss.length).toBe(1);
-      expect(argss[0].length).toBe(4);
+      expect(argss[0].length).toBe(5);
 
-      const [[input, output, stream, shapeFilters]] = argss;
+      const [[input, output, stream, timestamp, shapeFilters]] = argss;
+
       testReader(input);
       testWriter(output);
       expect(stream.value).toBe("http://me.com/stream");
+      expect(timestamp.value).toBe("http://ex.org/timestamp");
       expect(new Parser().parse(shapeFilters[0]).length).toBe(2);
 
       await checkProc(proc.file, proc.func);

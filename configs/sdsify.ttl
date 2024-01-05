@@ -29,8 +29,12 @@ js:Sdsify a js:JsProcess;
       fnom:implementationParameterPosition "2"^^xsd:int;
     ], [
       a fnom:PositionParameterMapping;
-      fnom:functionParameter "Shape filters";
+      fnom:functionParameter "Timestamp path";
       fnom:implementationParameterPosition "3"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Shape filters";
+      fnom:implementationParameterPosition "4"^^xsd:int;
     ];
   ].
 
@@ -54,6 +58,12 @@ js:Sdsify a js:JsProcess;
     sh:name "Target stream";
     sh:maxCount 1;
     sh:minCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:timestampPath;
+    sh:name "Timestamp path";
+    sh:minCount 0;
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:shapeFilter;

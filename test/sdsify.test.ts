@@ -297,7 +297,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, "http://ex.org/timestamp", [SHAPE_4]);
+        sdsify(input, output, STREAM_ID, namedNode("http://ex.org/timestamp"), [SHAPE_4]);
 
         // Push some data in
         await input.push(INPUT_3);
