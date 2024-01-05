@@ -26,9 +26,9 @@ function extractMainNodeShape(store: Store): Quad_Subject {
    if (nodeShapes && nodeShapes.length > 0) {
       for (const ns of nodeShapes) {
          const isNotReferenced = store.getSubjects(null, ns, null).length === 0;
-         
-         if(isNotReferenced) {
-            if(!mainNodeShape) {
+
+         if (isNotReferenced) {
+            if (!mainNodeShape) {
                mainNodeShape = ns;
             } else {
                throw new Error("There are multiple main node shapes in a given shape. Unrelated shapes must be given as separate shape filters");
@@ -49,12 +49,13 @@ export function sdsify(
    input: Stream<string | Quad[]>,
    output: Writer<string>,
    streamNode: Term,
+   timestampPath?: string,
    shapeFilters?: string[],
 ) {
    input.data(async (input) => {
       const dataStore = new Store(maybe_parse(input));
       console.log("[sdsify] Got input with", dataStore.size, "quads");
-      const members: { [id: string]: Quad[] } = {};
+      const members: Array<{ [id: string]: Quad[] }> = [];
 
       if (shapeFilters) {
          console.log("[sdsify] Extracting SDS members based on given shape(s)");
@@ -72,9 +73,8 @@ export function sdsify(
 
             // Execute the CBDShapeExtractor over every targeted instance of the given shape
             for (const entity of dataStore.getSubjects(RDF.type, targetClass, null)) {
-               members[entity.value] = await shapeExtractor.extract(dataStore, entity, mainNodeShape);
+               members.push({[entity.value]: await shapeExtractor.extract(dataStore, entity, mainNodeShape)});
             }
-
          }
       } else {
          // Extract members based on a Concise Bound Description (CBD)
@@ -82,9 +82,18 @@ export function sdsify(
 
          for (const sub of dataStore.getSubjects(null, null, null)) {
             if (sub instanceof NamedNode) {
-               members[sub.value] = await cbdExtractor.extract(dataStore, sub);
+               members.push({[sub.value]: await cbdExtractor.extract(dataStore, sub)});
             }
          }
+      }
+
+      // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
+      if (timestampPath) {
+         members.sort((a, b) => {
+            const ta = new Date(dataStore.getObjects(Object.keys(a)[0], timestampPath, null)[0].value).getTime();
+            const tb = new Date(dataStore.getObjects(Object.keys(b)[0], timestampPath, null)[0].value).getTime();
+            return ta - tb;
+         });
       }
 
       let membersCount = 0;
@@ -95,8 +104,9 @@ export function sdsify(
          .quadsToString(dataStore.getQuads(null, null, null, null)))
          .digest("hex") + "_" + new Date().toISOString();
 
-      for (const key of Object.keys(members)) {
-         const quads = members[key];
+      for (const obj of members) {
+         const key = Object.keys(obj)[0];
+         const quads = obj[key];
          const blank = blankNode();
 
          quads.push(

@@ -34,6 +34,22 @@ describe("Functional tests for the sdsify function", () => {
         <B> a ex:SomeOtherClass;
             ex:prop3 "another value".
     `;
+    const INPUT_3 = `
+        @prefix ex:  <http://ex.org/>.
+        @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+        <A> a ex:SomeClass;
+            ex:prop1 "some value A";
+            ex:timestamp "2024-01-05T09:00:00.000Z"^^xsd:dateTime.
+
+        <B> a ex:SomeClass;
+            ex:prop1 "some value B";
+            ex:timestamp "2024-01-05T10:00:00.000Z"^^xsd:dateTime.
+        
+        <C> a ex:SomeClass;
+            ex:prop1 "some value C";
+            ex:timestamp "2024-01-05T07:00:00.000Z"^^xsd:dateTime.
+    `;
     const SHAPE_1 = `
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
@@ -77,6 +93,14 @@ describe("Functional tests for the sdsify function", () => {
                     ]
                 ]
             ].
+    `;
+    const SHAPE_4 = `
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+
+        [ ] a sh:NodeShape;
+            sh:targetClass ex:SomeClass.
     `;
     const BAD_SHAPE_1 = `
         @prefix sh: <http://www.w3.org/ns/shacl#>.
@@ -139,7 +163,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, [SHAPE_1]);
+        sdsify(input, output, STREAM_ID, undefined, [SHAPE_1]);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -163,7 +187,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, [SHAPE_2]);
+        sdsify(input, output, STREAM_ID, undefined, [SHAPE_2]);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -190,7 +214,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, [SHAPE_3]);
+        sdsify(input, output, STREAM_ID, undefined, [SHAPE_3]);
 
         // Push some data in
         await input.push(INPUT_2);
@@ -216,7 +240,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, [SHAPE_1, SHAPE_2]);
+        sdsify(input, output, STREAM_ID, undefined, [SHAPE_1, SHAPE_2]);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -233,12 +257,50 @@ describe("Functional tests for the sdsify function", () => {
         }).on("end", () => { });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, [BAD_SHAPE_1]);
+        sdsify(input, output, STREAM_ID, undefined, [BAD_SHAPE_1]);
         try {
             // Push some data in
             expect(await input.push(INPUT_1)).toThrow(Error);
         } catch (err) {
             expect(err.message).toBe("There are multiple main node shapes in a given shape. Unrelated shapes must be given as separate shape filters");
         }
+    });
+
+    test("Time stamp-based ordering of extraction SHACL-based extraction", async () => {
+        const input = new SimpleStream<string>();
+        const output = new SimpleStream<string>();
+
+        const store = new Store();
+        const timestamps: string[] = [];
+
+        output.data(data => {
+            const quads = new Parser().parse(data);
+            const subj = quads[0].subject;
+            store.addQuads(quads);
+            timestamps.push(store.getObjects(subj, "http://ex.org/timestamp", null)[0].value);
+        }).on("end", () => {
+            // Check there number of members
+            expect(store.getObjects(null, SDS.payload, null).length).toBe(3);
+
+            // Check all properties are extracted for members
+            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value A"), null).length).toBe(1);
+            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value B"), null).length).toBe(1);
+            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value C"), null).length).toBe(1);
+            expect(store.getQuads(null, "http://ex.org/timestamp", null, null).length).toBe(3);
+
+            let currT = 0;
+            for (const ts of timestamps) {
+                const tsv = new Date(ts).getTime();
+                expect(tsv).toBeGreaterThanOrEqual(currT);
+                currT = tsv;
+            }
+        });
+
+        // Execute function
+        sdsify(input, output, STREAM_ID, "http://ex.org/timestamp", [SHAPE_4]);
+
+        // Push some data in
+        await input.push(INPUT_3);
+        await input.end();
     });
 });
