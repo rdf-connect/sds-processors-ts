@@ -10,6 +10,8 @@ This processor takes as input a stream of (batched) RDF data entities and wraps 
 
 Alternatively, a set of SHACL shapes can be given to concretely define and filter the type of entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
 
+If the `js:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
+
 An example of how to use this processor within a Connector Architecture pipeline definition is shown next:
 
 ```turtle
@@ -21,6 +23,7 @@ An example of how to use this processor within a Connector Architecture pipeline
     js:input <inputChannelReader>;
     js:output <outputChannerWriter>;
     js:stream <http://ex.org/myStream>;
+    js:timestampPath <http://ex.org/timestamp>;
     js:shapeFilter """
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
