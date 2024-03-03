@@ -2,7 +2,7 @@ import { describe, test, expect } from "@jest/globals";
 import { SimpleStream } from "@ajuvercr/js-runner";
 import { DataFactory, Parser, Store } from "n3";
 import { sdsify } from "../src/sdsify";
-import { RDF, SDS } from "@treecg/types";
+import { LDES, RDF, SDS } from "@treecg/types";
 
 const { namedNode, literal } = DataFactory;
 
@@ -266,7 +266,7 @@ describe("Functional tests for the sdsify function", () => {
         }
     });
 
-    test("Time stamp-based ordering of extraction SHACL-based extraction", async () => {
+    test("Time stamp-based ordering of SHACL-based extraction", async () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
@@ -287,6 +287,11 @@ describe("Functional tests for the sdsify function", () => {
             expect(store.getQuads(null, "http://ex.org/prop1", literal("some value B"), null).length).toBe(1);
             expect(store.getQuads(null, "http://ex.org/prop1", literal("some value C"), null).length).toBe(1);
             expect(store.getQuads(null, "http://ex.org/timestamp", null, null).length).toBe(3);
+
+            // Check all members belong to the same transaction and last one is marked as such
+            const tIds = store.getObjects(null, LDES.terms.custom("transactionId"), null);
+            expect(tIds.every(id => id.value === tIds[0].value));
+            expect(store.getObjects(null, LDES.terms.custom("isLastOfTransaction"), null).length).toBe(1);
 
             let currT = 0;
             for (const ts of timestamps) {

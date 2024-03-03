@@ -1,5 +1,5 @@
 import type { Stream, Writer } from "@ajuvercr/js-runner";
-import { LDES, RDF, SDS, SHACL } from "@treecg/types";
+import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Term } from "@rdfjs/types";
 import { blankNode, namedNode } from "./core.js";
 import { DataFactory, Parser, Quad_Object, Store, Writer as NWriter, Quad_Subject, NamedNode } from "n3";
@@ -56,6 +56,7 @@ export function sdsify(
       const dataStore = new Store(maybe_parse(input));
       console.log("[sdsify] Got input with", dataStore.size, "quads");
       const members: Array<{ [id: string]: Quad[] }> = [];
+      const t0 = new Date();
 
       if (shapeFilters) {
          console.log("[sdsify] Extracting SDS members based on given shape(s)");
@@ -73,7 +74,7 @@ export function sdsify(
 
             // Execute the CBDShapeExtractor over every targeted instance of the given shape
             for (const entity of dataStore.getSubjects(RDF.type, targetClass, null)) {
-               members.push({[entity.value]: await shapeExtractor.extract(dataStore, entity, mainNodeShape)});
+               members.push({ [entity.value]: await shapeExtractor.extract(dataStore, entity, mainNodeShape) });
             }
          }
       } else {
@@ -82,10 +83,12 @@ export function sdsify(
 
          for (const sub of dataStore.getSubjects(null, null, null)) {
             if (sub instanceof NamedNode) {
-               members.push({[sub.value]: await cbdExtractor.extract(dataStore, sub)});
+               members.push({ [sub.value]: await cbdExtractor.extract(dataStore, sub) });
             }
          }
       }
+
+      console.log(`[sdsify] Members extracted in ${new Date().getTime() - t0.getTime()} ms`);
 
       // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
       if (timestampPath) {
@@ -116,11 +119,23 @@ export function sdsify(
             DataFactory.quad(namedNode(key), LDES.terms.custom("transactionId"), DataFactory.literal(TRANSACTION_ID))
          );
 
+         if (membersCount === Object.keys(members).length - 1) {
+            // Annotate last member of a transaction
+            quads.push(
+               // This is not standardized (yet)
+               DataFactory.quad(
+                  namedNode(key), 
+                  LDES.terms.custom("isLastOfTransaction"), 
+                  DataFactory.literal("true", XSD.terms.custom("boolean"))
+               )
+            );
+         }
+
          await output.push(new NWriter().quadsToString(quads));
          membersCount += 1;
       }
 
-      console.log("[sdsify] extracted", membersCount, "members");
+      console.log(`[sdsify] successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`);
    });
 
    input.on("end", async () => {
