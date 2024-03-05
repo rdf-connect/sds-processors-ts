@@ -116,6 +116,46 @@ describe("SDS processors tests", async () => {
     await checkProc(proc.file, proc.func);
   });
 
+  test("js:Ldesify is properly defined, optionals", async () => {
+    const processor = `
+    [ ] a js:Ldesify;
+      js:input <jr>;
+      js:path "save.json";
+      js:checkProps false;
+      js:timestampPath <timestamp>;
+      js:versionOfPath <version>;
+      js:output <jw>.
+    `;
+
+    const source: Source = {
+      value: pipeline + processor,
+      baseIRI,
+      type: "memory",
+    };
+
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
+
+    const proc = processors[0];
+    expect(proc).toBeDefined();
+
+    const argss = extractSteps(proc, quads, config);
+    expect(argss.length).toBe(1);
+    expect(argss[0].length).toBe(6);
+
+    const [[input, output, save, checkProps, timestamp, version]] = argss;
+    testReader(input);
+    testWriter(output);
+    expect(save).toBe("save.json");
+    expect(checkProps).toBe(false);
+    expect(timestamp.value.endsWith("timestamp")).toBe(true);
+    expect(version.value.endsWith("version")).toBe(true);
+    await checkProc(proc.file, proc.func);
+  });
+
   test("generator", async () => {
     const processor = `
     [ ] a js:Generate;

@@ -61,13 +61,8 @@ export function sdsify(
 
     let membersCount = 0;
 
-    let first = true;
-
     for (let key of Object.keys(members)) {
       const quads = members[key];
-      if (first) {
-        first = false;
-      }
       const blank = blankNode();
       quads.push(
         DataFactory.quad(blank, SDS.terms.payload, namedNode(key)),
