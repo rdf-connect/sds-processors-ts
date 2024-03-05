@@ -83,3 +83,4 @@ export function updateMetadata(
 
   sr.metadata.data((quads) => sw.metadata.push(f(quads)));
 }
+

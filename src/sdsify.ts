@@ -1,17 +1,16 @@
 import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Term } from "@rdfjs/types";
-import { blankNode, namedNode } from "./core.js";
+import { blankNode } from "./core.js";
 import {
   DataFactory,
   NamedNode,
   Parser,
   Quad_Object,
   Quad_Subject,
-  Store,
   Writer as NWriter,
 } from "n3";
-import { CBDShapeExtractor, shape } from "extract-cbd-shape";
+import { CBDShapeExtractor } from "extract-cbd-shape";
 import { createHash } from "crypto";
 import { RdfStore } from "rdf-stores";
 
