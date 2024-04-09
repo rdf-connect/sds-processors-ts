@@ -24,11 +24,14 @@
     "@treecg/bucketizers": "^2.1.13",
     "@treecg/types": "^0.4.5",
     "csv-parse": "^5.5.2",
+    "extract-cbd-shape": "^0.1.4",
     "jsonld": "^8.3.1",
-    "n3": "^1.17.2"
+    "n3": "^1.17.2",
+    "rdf-lens": "^1.2.5",
+    "rdf-stores": "^1.0.0"
   },
   "devDependencies": {
-    "@ajuvercr/js-runner": "^0.1.12",
+    "@ajuvercr/js-runner": "^0.1.18",
     "@jest/globals": "^29.7.0",
     "@rdfjs/types": "^1.1.0",
     "@types/jsonld": "^1.5.11",

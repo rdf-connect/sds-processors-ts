@@ -1,18 +1,16 @@
 import { describe, expect, test } from "@jest/globals";
-import { shacl } from "rdf-lens";
-import { readFileSync } from "fs";
+import { extractShapes } from "rdf-lens";
 import { DataFactory, Parser } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
-import { Bucket, Extractor } from "../src/bucketizers/index";
+import { Bucket, Extractor, SHAPES_TEXT } from "../src/utils/index";
 
-export const { namedNode, blankNode, literal, quad } = DataFactory;
+const { namedNode, blankNode, literal, quad } = DataFactory;
 
 describe("Extracting defined shapes", async () => {
-  const pipeline = readFileSync("./shapes.ttl", { encoding: "utf8" });
-  const quads = new Parser({ baseIRI: "" }).parse(pipeline);
+  const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
 
-  const shapes = shacl.extractShapes(quads);
+  const shapes = extractShapes(quads);
 
   test("extracts relation", () => {
     const quadsStr = `
@@ -96,7 +94,7 @@ describe("Extracting defined shapes", async () => {
     const keys = Object.keys(record);
     expect(keys).toContain("bucket");
     expect(keys).toContain("stream");
-    expect(keys).toContain("thing");
+    expect(keys).toContain("data");
   });
 
   test("defined shapes", async () => {
@@ -107,8 +105,6 @@ describe("Extracting defined shapes", async () => {
 
   test("extract sds records", async () => {
     const extractor = new Extractor(new CBDShapeExtractor());
-    await extractor.init();
-
     const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
@@ -122,8 +118,8 @@ describe("Extracting defined shapes", async () => {
     <y> 45;
   ].
 
-<bucket> sds:relation <a>; a <#Bucket>.
-<a> a <#Relation>;
+<bucket> sds:relation <a>.
+<a>
   sds:relationType tree:GreaterThanRelation ;
   sds:relationBucket <bucket2> ;
   sds:relationValue 1;
@@ -133,9 +129,54 @@ describe("Extracting defined shapes", async () => {
 
     const out = await extractor.parse_records(quads);
     expect(out.length).toBe(1);
-    expect(out[0].thing.quads.length).toBe(2);
+    expect(out[0].data.quads.length).toBe(2);
 
     expect(out[0].bucket).toBeInstanceOf(Bucket);
-  })
-});
+  });
 
+  test("extract deep buckets", async () => {
+    const extractor = new Extractor(new CBDShapeExtractor());
+    const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+<record> a sds:Record;
+  sds:stream <#stream>;
+  sds:bucket <bucket>;
+  sds:payload [
+    <x> 42;
+    <y> 45;
+  ].
+
+<bucket> sds:relation <a>; a sds:Bucket.
+<a>
+  sds:relationType tree:GreaterThanRelation ;
+  sds:relationBucket <bucket2> ;
+  sds:relationValue 1;
+  sds:relationPath ex:x.
+
+<bucket2> sds:relation <b>; a sds:Bucket.
+<b>
+  sds:relationType tree:GreaterThanRelation ;
+  sds:relationBucket <bucket3> ;
+  sds:relationValue 1;
+  sds:relationPath ex:x.
+`;
+    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+
+    const out = await extractor.parse_records(quads);
+    expect(out.length).toBe(1);
+    const rec = out[0];
+    expect(rec.data.quads.length).toBe(2);
+    expect(rec.bucket).toBeInstanceOf(Bucket);
+    expect(rec.bucket!.links.length).toBe(1);
+    const link = rec.bucket!.links[0];
+    expect(link.target.id.value).toBe("bucket2");
+
+    const next = rec.bucket!.links[0].target;
+    expect(next.links.length).toBe(1);
+    const nextLink = next.links[0];
+    expect(nextLink.target.id.value).toBe("bucket3");
+  });
+});

@@ -1,0 +1,81 @@
+@prefix tree: <https://w3id.org/tree#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sds: <https://w3id.org/sds#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:FragmentationStrategy;
+  sh:property [
+    sh:name "type";
+    sh:path rdf:type;
+    sh:datatype xsd:iri;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "config";
+    sh:path ( );
+    sh:class rdfl:TypedExtract;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <RdfThing>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:iri;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:CBD;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:SubjectFragmentation;
+  sh:property [
+    sh:name "path";
+    sh:path tree:fragmentationPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "pathQuads";
+    sh:path tree:fragmentationPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:PageFragmentation;
+  sh:property [
+    sh:name "pageSize";
+    sh:path tree:pageSize;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:TimebasedFragmentation;
+  sh:property [
+    sh:name "path";
+    sh:path tree:fragmentationPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "maxGranularity";
+    sh:path tree:maxGranularity;
+    sh:datatype xsd:string;
+    sh:maxCount 1;
+  ].
+

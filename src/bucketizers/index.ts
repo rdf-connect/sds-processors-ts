@@ -1,148 +1,118 @@
-import { Quad, Term } from "@rdfjs/types";
-import { blankNode, literal, namedNode, quad } from "../core";
-import { Parser, Quad_Object, Store, Writer } from "n3";
-import { SDS, XSD } from "@treecg/types";
-import { BasicLensM, match, shacl } from "rdf-lens";
 import { readFileSync } from "fs";
-import { CBDShapeExtractor } from "extract-cbd-shape";
+import * as path from "path";
+import { Term } from "rdf-js";
+import { BasicLensM, Cont } from "rdf-lens";
+import { Bucket, Record } from "../utils";
+import { TREE } from "@treecg/types";
+import { namedNode } from "../core";
+import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
 
-export type RdfThing = {
-  id: Term;
-  quads: Quad[];
-};
+export const SHAPES_FILE_LOCATION = path.join(__dirname, "shapes.ttl");
+export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
+  encoding: "utf8",
+});
 
-export type BucketRelation = {
+export type Config = {
   type: Term;
-  target: string;
-  value: Term;
-  path: RdfThing;
+  config: SubjectFragmentation | PageFragmentation | TimebasedFragmentation;
 };
 
-function writeRelation(rel: BucketRelation, writer: Writer): Term {
-  const id = blankNode();
-  writer.addQuads([
-    quad(id, SDS.terms.relationType, <Quad_Object>rel.type),
-    quad(id, SDS.terms.relationBucket, namedNode(rel.target)),
-    quad(id, SDS.terms.relationValue, <Quad_Object>rel.value),
-    quad(id, SDS.terms.relationPath, <Quad_Object>rel.path.id),
-    ...rel.path.quads,
-  ]);
-  return id;
+export type SubjectFragmentation = {
+  path: BasicLensM<Cont, Cont>;
+  pathQuads: Cont;
+};
+
+export type PageFragmentation = {
+  pageSize: number;
+};
+
+export type TimebasedFragmentation = {
+  path: BasicLensM<Cont, Cont>;
+  maxGranularity: "day" | "hour" | "second";
+};
+
+export interface Bucketizer {
+  bucketize(
+    sdsMember: Record,
+    getBucket: (key: string, root?: boolean) => Bucket,
+  ): Bucket[];
+
+  save(): string;
 }
 
-export class Bucket {
-  id: string;
-  root?: boolean;
-  links: BucketRelation[];
+type Save = { [key: string]: { bucketizer?: Bucketizer; save?: string } };
 
-  constructor(id: string, links: BucketRelation[], root?: boolean) {
-    this.id = id;
-    this.root = root;
-    this.links = links;
+function createBucketizer(config: Config, save?: string): Bucketizer {
+  switch (config.type.value) {
+    case TREE.custom("SubjectFragmentation"):
+      return new SubjectBucketizer(<SubjectFragmentation>config.config, save);
+    case TREE.custom("PageFragmentation"):
+      return new PagedBucketizer(<PageFragmentation>config.config, save);
+    case TREE.custom("TimebasedFragmentation"):
+      throw "Not yet implemented";
+  }
+  throw "Unknown bucketizer " + config.type.value;
+}
+
+export class BucketizerOrchestrator {
+  private readonly configs: Config[];
+
+  private saves: Save = {};
+
+  constructor(configs: Config[], save?: string) {
+    this.configs = configs;
+
+    if (save) {
+      this.saves = JSON.parse(save);
+    }
   }
 
-  static parse(bucket: { [field: string]: any }): Bucket {
-    return new Bucket(bucket.id, bucket.links, bucket.root);
-  }
+  bucketize(record: Record, buckets: { [id: string]: Bucket }): string[] {
+    let queue = [""];
 
-  addRelation(target: Bucket, type: Term, value: Term, path: RdfThing) {
-    this.links.push({ type, value, path, target: target.id });
-  }
+    for (let i = 0; i < this.configs.length; i++) {
+      const todo = queue.slice();
+      queue = [];
 
-  write(writer: Writer) {
-    const id = namedNode(this.id);
-    const relations = this.links
-      .map((rel) => writeRelation(rel, writer))
-      .map((rel) => quad(id, SDS.terms.relation, <Quad_Object>rel));
+      for (let prefix of todo) {
+        const bucketizer = this.getBucketizer(i, prefix);
 
-    if (this.root) {
-      relations.push(
-        quad(
-          id,
-          SDS.terms.custom("root"),
-          literal("true", XSD.terms.custom("boolean")),
-        ),
-      );
+        const foundBucket = bucketizer.bucketize(record, (key, root) => {
+          const id = prefix + "/" + key;
+          if (!buckets[id]) {
+            buckets[id] = new Bucket(namedNode(id), [], root);
+          }
+          return buckets[id];
+        });
+
+        for (let bucket of foundBucket) {
+          queue.push(bucket.id.value);
+        }
+      }
     }
 
-    writer.addQuads(relations);
-  }
-}
-
-interface RecordDTO {
-  stream: Term;
-  thing: Term;
-  bucket: Bucket;
-}
-
-export class Record {
-  stream: Term;
-  thing: RdfThing;
-  bucket?: Bucket;
-
-  constructor(thing: RdfThing, stream: Term, bucket?: Bucket) {
-    this.stream = stream;
-    this.thing = thing;
-    this.bucket = bucket;
+    return queue;
   }
 
-  static async parse(
-    { stream, thing, bucket }: RecordDTO,
-    store: Store,
-    extractor: CBDShapeExtractor,
-  ): Promise<Record> {
-    const thingQuads = await extractor.extract(store, thing);
-    if (bucket) {
-      bucket = Bucket.parse(bucket);
+  save(): string {
+    for (let key of Object.keys(this.saves)) {
+      this.saves[key].save = this.saves[key].bucketizer!.save();
+      delete this.saves[key].bucketizer;
     }
-    return new Record({ id: thing, quads: thingQuads }, stream, bucket);
+    return JSON.stringify(this.saves);
   }
 
-  write(writer: Writer) {
-    const id = blankNode();
-
-    const quads = [
-      quad(id, SDS.terms.payload, <Quad_Object>this.thing.id),
-      quad(id, SDS.terms.stream, <Quad_Object>this.stream),
-    ];
-    if (this.bucket) {
-      quads.push(quad(id, SDS.terms.bucket, namedNode(this.bucket.id)));
-      this.bucket.write(writer);
+  private getBucketizer(index: number, key: string): Bucketizer {
+    if (!this.saves[key]) {
+      this.saves[key] = {};
     }
-    writer.addQuads(quads);
-  }
-}
 
-export class Extractor {
-  shapes!: shacl.Shapes;
-  lens!: BasicLensM<Quad[], RecordDTO>;
-  extractor: CBDShapeExtractor;
+    const save = this.saves[key];
 
-  constructor(extractor: CBDShapeExtractor) {
-    this.extractor = extractor;
-  }
+    if (!save.bucketizer) {
+      save.bucketizer = createBucketizer(this.configs[index], save.save);
+    }
 
-  async init() {
-    const pipeline = readFileSync("./shapes.ttl", { encoding: "utf8" });
-    const quads = new Parser({ baseIRI: "" }).parse(pipeline);
-
-    this.shapes = shacl.extractShapes(quads);
-
-    this.lens = <BasicLensM<Quad[], RecordDTO>>match(
-      undefined,
-      SDS.terms.stream,
-      undefined,
-    )
-      .mapAll(({ id, quads }) => ({ id: id.subject, quads }))
-      .thenSome(this.shapes.lenses["#Record"])
-      .mapAll((x) => <RecordDTO>x);
-  }
-
-  async parse_records(quads: Quad[]): Promise<Record[]> {
-    const dtos = this.lens.execute(quads);
-    const store = new Store(quads);
-    return await Promise.all(
-      dtos.map((dto) => Record.parse(dto, store, this.extractor)),
-    );
+    return save.bucketizer!;
   }
 }

@@ -89,7 +89,7 @@ describe("SDS processors tests", async () => {
 
     const argss = extractSteps(proc, quads, config);
     expect(argss.length).toBe(1);
-    expect(argss[0].length).toBe(3);
+    expect(argss[0].length).toBe(6);
 
     const [[input, output, save]] = argss;
     testReader(input);
@@ -167,15 +167,15 @@ describe("SDS processors tests", async () => {
 
 function testReader(arg: any) {
   expect(arg).toBeInstanceOf(Object);
-  expect(arg.channel).toBeDefined();
-  expect(arg.channel.id).toBeDefined();
+  expect(arg.config.channel).toBeDefined();
+  expect(arg.config.channel.id).toBeDefined();
   expect(arg.ty).toBeDefined();
 }
 
 function testWriter(arg: any) {
   expect(arg).toBeInstanceOf(Object);
-  expect(arg.channel).toBeDefined();
-  expect(arg.channel.id).toBeDefined();
+  expect(arg.config.channel).toBeDefined();
+  expect(arg.config.channel.id).toBeDefined();
   expect(arg.ty).toBeDefined();
 }
 
