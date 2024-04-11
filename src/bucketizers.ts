@@ -1,11 +1,15 @@
 import { FACTORY } from "@treecg/bucketizers";
-import { writeFileSync } from "fs";
+import { readFileSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
-import { DataFactory, Parser, Quad, Store } from "n3";
+import { DataFactory, Parser, Store } from "n3";
 import * as N3 from "n3";
-import { literal, NBNode, SR, SW, transformMetadata } from "./core.js";
+import { blankNode, literal, SR, SW, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@ajuvercr/js-runner";
+import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
+import { Quad, Quad_Object, Term } from "rdf-js";
+import { Bucket, Extractor, Record } from "./utils/index";
+import { CBDShapeExtractor } from "extract-cbd-shape";
 
 type Data = { data: Quad[]; metadata: Quad[] };
 const { namedNode, quad } = DataFactory;
@@ -27,13 +31,13 @@ async function writeState(path: string, content: any): Promise<void> {
 }
 
 function addProcess(
-  id: NBNode | undefined,
+  id: Term | undefined,
   store: Store,
-  strategyId: NBNode,
+  strategyId: Term,
   bucketizeConfig: Quad[],
-): NBNode {
+): Term {
   const newId = store.createBlankNode();
-  const time = new Date().getTime();
+  const time = new Date().toISOString();
 
   store.addQuad(newId, RDF.terms.type, PPLAN.terms.Activity);
   store.addQuad(newId, RDF.terms.type, LDES.terms.Bucketization);
@@ -41,9 +45,9 @@ function addProcess(
   store.addQuads(bucketizeConfig);
 
   store.addQuad(newId, PROV.terms.startedAtTime, literal(time));
-  store.addQuad(newId, PROV.terms.used, strategyId);
+  store.addQuad(newId, PROV.terms.used, <Quad_Object>strategyId);
   if (id) {
-    store.addQuad(newId, PROV.terms.used, id);
+    store.addQuad(newId, PROV.terms.used, <Quad_Object>id);
   }
 
   return newId;
@@ -83,17 +87,13 @@ export async function doTheBucketization(
   const sw = { metadata: metadataWriter, data: dataWriter };
 
   const content = await readFile(location, { encoding: "utf-8" });
-  console.log("content", content);
   const quads = new Parser().parse(content);
 
-  const quadMemberId = <NBNode>(
-    quads.find(
-      (quad) =>
-        quad.predicate.equals(RDF.terms.type) &&
-        quad.object.equals(LDES.terms.BucketizeStrategy),
-    )!.subject
-  );
-  console.log("Do bucketization", quadMemberId);
+  const quadMemberId = quads.find(
+    (quad) =>
+      quad.predicate.equals(RDF.terms.type) &&
+      quad.object.equals(LDES.terms.BucketizeStrategy),
+  )!.subject;
 
   const f = transformMetadata(
     namedNode(resultingStream),
@@ -124,7 +124,6 @@ export async function doTheBucketization(
 
   sr.data.data(async (data: Quad[] | string) => {
     const t = parseQuads(data);
-    console.log("Bucketizing member");
     if (!t.length) return;
 
     const checkStream = sourceStream
@@ -165,5 +164,158 @@ export async function doTheBucketization(
 
     console.log("Pushing thing bucketized!");
     await sw.data.push(serializeQuads(t));
+  });
+}
+
+type Channels = {
+  dataInput: Stream<string>;
+  metadataInput: Stream<string>;
+  dataOutput: Writer<string>;
+  metadataOutput: Writer<string>;
+};
+
+type Config = {
+  quads: { id: Term; quads: Quad[] };
+  strategy: BucketizerConfig[];
+};
+
+function record_to_quads(
+  record: Record,
+  resultingStream: Term,
+  buckets: Bucket[],
+): Quad[] {
+  const id = blankNode();
+  const out: Quad[] = [
+    quad(id, SDS.terms.payload, <N3.Quad_Object>record.data.id),
+    quad(id, SDS.terms.stream, <N3.Quad_Object>resultingStream),
+    ...record.data.quads,
+    ...buckets
+      .map((bucket) => bucket.id)
+      .map((bucket) => quad(id, SDS.terms.bucket, <N3.Quad_Object>bucket)),
+  ];
+  return out;
+}
+
+function bucket_to_quads(bucket: Bucket): Quad[] {
+  const out: Quad[] = [
+    quad(
+      <N3.Quad_Subject>bucket.id,
+      RDF.terms.type,
+      SDS.terms.custom("Bucket"),
+    ),
+  ];
+  if (bucket.immutable) {
+    out.push(
+      quad(
+        <N3.Quad_Subject>bucket.id,
+        SDS.terms.custom("immutable"),
+        literal("true"),
+      ),
+    );
+  }
+
+  if (bucket.root) {
+    out.push(
+      quad(
+        <N3.Quad_Subject>bucket.id,
+        SDS.terms.custom("isRoot"),
+        literal("true"),
+      ),
+    );
+  }
+
+  for (let rel of bucket.links) {
+    const id = blankNode();
+    out.push(
+      quad(<N3.Quad_Subject>bucket.id, SDS.terms.relation, id),
+      quad(id, SDS.terms.relationType, <N3.Quad_Object>rel.type),
+      quad(id, SDS.terms.relationBucket, <N3.Quad_Object>rel.target.id),
+    );
+
+    if (rel.path) {
+      out.push(
+        quad(id, SDS.terms.relationPath, <N3.Quad_Object>rel.path.id),
+        ...rel.path.quads,
+      );
+    }
+
+    if (rel.value) {
+      out.push(quad(id, SDS.terms.relationValue, <N3.Quad_Object>rel.value));
+    }
+
+    out.push();
+  }
+
+  return out;
+}
+
+function set_metadata(
+  channels: Channels,
+  resultingStream: Term,
+  sourceStream: Term | undefined,
+  config: Config,
+) {
+  const f = transformMetadata(
+    resultingStream,
+    sourceStream,
+    "sds:Member",
+    (x, y) => addProcess(x, y, config.quads.id, config.quads.quads),
+  );
+  channels.metadataInput.data((quads) =>
+    channels.metadataOutput.push(serializeQuads(f(parseQuads(quads)))),
+  );
+}
+
+export async function bucketize(
+  channels: Channels,
+  config: Config,
+  savePath: string | undefined,
+  sourceStream: Term | undefined,
+  resultingStream: Term,
+) {
+  set_metadata(channels, resultingStream, sourceStream, config);
+  const save = savePath
+    ? readFileSync(savePath, { encoding: "utf8" })
+    : undefined;
+  const orchestrator = new BucketizerOrchestrator(config.strategy, save);
+  const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
+
+  const buckets: { [id: string]: Bucket } = {};
+  channels.dataInput.data(async (x) => {
+    const outputQuads: Quad[] = [];
+    const quads = new Parser().parse(x);
+    // Strange, this should be doable with just shacl shape definitions
+    // But it is a good question to ask, what if an sds:Record is not only cbd?
+    const records = await extractor.parse_records(quads);
+    const relatedBuckets = new Set<string>();
+    for (let record of records) {
+      const record_buckets = orchestrator.bucketize(
+        record,
+        buckets,
+        sourceStream?.value || "root",
+      );
+      outputQuads.push(
+        ...record_to_quads(
+          record,
+          resultingStream,
+          record_buckets.map((x) => buckets[x]),
+        ),
+      );
+
+      for (let b of record_buckets) {
+        relatedBuckets.add(b);
+        let parent = buckets[b].parent;
+        while (parent) {
+          relatedBuckets.add(parent.id.value);
+          parent = parent.parent;
+        }
+      }
+    }
+
+    for (let relatedBucket of relatedBuckets.values()) {
+      outputQuads.push(...bucket_to_quads(buckets[relatedBucket]));
+    }
+
+    await channels.dataOutput.push(new N3.Writer().quadsToString(outputQuads));
   });
 }

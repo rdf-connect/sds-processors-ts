@@ -1,29 +1,18 @@
 import type { Stream, Writer } from "@ajuvercr/js-runner";
-import {
-  BlankNode,
-  DataFactory,
-  DefaultGraph,
-  NamedNode,
-  Quad,
-  Store,
-  Term,
-  Writer as NWriter,
-} from "n3";
+import { BlankNode, DataFactory, DefaultGraph, NamedNode, Store } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
+import { Quad, Quad_Object, Quad_Subject, Term } from "rdf-js";
 
 export const { namedNode, blankNode, literal, quad } = DataFactory;
 
 export type NBNode = NamedNode | BlankNode;
 
 export type ShapeTransform = (
-  id: NBNode | undefined,
+  id: Term | undefined,
   store: Store,
-) => NBNode | undefined;
-export type AddProcess = (used: NBNode | undefined, store: Store) => NBNode;
-export type DatasetTransform = (
-  used: NBNode | undefined,
-  store: Store,
-) => NBNode;
+) => Term | undefined;
+export type AddProcess = (used: Term | undefined, store: Store) => Term;
+export type DatasetTransform = (used: Term | undefined, store: Store) => Term;
 
 export type QuadsTransform = (quads: Quad[]) => Quad[];
 
@@ -78,7 +67,7 @@ function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
   return <NBNode>shapeIds[0];
 }
 
-function getLatestDataset(streamId: Term, store: Store): NBNode | undefined {
+function getLatestDataset(streamId: Term, store: Store): Term | undefined {
   const datasets = store.getObjects(streamId, SDS.terms.dataset, null);
 
   if (datasets.length !== 1) {
@@ -88,12 +77,12 @@ function getLatestDataset(streamId: Term, store: Store): NBNode | undefined {
     if (datasets.length == 0) return;
   }
 
-  return <NBNode>datasets[0];
+  return datasets[0];
 }
 
 export function transformMetadata(
-  streamId: NBNode,
-  sourceStream: NamedNode | undefined,
+  streamId: Term,
+  sourceStream: Term | undefined,
   itemType: string,
   gp: AddProcess,
   shT?: ShapeTransform,
@@ -118,17 +107,25 @@ export function transformMetadata(
 
     const blank = store.createBlankNode();
 
-    store.addQuad(streamId, RDF.terms.type, SDS.terms.Stream);
+    store.addQuad(<Quad_Subject>streamId, RDF.terms.type, SDS.terms.Stream);
     if (datasetId) {
-      store.addQuad(streamId, SDS.terms.dataset, datasetId);
+      store.addQuad(
+        <Quad_Subject>streamId,
+        SDS.terms.dataset,
+        <Quad_Object>datasetId,
+      );
     }
-    store.addQuad(streamId, SDS.terms.carries, blank);
-    store.addQuad(streamId, PROV.terms.wasGeneratedBy, activityId);
+    store.addQuad(<Quad_Subject>streamId, SDS.terms.carries, blank);
+    store.addQuad(
+      <Quad_Subject>streamId,
+      PROV.terms.wasGeneratedBy,
+      <Quad_Object>activityId,
+    );
 
     store.addQuad(blank, RDF.terms.type, namedNode(itemType));
 
     if (newShape) {
-      store.addQuad(blank, SDS.terms.shape, newShape);
+      store.addQuad(blank, SDS.terms.shape, <Quad_Object>newShape);
     }
 
     const out: Quad[] = [];

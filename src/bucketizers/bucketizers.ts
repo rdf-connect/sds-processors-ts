@@ -25,6 +25,7 @@ export class PagedBucketizer implements Bucketizer {
 
     if (this.count % this.pageSize == 1 && this.count > 1) {
       const oldBucket = getBucket("page-" + (index - 1), index - 1 == 0);
+      oldBucket.immutable = true;
       oldBucket.addRelation(currentbucket, TREE.terms.Relation);
     }
 

@@ -8,7 +8,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
 
-export const SHAPES_FILE_LOCATION = path.join(__dirname, "shapes.ttl");
+export const SHAPES_FILE_LOCATION = path.join(__dirname, "../../configs/sds_shapes.ttl");
 export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
   encoding: "utf8",
 });
@@ -59,7 +59,9 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
 
 export class Bucket {
   id: Term;
+  parent?: Bucket;
   root?: boolean;
+  immutable?: boolean;
   links: BucketRelation[];
 
   constructor(id: Term, links: BucketRelation[], root?: boolean) {
@@ -80,6 +82,7 @@ export class Bucket {
 
   addRelation(target: Bucket, type: Term, value?: Term, path?: RdfThing) {
     this.links.push({ type, value, path, target });
+    target.parent = this;
   }
 
   write(writer: Writer) {
@@ -153,7 +156,7 @@ export class Extractor {
   shapes: Shapes;
   lens: BasicLensM<Quad[], RecordDTO>;
 
-  constructor(extractor: CBDShapeExtractor) {
+  constructor(extractor: CBDShapeExtractor, stream?: Term) {
     this.extractor = extractor;
 
     const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
@@ -166,7 +169,7 @@ export class Extractor {
     this.lens = <BasicLensM<Quad[], RecordDTO>>match(
       undefined,
       SDS.terms.stream,
-      undefined,
+      stream,
     )
       .thenAll(subject)
       .thenSome(this.shapes.lenses["#Record"])

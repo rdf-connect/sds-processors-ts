@@ -7,12 +7,15 @@ import { TREE } from "@treecg/types";
 import { namedNode } from "../core";
 import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
 
-export const SHAPES_FILE_LOCATION = path.join(__dirname, "shapes.ttl");
+export const SHAPES_FILE_LOCATION = path.join(
+  __dirname,
+  "../../configs/bucketizer_configs.ttl",
+);
 export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
   encoding: "utf8",
 });
 
-export type Config = {
+export type BucketizerConfig = {
   type: Term;
   config: SubjectFragmentation | PageFragmentation | TimebasedFragmentation;
 };
@@ -42,7 +45,7 @@ export interface Bucketizer {
 
 type Save = { [key: string]: { bucketizer?: Bucketizer; save?: string } };
 
-function createBucketizer(config: Config, save?: string): Bucketizer {
+function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
   switch (config.type.value) {
     case TREE.custom("SubjectFragmentation"):
       return new SubjectBucketizer(<SubjectFragmentation>config.config, save);
@@ -55,11 +58,11 @@ function createBucketizer(config: Config, save?: string): Bucketizer {
 }
 
 export class BucketizerOrchestrator {
-  private readonly configs: Config[];
+  private readonly configs: BucketizerConfig[];
 
   private saves: Save = {};
 
-  constructor(configs: Config[], save?: string) {
+  constructor(configs: BucketizerConfig[], save?: string) {
     this.configs = configs;
 
     if (save) {
@@ -67,8 +70,12 @@ export class BucketizerOrchestrator {
     }
   }
 
-  bucketize(record: Record, buckets: { [id: string]: Bucket }): string[] {
-    let queue = [""];
+  bucketize(
+    record: Record,
+    buckets: { [id: string]: Bucket },
+    prefix = "",
+  ): string[] {
+    let queue = [prefix];
 
     for (let i = 0; i < this.configs.length; i++) {
       const todo = queue.slice();
@@ -77,18 +84,27 @@ export class BucketizerOrchestrator {
       for (let prefix of todo) {
         const bucketizer = this.getBucketizer(i, prefix);
 
-        const foundBucket = bucketizer.bucketize(record, (key, root) => {
-          const id = prefix + "/" + key;
+        const getBucket = (value: string, root?: boolean) => {
+          const terms = value.split("/");
+          const key = encodeURIComponent(terms[terms.length - 1]);
+          // If the requested bucket is the root, it actually is the previous bucket
+          const id = root ? prefix : prefix + "/" + key;
           if (!buckets[id]) {
-            buckets[id] = new Bucket(namedNode(id), [], root);
+            buckets[id] = new Bucket(namedNode(id), [], false);
           }
           return buckets[id];
-        });
+        };
+
+        const foundBucket = bucketizer.bucketize(record, getBucket);
 
         for (let bucket of foundBucket) {
           queue.push(bucket.id.value);
         }
       }
+    }
+
+    if (buckets[prefix]) {
+      buckets[prefix].root = true;
     }
 
     return queue;

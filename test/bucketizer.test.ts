@@ -156,9 +156,9 @@ describe("Bucketizer behavior", () => {
       recordBuckets.push(...orchestrator.bucketize(member, buckets));
     }
 
-    expect(recordBuckets).toEqual(["/page-0", "/page-0", "/page-1"]);
-    expect(buckets["/page-0"].root).toBeTruthy();
-    expect(buckets["/page-0"].links.length).toBe(1);
+    expect(recordBuckets).toEqual(["", "", "/page-1"]);
+    expect(buckets[""].root).toBeTruthy();
+    expect(buckets[""].links.length).toBe(1);
     expect(buckets["/page-1"].links.length).toBe(0);
   });
 
@@ -188,8 +188,8 @@ describe("Bucketizer behavior", () => {
     }
 
     expect(recordBuckets).toEqual(["/bucket-a1", "/bucket-a2", "/bucket-a2"]);
-    expect(buckets["/root"].root).toBeTruthy();
-    expect(buckets["/root"].links.length).toBe(2);
+    expect(buckets[""].root).toBeTruthy();
+    expect(buckets[""].links.length).toBe(2);
   });
 
   test("Combined", () => {
@@ -222,16 +222,17 @@ describe("Bucketizer behavior", () => {
       recordBuckets.push(...orchestrator.bucketize(member, buckets));
     }
 
+    expect(Object.keys(buckets).length).toBe(4)
     expect(recordBuckets).toEqual([
-      "/bucket-a1/page-0",
-      "/bucket-a2/page-0",
-      "/bucket-a2/page-0",
+      "/bucket-a1",
+      "/bucket-a2",
+      "/bucket-a2",
       "/bucket-a2/page-1",
     ]);
-    expect(buckets["/root"].root).toBeTruthy();
-    expect(buckets["/root"].links.length).toBe(2);
-    expect(buckets["/bucket-a2/page-0"].links.length).toBe(1);
+    expect(buckets[""].root).toBeTruthy();
+    expect(buckets[""].links.length).toBe(2);
+    expect(buckets["/bucket-a2"].links.length).toBe(1);
     expect(buckets["/bucket-a2/page-1"].links.length).toBe(0);
-    expect(buckets["/bucket-a1/page-0"].links.length).toBe(0);
+    expect(buckets["/bucket-a1"].links.length).toBe(0);
   });
 });

@@ -41,24 +41,12 @@ export function sdsify(
 ) {
   input.data(async (input) => {
     const quads = maybe_parse(input);
-    console.log("sdsify: Got input", quads.length, "quads");
-    logger.info("sdsisfy got input!");
-
-    const types = quads
-      .filter((x) => x.predicate.equals(RDFT.terms.type))
-      .map((x) => x.object.value)
-      .join(", ");
-    logger.info("Found types " + types);
-
     const members: { [id: string]: RDF.Quad[] } = {};
 
     if (type) {
-      logger.info("Extracting with type " + type);
       // Group quads based on given member type
       const store = new Store(quads);
       for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
-        logger.info("Found one!");
-        console.log("Found one!");
         members[quad.subject.value] = extractMember(store, quad.subject);
       }
     } else {
@@ -79,15 +67,11 @@ export function sdsify(
       const quads = members[key];
       if (first) {
         first = false;
-        console.log(
-          "predicates",
-          quads.map((q) => q.predicate.value),
-        );
       }
       const blank = blankNode();
       quads.push(
         DataFactory.quad(blank, SDS.terms.payload, namedNode(key)),
-        DataFactory.quad(blank, SDS.terms.stream, <Quad_Object> streamNode),
+        DataFactory.quad(blank, SDS.terms.stream, <Quad_Object>streamNode),
       );
 
       const str = new NWriter().quadsToString(quads);
