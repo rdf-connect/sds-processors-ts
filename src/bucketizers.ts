@@ -10,6 +10,7 @@ import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Quad, Quad_Object, Term } from "rdf-js";
 import { Bucket, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
+import { Cleanup } from "./exitHandler";
 
 type Data = { data: Quad[]; metadata: Quad[] };
 const { namedNode, quad } = DataFactory;
@@ -23,10 +24,12 @@ async function readState(path: string): Promise<any | undefined> {
   }
 }
 
-async function writeState(path: string, content: any): Promise<void> {
+async function writeState(
+  path: string | undefined,
+  content: string,
+): Promise<void> {
   if (path) {
-    const str = JSON.stringify(content);
-    writeFileSync(path, str, { encoding: "utf-8" });
+    writeFileSync(path, content, { encoding: "utf-8" });
   }
 }
 
@@ -204,15 +207,13 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
       SDS.terms.custom("Bucket"),
     ),
   ];
-  if (bucket.immutable) {
-    out.push(
-      quad(
-        <N3.Quad_Subject>bucket.id,
-        SDS.terms.custom("immutable"),
-        literal("true"),
-      ),
-    );
-  }
+  out.push(
+    quad(
+      <N3.Quad_Subject>bucket.id,
+      SDS.terms.custom("immutable"),
+      literal((bucket.immutable || false) + ""),
+    ),
+  );
 
   if (bucket.root) {
     out.push(
@@ -229,7 +230,7 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
     out.push(
       quad(<N3.Quad_Subject>bucket.id, SDS.terms.relation, id),
       quad(id, SDS.terms.relationType, <N3.Quad_Object>rel.type),
-      quad(id, SDS.terms.relationBucket, <N3.Quad_Object>rel.target.id),
+      quad(id, SDS.terms.relationBucket, <N3.Quad_Object>rel.target),
     );
 
     if (rel.path) {
@@ -266,6 +267,15 @@ function set_metadata(
   );
 }
 
+function read_save(savePath?: string) {
+  try {
+    if (savePath) {
+      return readFileSync(savePath, { encoding: "utf8" });
+    }
+  } catch (ex: any) {}
+  return;
+}
+
 export async function bucketize(
   channels: Channels,
   config: Config,
@@ -274,11 +284,14 @@ export async function bucketize(
   resultingStream: Term,
 ) {
   set_metadata(channels, resultingStream, sourceStream, config);
-  const save = savePath
-    ? readFileSync(savePath, { encoding: "utf8" })
-    : undefined;
+  const save = read_save(savePath);
   const orchestrator = new BucketizerOrchestrator(config.strategy, save);
   const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
+
+  Cleanup(async () => {
+    const state = orchestrator.save();
+    await writeState(savePath, state);
+  });
 
   const buckets: { [id: string]: Bucket } = {};
   channels.dataInput.data(async (x) => {

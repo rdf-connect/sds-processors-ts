@@ -45,7 +45,7 @@ describe("Extracting defined shapes", async () => {
 @prefix sds: <https://w3id.org/sds#>.
 
 <bucket> sds:relation <a>;
-  sds:root true.
+  sds:isRoot true.
 <a> a <#Relation>;
   sds:relationType tree:GreaterThanRelation ;
   sds:relationBucket <bucket2> ;
@@ -143,7 +143,7 @@ describe("Extracting defined shapes", async () => {
 
 <record> a sds:Record;
   sds:stream <#stream>;
-  sds:bucket <bucket>;
+  sds:bucket <bucket3>;
   sds:payload [
     <x> 42;
     <y> 45;
@@ -170,13 +170,10 @@ describe("Extracting defined shapes", async () => {
     const rec = out[0];
     expect(rec.data.quads.length).toBe(2);
     expect(rec.bucket).toBeInstanceOf(Bucket);
-    expect(rec.bucket!.links.length).toBe(1);
-    const link = rec.bucket!.links[0];
-    expect(link.target.id.value).toBe("bucket2");
-
-    const next = rec.bucket!.links[0].target;
-    expect(next.links.length).toBe(1);
-    const nextLink = next.links[0];
-    expect(nextLink.target.id.value).toBe("bucket3");
+    expect(rec.bucket!.links.length).toBe(0);
+    expect(rec.bucket!.parent).toBeDefined();
+    expect(rec.bucket!.parent!.id.value).toBe("bucket2");
+    expect(rec.bucket!.parent!.parent).toBeDefined();
+    expect(rec.bucket!.parent!.parent!.id.value).toBe("bucket");
   });
 });

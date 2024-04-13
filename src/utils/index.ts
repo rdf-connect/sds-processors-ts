@@ -8,7 +8,10 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
 
-export const SHAPES_FILE_LOCATION = path.join(__dirname, "../../configs/sds_shapes.ttl");
+export const SHAPES_FILE_LOCATION = path.join(
+  __dirname,
+  "../../configs/sds_shapes.ttl",
+);
 export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
   encoding: "utf8",
 });
@@ -20,20 +23,22 @@ export type RdfThing = {
 
 export type RelationDTO = {
   type: Term;
-  target: BucketDTO;
-  value: any;
-  path: Term;
+  target: Term;
+  value?: any;
+  path?: RdfThing;
 };
 
 export type BucketDTO = {
   links: RelationDTO[];
   id: Term;
-  root: boolean;
+  root?: boolean;
+  immutable?: boolean;
+  parent?: BucketDTO;
 };
 
 export type BucketRelation = {
   type: Term;
-  target: Bucket;
+  target: Term;
   value?: Term;
   path?: RdfThing;
 };
@@ -42,7 +47,7 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
   const id = blankNode();
   writer.addQuads([
     quad(id, SDS.terms.relationType, <Quad_Object>rel.type),
-    quad(id, SDS.terms.relationBucket, <Quad_Object>rel.target.id),
+    quad(id, SDS.terms.relationBucket, <Quad_Object>rel.target),
   ]);
 
   if (rel.value) {
@@ -64,24 +69,46 @@ export class Bucket {
   immutable?: boolean;
   links: BucketRelation[];
 
-  constructor(id: Term, links: BucketRelation[], root?: boolean) {
+  constructor(
+    id: Term,
+    links: BucketRelation[],
+    root?: boolean,
+    immutable?: boolean,
+    parent?: Bucket,
+  ) {
     this.id = id;
     this.root = root;
+    this.immutable = immutable;
     this.links = links;
+    this.parent = parent;
   }
 
-  static parse(bucket: BucketDTO): Bucket {
+  static parse(
+    bucket: BucketDTO,
+    bucket_cache: { [id: string]: Bucket },
+  ): Bucket {
+    const parent = bucket.parent
+      ? Bucket.parse(bucket.parent, bucket_cache)
+      : undefined;
     const links = bucket.links.map(({ target, path, value, type }) => ({
-      path: { id: path, quads: [] },
+      path,
       value,
       type,
-      target: Bucket.parse(target),
+      target: target,
     }));
-    return new Bucket(bucket.id, links, bucket.root);
+    const out = new Bucket(
+      bucket.id,
+      links,
+      bucket.root,
+      bucket.immutable,
+      parent,
+    );
+    bucket_cache[bucket.id.value] = out;
+    return out;
   }
 
   addRelation(target: Bucket, type: Term, value?: Term, path?: RdfThing) {
-    this.links.push({ type, value, path, target });
+    this.links.push({ type, value, path, target: target.id });
     target.parent = this;
   }
 
@@ -95,7 +122,7 @@ export class Bucket {
       relations.push(
         quad(
           id,
-          SDS.terms.custom("root"),
+          SDS.terms.custom("isRoot"),
           literal("true", XSD.terms.custom("boolean")),
         ),
       );
@@ -126,14 +153,16 @@ export class Record {
     { stream, data, bucket }: RecordDTO,
     store: RdfStore,
     extractor: CBDShapeExtractor,
+    bucket_cache: { [id: string]: Bucket },
   ): Promise<Record> {
     const thingQuads = await extractor.extract(store, data);
 
+    let actual_bucket: Bucket | undefined;
     if (bucket) {
-      bucket = Bucket.parse(bucket);
+      actual_bucket = Bucket.parse(bucket, bucket_cache);
     }
 
-    return new Record({ id: data, quads: thingQuads }, stream, bucket);
+    return new Record({ id: data, quads: thingQuads }, stream, actual_bucket);
   }
 
   write(writer: Writer) {
@@ -156,13 +185,15 @@ export class Extractor {
   shapes: Shapes;
   lens: BasicLensM<Quad[], RecordDTO>;
 
+  bucket_cache: { [id: string]: Bucket } = {};
+
   constructor(extractor: CBDShapeExtractor, stream?: Term) {
     this.extractor = extractor;
 
     const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
     this.shapes = extractShapes(quads, {
       "#Bucket": (item) => {
-        return Bucket.parse(item);
+        return Bucket.parse(item, this.bucket_cache);
       },
     });
 
@@ -184,7 +215,7 @@ export class Extractor {
 
     return await Promise.all(
       dtos.map((dto) => {
-        return Record.parse(dto, store, this.extractor);
+        return Record.parse(dto, store, this.extractor, this.bucket_cache);
       }),
     );
   }

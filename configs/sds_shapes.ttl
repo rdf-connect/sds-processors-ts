@@ -7,6 +7,22 @@
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 
 [ ] a sh:NodeShape;
+  sh:targetClass <RdfThing>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:iri;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:CBD;
+  ].
+
+[ ] a sh:NodeShape;
   sh:targetClass <#Bucket>;
   sh:property [
     sh:name "links";
@@ -19,8 +35,18 @@
     sh:minCount 1;
     sh:maxCount 1;
   ], [
+    sh:name "parent";
+    sh:path [ sh:inversePath ( sds:relation sds:relationBucket ) ];
+    sh:class <#Bucket>;
+    sh:maxCount 1;
+  ], [
     sh:name "root";
-    sh:path sds:root;
+    sh:path sds:isRoot;
+    sh:datatype xsd:boolean;
+    sh:maxCount 1;
+  ], [
+    sh:name "immutable";
+    sh:path sds:immutable;
     sh:datatype xsd:boolean;
     sh:maxCount 1;
   ].
@@ -36,7 +62,7 @@
   ], [
     sh:name "target";
     sh:path sds:relationBucket;
-    sh:class <#Bucket>;
+    sh:datatype xsd:iri;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
@@ -47,8 +73,7 @@
   ], [
     sh:name "path";
     sh:path sds:relationPath;
-    sh:datatype xsd:iri;
-    sh:minCount 1;
+    sh:class <RdfThing>;
     sh:maxCount 1;
   ].
 
