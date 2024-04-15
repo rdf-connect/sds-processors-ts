@@ -86,7 +86,7 @@ export class BucketizerOrchestrator {
 
         const getBucket = (value: string, root?: boolean) => {
           const terms = value.split("/");
-          const key = encodeURIComponent(terms[terms.length - 1]);
+          const key = terms[terms.length - 1].replaceAll("#", "-");
           // If the requested bucket is the root, it actually is the previous bucket
           const id = root ? prefix : prefix + "/" + key;
           if (!buckets[id]) {
@@ -112,7 +112,7 @@ export class BucketizerOrchestrator {
 
   save(): string {
     for (let key of Object.keys(this.saves)) {
-      this.saves[key].save = this.saves[key].bucketizer!.save();
+      this.saves[key].save = this.saves[key].bucketizer?.save();
       delete this.saves[key].bucketizer;
     }
     return JSON.stringify(this.saves);

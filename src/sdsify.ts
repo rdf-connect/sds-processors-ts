@@ -78,8 +78,6 @@ export function sdsify(
       await output.push(str);
       membersCount += 1;
     }
-
-    console.log("sdsify: pushed ", membersCount, "members");
   });
 
   input.on("end", () => {

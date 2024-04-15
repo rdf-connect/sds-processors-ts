@@ -63,7 +63,6 @@ function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
     return;
   }
 
-  console.log("Found valid stream", shapeIds[0]);
   return <NBNode>shapeIds[0];
 }
 
@@ -90,7 +89,6 @@ export function transformMetadata(
 ): QuadsTransform {
   return (quads: Quad[]) => {
     const store = new Store();
-    console.log("handling metadata transform");
     store.addQuads(quads);
 
     const latest = sourceStream || getLatestStream(store);
@@ -131,7 +129,6 @@ export function transformMetadata(
     const out: Quad[] = [];
     for (let q of store) out.push(<any>q);
 
-    console.log("returning new metadata");
     return out;
   };
 }

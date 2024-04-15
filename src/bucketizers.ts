@@ -165,7 +165,6 @@ export async function doTheBucketization(
     t.push(quad(recordId, SDS.terms.stream, namedNode(resultingStream)));
     t.push(quad(recordId, RDF.terms.type, SDS.terms.Member));
 
-    console.log("Pushing thing bucketized!");
     await sw.data.push(serializeQuads(t));
   });
 }
