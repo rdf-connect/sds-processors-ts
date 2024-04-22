@@ -7,6 +7,7 @@
     "prepublishOnly": "tsc",
     "test": "bun test"
   },
+  "main": "./lib/index.js",
   "files": [
     "lib/**/*",
     "js/**/*",
@@ -25,17 +26,20 @@
     "@treecg/bucketizers": "^2.1.13",
     "@treecg/types": "^0.4.5",
     "csv-parse": "^5.5.2",
-    "extract-cbd-shape": "^0.0.3",
+    "extract-cbd-shape": "^0.1.4",
     "jsonld": "^8.3.1",
-    "n3": "^1.17.2"
+    "n3": "^1.17.2",
+    "rdf-lens": "^1.2.5",
+    "rdf-stores": "^1.0.0"
   },
   "devDependencies": {
-    "@ajuvercr/js-runner": "^0.1.12",
+    "@ajuvercr/js-runner": "^0.2.0-alpha.0",
+    "@jest/globals": "^29.7.0",
     "@types/jsonld": "^1.5.13",
     "@types/n3": "^1.16.4",
-    "@jest/globals": "^29.7.0",
-    "@rdfjs/types": "^1.1.0",
     "@types/node": "^20.10.0",
+    "@types/rdf-js": "^4.0.2",
+    "@rdfjs/types": "^1.1.0",
     "typescript": "^5.3.2"
   }
 }

@@ -46,7 +46,27 @@ An example of how to use this processor within a Connector Architecture pipeline
 
 This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/ajuvercr/sds-processors/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
 
-This processor relies on the bucketizer implementations available in the [TREEcg/bucketizers](https://github.com/TREEcg/bucketizers) repository.
+You can define bucketizers as follows:
+
+```turtle
+<bucketize> a js:Bucketize;
+  js:channels [
+    js:dataInput <...data input>;
+    js:metadataInput <... metadata input>;
+    js:dataOutput <... data output>;
+    js:metadataOutput <... metadata output>;
+  ];
+  js:bucketizeStrategy ( [            # One or more bucketize strategies
+    a tree:SubjectFragmentation;      # Create a bucket based on this path
+    tree:fragmentationPath ( );
+  ] [
+    a tree:PageFragmentation;         # Create a new bucket when the previous bucket has 2 members
+    tree:pageSize 2;
+  ] );
+  js:savePath <./buckets_save.json>;
+  js:outputStreamId <MyEpicStream>.
+```
+
 
 ### [`js:Ldesify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/ldesify.ttl#L10)
 

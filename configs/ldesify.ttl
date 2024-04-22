@@ -27,6 +27,18 @@ js:Ldesify a js:JsProcess;
       a fnom:PositionParameterMapping;
       fnom:functionParameter "State file path";
       fnom:implementationParameterPosition "2"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Check properties";
+      fnom:implementationParameterPosition "3"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Timestamp Path";
+      fnom:implementationParameterPosition "4"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Version Of Path";
+      fnom:implementationParameterPosition "5"^^xsd:int;
     ];
   ].
 
@@ -44,6 +56,21 @@ js:Ldesify a js:JsProcess;
     sh:name "Data output channel";
     sh:maxCount 1;
     sh:minCount 1;
+  ], [
+    sh:datatype xsd:boolean;
+    sh:path js:checkProps;
+    sh:name "Check properties";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:timestampPath;
+    sh:name "Timestamp Path";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:versionOfPath;
+    sh:name "Version Of Path";
+    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:path;

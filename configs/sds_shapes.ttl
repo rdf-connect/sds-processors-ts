@@ -1,0 +1,100 @@
+@prefix tree: <https://w3id.org/tree#>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix sds: <https://w3id.org/sds#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
+
+[ ] a sh:NodeShape;
+  sh:targetClass <RdfThing>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:iri;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:CBD;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <#Bucket>;
+  sh:property [
+    sh:name "links";
+    sh:path sds:relation;
+    sh:class <#Relation>;
+  ], [
+    sh:name "id";
+    sh:path ( );
+    sh:datatype xsd:iri;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "parent";
+    sh:path [ sh:inversePath ( sds:relation sds:relationBucket ) ];
+    sh:class <#Bucket>;
+    sh:maxCount 1;
+  ], [
+    sh:name "root";
+    sh:path sds:isRoot;
+    sh:datatype xsd:boolean;
+    sh:maxCount 1;
+  ], [
+    sh:name "immutable";
+    sh:path sds:immutable;
+    sh:datatype xsd:boolean;
+    sh:maxCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <#Relation>;
+  sh:property [
+    sh:name "type";
+    sh:path sds:relationType;
+    sh:datatype xsd:iri;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "target";
+    sh:path sds:relationBucket;
+    sh:datatype xsd:iri;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "value";
+    sh:path sds:relationValue;
+    sh:datatype xsd:literal;
+    sh:maxCount 1;
+  ], [
+    sh:name "path";
+    sh:path sds:relationPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <#Record>;
+  sh:property [
+    sh:name "stream";
+    sh:path sds:stream;
+    sh:datatype xsd:iri;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "data";
+    sh:path sds:payload;
+    sh:datatype xsd:iri;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "bucket";
+    sh:path sds:bucket;
+    sh:class <#Bucket>;
+    sh:maxCount 1;
+  ].
+
