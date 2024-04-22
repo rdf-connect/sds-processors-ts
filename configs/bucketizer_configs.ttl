@@ -52,6 +52,16 @@
     sh:class <RdfThing>;
     sh:maxCount 1;
     sh:minCount 1;
+  ], [
+    sh:name "namePath";
+    sh:path tree:fragmentationPathName;
+    sh:class rdfl:pathLens;
+    sh:maxCount 1;
+  ], [
+    sh:name "defaultName";
+    sh:path tree:fragmentationDefaultName;
+    sh:datatype xsd:string;
+    sh:maxCount 1;
   ].
 
 [ ] a sh:NodeShape;

@@ -2,6 +2,9 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { Bucketizer, PageFragmentation, SubjectFragmentation } from ".";
+import { Term } from "rdf-js";
+import { warn } from "console";
+import { Writer } from "n3";
 
 export class PagedBucketizer implements Bucketizer {
   private readonly pageSize: number;
@@ -38,14 +41,23 @@ export class PagedBucketizer implements Bucketizer {
 }
 
 export class SubjectBucketizer implements Bucketizer {
-  private readonly path: BasicLensM<Cont, Cont>;
+  private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
   private readonly pathQuads: RdfThing;
+  private readonly namePath?: BasicLensM<Cont, Cont>;
+  private readonly defaultName?: string;
 
   private seen: Set<string> = new Set();
 
   constructor(config: SubjectFragmentation, save?: string) {
-    this.path = config.path;
+    console.log("path", config.path.constructor.name);
+    this.path = config.path.mapAll((x) => ({
+      value: x.id.value,
+      literal: x.id,
+    }));
     this.pathQuads = config.pathQuads;
+    this.namePath = config.namePath;
+    this.defaultName = config.defaultName;
+
     if (save) {
       this.seen = new Set(JSON.parse(save));
     }
@@ -56,21 +68,39 @@ export class SubjectBucketizer implements Bucketizer {
     getBucket: (key: string, root?: boolean) => Bucket,
   ): Bucket[] {
     const values = this.path.execute(record.data);
+    console.log(new Writer().quadsToString(record.data.quads));
     const out: Bucket[] = [];
 
     const root = getBucket("root", true);
 
-    for (let value of values) {
-      const bucket = getBucket("bucket-" + value.id.value);
+    if (values.length === 0 && this.defaultName) {
+      values.push({ value: this.defaultName });
+    }
 
-      if (!this.seen.has(value.id.value)) {
-        this.seen.add(value.id.value);
+    if (values.length === 0) {
+      console.error(
+        "Didn't find bucket, and default name is not set, sadness :(",
+      );
+    }
+
+    for (let value of values) {
+      const name = value.literal
+        ? this.namePath?.execute({
+            id: value.literal,
+            quads: record.data.quads,
+          })[0] || value.literal.value
+        : value.value;
+
+      const bucket = getBucket("bucket-" + name);
+
+      if (!this.seen.has(value.value)) {
+        this.seen.add(value.value);
 
         root.addRelation(
           bucket,
           TREE.terms.EqualToRelation,
-          value.id,
-          this.pathQuads,
+          value.literal,
+          value.literal ? this.pathQuads : undefined,
         );
       }
 

@@ -1,5 +1,5 @@
 import { Quad, Term } from "@rdfjs/types";
-import { blankNode, literal, quad } from "../core";
+import { blankNode, literal, namedNode, NBNode, quad } from "../core";
 import { Parser, Quad_Object, Quad_Subject, Writer } from "n3";
 import { SDS, XSD } from "@treecg/types";
 import { BasicLensM, extractShapes, match, Shapes, subject } from "rdf-lens";
@@ -8,6 +8,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
 
+export const SDS_GRAPH = SDS.terms.custom("DataDescription");
 export const SHAPES_FILE_LOCATION = path.join(
   __dirname,
   "../../configs/sds_shapes.ttl",
@@ -154,8 +155,9 @@ export class Record {
     store: RdfStore,
     extractor: CBDShapeExtractor,
     bucket_cache: { [id: string]: Bucket },
+    shape?: NBNode,
   ): Promise<Record> {
-    const thingQuads = await extractor.extract(store, data);
+    const thingQuads = await extractor.extract(store, data, shape);
 
     let actual_bucket: Bucket | undefined;
     if (bucket) {
@@ -184,6 +186,7 @@ export class Extractor {
   extractor: CBDShapeExtractor;
   shapes: Shapes;
   lens: BasicLensM<Quad[], RecordDTO>;
+  shape?: NBNode;
 
   bucket_cache: { [id: string]: Bucket } = {};
 
@@ -215,7 +218,13 @@ export class Extractor {
 
     return await Promise.all(
       dtos.map((dto) => {
-        return Record.parse(dto, store, this.extractor, this.bucket_cache);
+        return Record.parse(
+          dto,
+          store,
+          this.extractor,
+          this.bucket_cache,
+          this.shape,
+        );
       }),
     );
   }

@@ -23,6 +23,8 @@ export type BucketizerConfig = {
 export type SubjectFragmentation = {
   path: BasicLensM<Cont, Cont>;
   pathQuads: Cont;
+  namePath?: BasicLensM<Cont, Cont>;
+  defaultName?: string;
 };
 
 export type PageFragmentation = {

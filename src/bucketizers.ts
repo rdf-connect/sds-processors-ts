@@ -3,7 +3,7 @@ import { readFileSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
 import { DataFactory, Parser, Store } from "n3";
 import * as N3 from "n3";
-import { blankNode, literal, SR, SW, transformMetadata } from "./core";
+import { blankNode, getLatestShape, getLatestStream, literal, SR, SW, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
@@ -11,6 +11,7 @@ import { Quad, Quad_Object, Term } from "rdf-js";
 import { Bucket, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Cleanup } from "./exitHandler";
+import { RdfStore } from "rdf-stores";
 
 type Data = { data: Quad[]; metadata: Quad[] };
 const { namedNode, quad } = DataFactory;
@@ -286,6 +287,27 @@ export async function bucketize(
   const save = read_save(savePath);
   const orchestrator = new BucketizerOrchestrator(config.strategy, save);
   const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
+
+  channels.metadataInput.data((x) => {
+    const quads = new Parser().parse(x);
+
+    const store = new Store();
+    store.addQuads(quads);
+
+    const latest = sourceStream || getLatestStream(store);
+    const latestShape = !!latest ? getLatestShape(latest, store) : undefined;
+
+    if(latestShape) {
+      const rdfStore = RdfStore.createDefault();
+      quads.forEach(x => rdfStore.addQuad(x));
+      const cbd_extract = new CBDShapeExtractor(rdfStore);
+
+      extractor.extractor = cbd_extract;
+      extractor.shape = latestShape;
+
+    }
+
+  });
 
   Cleanup(async () => {
     const state = orchestrator.save();

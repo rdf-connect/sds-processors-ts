@@ -16,7 +16,7 @@ export type DatasetTransform = (used: Term | undefined, store: Store) => Term;
 
 export type QuadsTransform = (quads: Quad[]) => Quad[];
 
-function getLatestStream(store: Store): NBNode | undefined {
+export function getLatestStream(store: Store): NBNode | undefined {
   const streams = store
     .getSubjects(RDF.terms.type, SDS.terms.Stream, null)
     .filter(
@@ -33,7 +33,7 @@ function getLatestStream(store: Store): NBNode | undefined {
   return <NBNode>streams[0];
 }
 
-function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
+export function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
   console.log(
     "Found predicates for stream",
     streamId,
