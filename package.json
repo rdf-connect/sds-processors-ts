@@ -1,11 +1,12 @@
 {
   "name": "sds-processors",
-  "version": "0.1.4",
+  "version": "0.2.1",
   "type": "module",
   "scripts": {
     "build": "tsc",
     "test": "bun test"
   },
+  "main": "./lib/index.js",
   "files": [
     "lib/**/*",
     "js/**/*",
@@ -21,19 +22,23 @@
   ],
   "license": "MIT",
   "dependencies": {
-    "@treecg/types": "^0.4.5",
     "@treecg/bucketizers": "^2.1.13",
+    "@treecg/types": "^0.4.5",
     "csv-parse": "^5.5.2",
+    "extract-cbd-shape": "^0.1.4",
     "jsonld": "^8.3.1",
-    "n3": "^1.17.2"
+    "n3": "^1.17.2",
+    "rdf-lens": "^1.2.5",
+    "rdf-stores": "^1.0.0"
   },
   "devDependencies": {
-    "@ajuvercr/js-runner": "^0.1.12",
-    "@types/jsonld": "^1.5.11",
-    "@types/n3": "^1.16.3",
+    "@ajuvercr/js-runner": "^0.2.0-alpha.0",
     "@jest/globals": "^29.7.0",
     "@rdfjs/types": "^1.1.0",
+    "@types/jsonld": "^1.5.11",
+    "@types/n3": "^1.16.3",
     "@types/node": "^20.8.9",
+    "@types/rdf-js": "^4.0.2",
     "typescript": "^5.2.2"
   }
 }

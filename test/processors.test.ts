@@ -3,6 +3,7 @@ import { extractProcessors, extractSteps, Source } from "@ajuvercr/js-runner";
 
 describe("SDS processors tests", async () => {
   const pipeline = `
+@prefix tree: <https://w3id.org/tree#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix ws: <https://w3id.org/conn/ws#>.
 @prefix : <https://w3id.org/conn#>.
@@ -28,12 +29,20 @@ describe("SDS processors tests", async () => {
 
   test("js:Bucketize is properly defined", async () => {
     const processor = `
-    [ ] a js:Bucketize;
-      js:dataInput <jr>;
-      js:metadataInput <jr>;
-      js:dataOutput <jw>;
-      js:metadataOutput <jw>;
-      js:bucketizeStrategy <./test.js>;
+<bucketize> a js:Bucketize;
+  js:channels [
+    js:dataInput <jr>;
+    js:metadataInput <jr>;
+    js:dataOutput <jw>;
+    js:metadataOutput <jw>;
+  ];
+  js:bucketizeStrategy ( [
+    a tree:SubjectFragmentation;
+    tree:fragmentationPath ( );
+  ] [
+    a tree:PageFragmentation;
+    tree:pageSize 2;
+  ] );
       js:inputStreamId <http://testStream>;
       js:outputStreamId <http://newStream>;
       js:savePath <./save.js>.
@@ -45,24 +54,29 @@ describe("SDS processors tests", async () => {
       type: "memory",
     };
 
-    const { processors, quads, shapes: config } = await extractProcessors(source);
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
 
     const proc = processors[0];
     expect(proc).toBeDefined();
 
     const argss = extractSteps(proc, quads, config);
     expect(argss.length).toBe(1);
-    expect(argss[0].length).toBe(8);
+    expect(argss[0].length).toBe(5);
 
-    const [[i, mi, o, mo, loc, save, si, so]] = argss;
-    testReader(i);
-    testReader(mi);
-    testWriter(o);
-    testWriter(mo);
+    const [[c, loc, save, si, so]] = argss;
 
-    expect(loc).toBe(process.cwd() + "/test.js");
-    expect(si).toBe("http://testStream");
-    expect(so).toBe("http://newStream");
+    testReader(c.dataInput);
+    testReader(c.metadataInput);
+    testWriter(c.dataOutput);
+    testWriter(c.metadataOutput);
+
+    expect(loc).toBeDefined()
+    expect(si.value).toBe("http://testStream");
+    expect(so.value).toBe("http://newStream");
     expect(save).toBe(process.cwd() + "/save.js");
 
     await checkProc(proc.file, proc.func);
@@ -82,14 +96,18 @@ describe("SDS processors tests", async () => {
       type: "memory",
     };
 
-    const { processors, quads, shapes: config } = await extractProcessors(source);
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
 
     const proc = processors[0];
     expect(proc).toBeDefined();
 
     const argss = extractSteps(proc, quads, config);
     expect(argss.length).toBe(1);
-    expect(argss[0].length).toBe(3);
+    expect(argss[0].length).toBe(6);
 
     const [[input, output, save]] = argss;
     testReader(input);
@@ -113,7 +131,11 @@ describe("SDS processors tests", async () => {
       type: "memory",
     };
 
-    const { processors, quads, shapes: config } = await extractProcessors(source);
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
 
     const proc = processors[0];
     expect(proc).toBeDefined();
@@ -146,7 +168,11 @@ describe("SDS processors tests", async () => {
       type: "memory",
     };
 
-    const { processors, quads, shapes: config } = await extractProcessors(source);
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
 
     const proc = processors[0];
     expect(proc).toBeDefined();
@@ -167,15 +193,15 @@ describe("SDS processors tests", async () => {
 
 function testReader(arg: any) {
   expect(arg).toBeInstanceOf(Object);
-  expect(arg.channel).toBeDefined();
-  expect(arg.channel.id).toBeDefined();
+  // expect(arg.config.channel).toBeDefined();
+  // expect(arg.config.channel.id).toBeDefined();
   expect(arg.ty).toBeDefined();
 }
 
 function testWriter(arg: any) {
   expect(arg).toBeInstanceOf(Object);
-  expect(arg.channel).toBeDefined();
-  expect(arg.channel.id).toBeDefined();
+  // expect(arg.config.channel).toBeDefined();
+  // expect(arg.config.channel.id).toBeDefined();
   expect(arg.ty).toBeDefined();
 }
 

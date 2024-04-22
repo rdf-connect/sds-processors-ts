@@ -1,5 +1,4 @@
-
 export { updateMetadata } from "./metadatatransforms.js";
-export { doTheBucketization } from "./bucketizers.js";
+export { bucketize } from "./bucketizers.js";
 
-export { readCsvFile, readCsvAsRDF } from "./readCsv.js";
+export { readCsvAsRDF, readCsvFile } from "./readCsv.js";
