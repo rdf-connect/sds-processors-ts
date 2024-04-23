@@ -83,7 +83,7 @@ export async function doTheBucketization(
     dataWriter.end();
   });
   metadataReader.on("end", () => {
-    console.log("buckeitze index closed");
+    console.log("bucketize index closed");
     metadataWriter.end();
   });
 

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import { extractProcessors, extractSteps, Source } from "@ajuvercr/js-runner";
+import { Parser } from "n3";
 
 describe("SDS processors tests", async () => {
   const pipeline = `
@@ -16,13 +17,18 @@ describe("SDS processors tests", async () => {
   <./configs/bucketizer.ttl>,
   <./configs/generator.ttl>,
   <./configs/ldesify.ttl>,
-  <./configs/sdsify.ttl>.
+  <./configs/sdsify.ttl>,
+  <./configs/stream_join.ttl>.
 
 [ ] a :Channel;
   :reader <jr>;
   :writer <jw>.
 <jr> a js:JsReaderChannel.
 <jw> a js:JsWriterChannel.
+
+[ ] a :Channel;
+  :reader <jr2>.
+<jr2> a js:JsReaderChannel.
 `;
 
   const baseIRI = process.cwd() + "/config.ttl";
@@ -74,7 +80,7 @@ describe("SDS processors tests", async () => {
     testWriter(c.dataOutput);
     testWriter(c.metadataOutput);
 
-    expect(loc).toBeDefined()
+    expect(loc).toBeDefined();
     expect(si.value).toBe("http://testStream");
     expect(so.value).toBe("http://newStream");
     expect(save).toBe(process.cwd() + "/save.js");
@@ -199,7 +205,14 @@ describe("SDS processors tests", async () => {
       js:input <jr>;
       js:output <jw>;
       js:stream <http://me.com/stream>;
-      js:objectType <http://myType.com>.
+      js:timestampPath <http://ex.org/timestamp>;
+      js:shapeFilter """
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+          sh:targetClass ex:SomeClass.
+      """.
     `;
 
     const source: Source = {
@@ -219,13 +232,50 @@ describe("SDS processors tests", async () => {
 
     const argss = extractSteps(proc, quads, config);
     expect(argss.length).toBe(1);
-    expect(argss[0].length).toBe(4);
+    expect(argss[0].length).toBe(5);
 
-    const [[input, output, stream, ty]] = argss;
+    const [[input, output, stream, timestamp, shapeFilters]] = argss;
+
     testReader(input);
     testWriter(output);
     expect(stream.value).toBe("http://me.com/stream");
-    expect(ty.value).toBe("http://myType.com");
+    expect(timestamp.value).toBe("http://ex.org/timestamp");
+    expect(new Parser().parse(shapeFilters[0]).length).toBe(2);
+
+    await checkProc(proc.file, proc.func);
+  });
+
+  test("streamJoin", async () => {
+    const processor = `
+    [ ] a js:StreamJoin;
+      js:input <jr>;
+      js:input <jr2>;
+      js:output <jw>.
+    `;
+
+    const source: Source = {
+      value: pipeline + processor,
+      baseIRI,
+      type: "memory",
+    };
+
+    const {
+      processors,
+      quads,
+      shapes: config,
+    } = await extractProcessors(source);
+
+    const proc = processors[0];
+    expect(proc).toBeDefined();
+
+    const argss = extractSteps(proc, quads, config);
+    expect(argss.length).toBe(1);
+    expect(argss[0].length).toBe(2);
+
+    const [[inputs, output]] = argss;
+    testReader(inputs[0]);
+    testReader(inputs[1]);
+    testWriter(output);
 
     await checkProc(proc.file, proc.func);
   });
