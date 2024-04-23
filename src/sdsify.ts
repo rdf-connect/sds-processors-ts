@@ -38,24 +38,29 @@ export function sdsify(
   output: Writer<string>,
   streamNode: Term,
   type?: Term,
+  simple: boolean = true,
 ) {
   input.data(async (input) => {
     const quads = maybe_parse(input);
     const members: { [id: string]: RDF.Quad[] } = {};
 
-    if (type) {
-      // Group quads based on given member type
-      const store = new Store(quads);
-      for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
-        members[quad.subject.value] = extractMember(store, quad.subject);
-      }
+    if (simple) {
+      members[quads[0].subject.value] = quads;
     } else {
-      // Group quads based on Subject IRI
-      for (let quad of quads) {
-        if (!members[quad.subject.value]) {
-          members[quad.subject.value] = [];
+      if (type) {
+        // Group quads based on given member type
+        const store = new Store(quads);
+        for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
+          members[quad.subject.value] = extractMember(store, quad.subject);
         }
-        members[quad.subject.value].push(quad);
+      } else {
+        // Group quads based on Subject IRI
+        for (let quad of quads) {
+          if (!members[quad.subject.value]) {
+            members[quad.subject.value] = [];
+          }
+          members[quad.subject.value].push(quad);
+        }
       }
     }
 

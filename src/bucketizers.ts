@@ -3,7 +3,15 @@ import { readFileSync, writeFileSync } from "fs";
 import { readFile } from "fs/promises";
 import { DataFactory, Parser, Store } from "n3";
 import * as N3 from "n3";
-import { blankNode, getLatestShape, getLatestStream, literal, SR, SW, transformMetadata } from "./core";
+import {
+  blankNode,
+  getLatestShape,
+  getLatestStream,
+  literal,
+  SR,
+  SW,
+  transformMetadata,
+} from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@ajuvercr/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
@@ -297,16 +305,14 @@ export async function bucketize(
     const latest = sourceStream || getLatestStream(store);
     const latestShape = !!latest ? getLatestShape(latest, store) : undefined;
 
-    if(latestShape) {
+    if (latestShape) {
       const rdfStore = RdfStore.createDefault();
-      quads.forEach(x => rdfStore.addQuad(x));
+      quads.forEach((x) => rdfStore.addQuad(x));
       const cbd_extract = new CBDShapeExtractor(rdfStore);
 
       extractor.extractor = cbd_extract;
       extractor.shape = latestShape;
-
     }
-
   });
 
   Cleanup(async () => {
@@ -318,11 +324,17 @@ export async function bucketize(
   channels.dataInput.data(async (x) => {
     const outputQuads: Quad[] = [];
     const quads = new Parser().parse(x);
+
     // Strange, this should be doable with just shacl shape definitions
     // But it is a good question to ask, what if an sds:Record is not only cbd?
     const records = await extractor.parse_records(quads);
     const relatedBuckets = new Set<string>();
     for (let record of records) {
+      if (records.length === 1) {
+        console.log("Quads is all quads for this juicy record!");
+        record.data.quads = quads;
+      }
+
       const record_buckets = orchestrator.bucketize(
         record,
         buckets,
@@ -350,6 +362,10 @@ export async function bucketize(
       outputQuads.push(...bucket_to_quads(buckets[relatedBucket]));
     }
 
+    console.log(
+      "Bucketizer output\n",
+      new N3.Writer().quadsToString(outputQuads),
+    );
     await channels.dataOutput.push(new N3.Writer().quadsToString(outputQuads));
   });
 }

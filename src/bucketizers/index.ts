@@ -23,8 +23,8 @@ export type BucketizerConfig = {
 export type SubjectFragmentation = {
   path: BasicLensM<Cont, Cont>;
   pathQuads: Cont;
-  namePath?: BasicLensM<Cont, Cont>;
   defaultName?: string;
+  namePath?: BasicLensM<Cont, Cont>;
 };
 
 export type PageFragmentation = {
@@ -88,7 +88,9 @@ export class BucketizerOrchestrator {
 
         const getBucket = (value: string, root?: boolean) => {
           const terms = value.split("/");
-          const key = terms[terms.length - 1].replaceAll("#", "-");
+          const key = terms[terms.length - 1]
+            .replaceAll("#", "-")
+            .replace(" ", "-");
           // If the requested bucket is the root, it actually is the previous bucket
           const id = root ? prefix : prefix + "/" + key;
           if (!buckets[id]) {

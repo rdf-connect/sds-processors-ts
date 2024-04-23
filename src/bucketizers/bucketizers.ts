@@ -68,7 +68,8 @@ export class SubjectBucketizer implements Bucketizer {
     getBucket: (key: string, root?: boolean) => Bucket,
   ): Bucket[] {
     const values = this.path.execute(record.data);
-    console.log(new Writer().quadsToString(record.data.quads));
+    console.log("Value", values);
+
     const out: Bucket[] = [];
 
     const root = getBucket("root", true);
@@ -88,7 +89,7 @@ export class SubjectBucketizer implements Bucketizer {
         ? this.namePath?.execute({
             id: value.literal,
             quads: record.data.quads,
-          })[0] || value.literal.value
+          })[0].id.value
         : value.value;
 
       const bucket = getBucket("bucket-" + name);
