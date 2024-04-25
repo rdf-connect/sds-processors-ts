@@ -4,6 +4,8 @@ import type * as RDF from "@rdfjs/types";
 import { blankNode, namedNode } from "./core.js";
 import { DataFactory, Parser, Quad_Object, Store, Writer as NWriter } from "n3";
 import { Term } from "@rdfjs/types";
+import { CBDShapeExtractor } from "extract-cbd-shape";
+import { RdfStore } from "rdf-stores";
 
 const logger = new Logger("info", "info");
 
@@ -33,33 +35,58 @@ function extractMember(store: Store, subject: RDF.Term): RDF.Quad[] {
   return subGraph;
 }
 
+function getExtractor(shape?: {
+  id: Term;
+  quads: RDF.Quad[];
+}): CBDShapeExtractor {
+  if (!shape) return new CBDShapeExtractor();
+
+  const store = RdfStore.createDefault();
+  shape.quads.forEach((x) => store.addQuad(x));
+  return new CBDShapeExtractor(store, undefined, {
+    fetch: async (_) =>
+      new Response("", { headers: { "content-type": "text/turtle" } }),
+  });
+}
+
 export function sdsify(
   input: Stream<string | RDF.Quad[]>,
   output: Writer<string>,
   streamNode: Term,
   type?: Term,
-  simple: boolean = true,
+  shape?: {
+    id: Term;
+    quads: RDF.Quad[];
+  },
 ) {
+  console.log("Shape input:", shape?.quads.length, shape?.id.value);
+  const extractor: CBDShapeExtractor = getExtractor(shape);
+
   input.data(async (input) => {
     const quads = maybe_parse(input);
     const members: { [id: string]: RDF.Quad[] } = {};
+    const store = RdfStore.createDefault();
+    quads.forEach((x) => store.addQuad(x));
 
-    if (simple) {
-      members[quads[0].subject.value] = quads;
+    if (type) {
+      console.log("Using type", type.value, "shape", shape?.id.value);
+      // Group quads based on given member type
+      for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
+        members[quad.subject.value] = await extractor.extract(
+          store,
+          quad.subject,
+          shape?.id,
+        );
+      }
     } else {
-      if (type) {
-        // Group quads based on given member type
-        const store = new Store(quads);
-        for (const quad of store.getQuads(null, RDFT.terms.type, type, null)) {
-          members[quad.subject.value] = extractMember(store, quad.subject);
-        }
-      } else {
-        // Group quads based on Subject IRI
-        for (let quad of quads) {
-          if (!members[quad.subject.value]) {
-            members[quad.subject.value] = [];
-          }
-          members[quad.subject.value].push(quad);
+      // Group quads based on Subject IRI
+      for (let quad of quads) {
+        if (
+          quad.subject.termType === "NamedNode" &&
+          !members[quad.subject.value]
+        ) {
+          members[quad.subject.value] = members[quad.subject.value] =
+            await extractor.extract(store, quad.subject, shape?.id);
         }
       }
     }
@@ -68,6 +95,7 @@ export function sdsify(
 
     let first = true;
 
+    console.log("sdsify input\n", new NWriter().quadsToString(quads));
     for (let key of Object.keys(members)) {
       const quads = members[key];
       if (first) {
@@ -75,11 +103,22 @@ export function sdsify(
       }
       const blank = blankNode();
       quads.push(
-        DataFactory.quad(blank, SDS.terms.payload, namedNode(key)),
-        DataFactory.quad(blank, SDS.terms.stream, <Quad_Object>streamNode),
+        DataFactory.quad(
+          blank,
+          SDS.terms.payload,
+          namedNode(key),
+          SDS.terms.custom("DataDescription"),
+        ),
+        DataFactory.quad(
+          blank,
+          SDS.terms.stream,
+          <Quad_Object>streamNode,
+          SDS.terms.custom("DataDescription"),
+        ),
       );
 
       const str = new NWriter().quadsToString(quads);
+      console.log("sdsify\n", str);
       await output.push(str);
       membersCount += 1;
     }

@@ -1,4 +1,5 @@
 @prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -31,7 +32,27 @@ js:Sdsify a js:JsProcess;
       a fnom:PositionParameterMapping;
       fnom:functionParameter "Type filter";
       fnom:implementationParameterPosition "3"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Shape";
+      fnom:implementationParameterPosition "4"^^xsd:int;
     ];
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <RdfThing2>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:iri;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:Context;
   ].
 
 [ ] a sh:NodeShape;
@@ -58,6 +79,11 @@ js:Sdsify a js:JsProcess;
     sh:datatype xsd:iri;
     sh:path js:objectType;
     sh:name "Type filter";
+    sh:maxCount 1;
+  ], [
+    sh:class <RdfThing2>;
+    sh:path js:shape;
+    sh:name "Shape";
     sh:maxCount 1;
   ].
 

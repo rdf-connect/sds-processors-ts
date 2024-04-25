@@ -90,7 +90,7 @@ export class BucketizerOrchestrator {
           const terms = value.split("/");
           const key = terms[terms.length - 1]
             .replaceAll("#", "-")
-            .replace(" ", "-");
+            .replaceAll(" ", "-");
           // If the requested bucket is the root, it actually is the previous bucket
           const id = root ? prefix : prefix + "/" + key;
           if (!buckets[id]) {

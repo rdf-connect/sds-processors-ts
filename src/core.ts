@@ -34,11 +34,6 @@ export function getLatestStream(store: Store): NBNode | undefined {
 }
 
 export function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
-  console.log(
-    "Found predicates for stream",
-    streamId,
-    store.getPredicates(streamId, null, null),
-  );
   const shapes = store.getObjects(
     streamId,
     SDS.terms.carries,

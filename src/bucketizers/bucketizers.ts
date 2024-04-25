@@ -3,8 +3,6 @@ import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { Bucketizer, PageFragmentation, SubjectFragmentation } from ".";
 import { Term } from "rdf-js";
-import { warn } from "console";
-import { Writer } from "n3";
 
 export class PagedBucketizer implements Bucketizer {
   private readonly pageSize: number;
@@ -49,7 +47,6 @@ export class SubjectBucketizer implements Bucketizer {
   private seen: Set<string> = new Set();
 
   constructor(config: SubjectFragmentation, save?: string) {
-    console.log("path", config.path.constructor.name);
     this.path = config.path.mapAll((x) => ({
       value: x.id.value,
       literal: x.id,
@@ -67,8 +64,9 @@ export class SubjectBucketizer implements Bucketizer {
     record: Record,
     getBucket: (key: string, root?: boolean) => Bucket,
   ): Bucket[] {
-    const values = this.path.execute(record.data);
-    console.log("Value", values);
+    const values = this.path
+      .execute(record.data)
+      .filter((x, i, arr) => arr.findIndex((y) => x.value === y.value) == i);
 
     const out: Bucket[] = [];
 
@@ -89,13 +87,13 @@ export class SubjectBucketizer implements Bucketizer {
         ? this.namePath?.execute({
             id: value.literal,
             quads: record.data.quads,
-          })[0].id.value
+          })[0]?.id.value || value.value
         : value.value;
 
-      const bucket = getBucket("bucket-" + name);
+      const bucket = getBucket(name);
 
-      if (!this.seen.has(value.value)) {
-        this.seen.add(value.value);
+      if (!this.seen.has(bucket.id.value)) {
+        this.seen.add(bucket.id.value);
 
         root.addRelation(
           bucket,

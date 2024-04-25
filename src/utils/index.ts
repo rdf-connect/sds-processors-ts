@@ -47,17 +47,46 @@ export type BucketRelation = {
 function writeRelation(rel: BucketRelation, writer: Writer): Term {
   const id = blankNode();
   writer.addQuads([
-    quad(id, SDS.terms.relationType, <Quad_Object>rel.type),
-    quad(id, SDS.terms.relationBucket, <Quad_Object>rel.target),
+    quad(
+      id,
+      SDS.terms.relationType,
+      <Quad_Object>rel.type,
+      SDS.terms.custom("DataDescription"),
+    ),
+    quad(
+      id,
+      SDS.terms.relationBucket,
+      <Quad_Object>rel.target,
+      SDS.terms.custom("DataDescription"),
+    ),
   ]);
 
   if (rel.value) {
-    writer.addQuad(quad(id, SDS.terms.relationValue, <Quad_Object>rel.value));
+    writer.addQuad(
+      quad(
+        id,
+        SDS.terms.relationValue,
+        <Quad_Object>rel.value,
+        SDS.terms.custom("DataDescription"),
+      ),
+    );
   }
   if (rel.path) {
     writer.addQuads([
-      quad(id, SDS.terms.relationPath, <Quad_Object>rel.path.id),
-      ...rel.path.quads,
+      quad(
+        id,
+        SDS.terms.relationPath,
+        <Quad_Object>rel.path.id,
+        SDS.terms.custom("DataDescription"),
+      ),
+      ...rel.path.quads.map((x) =>
+        quad(
+          x.subject,
+          x.predicate,
+          x.object,
+          SDS.terms.custom("DataDescription"),
+        ),
+      ),
     ]);
   }
   return id;
@@ -117,7 +146,14 @@ export class Bucket {
     const id = <Quad_Subject>this.id;
     const relations = this.links
       .map((rel) => writeRelation(rel, writer))
-      .map((rel) => quad(id, SDS.terms.relation, <Quad_Object>rel));
+      .map((rel) =>
+        quad(
+          id,
+          SDS.terms.relation,
+          <Quad_Object>rel,
+          SDS.terms.custom("DataDescription"),
+        ),
+      );
 
     if (this.root) {
       relations.push(
@@ -125,6 +161,7 @@ export class Bucket {
           id,
           SDS.terms.custom("isRoot"),
           literal("true", XSD.terms.custom("boolean")),
+          SDS.terms.custom("DataDescription"),
         ),
       );
     }
@@ -150,32 +187,49 @@ export class Record {
     this.bucket = bucket;
   }
 
-  static async parse(
+  static parse(
     { stream, data, bucket }: RecordDTO,
     store: RdfStore,
-    extractor: CBDShapeExtractor,
     bucket_cache: { [id: string]: Bucket },
-    shape?: NBNode,
-  ): Promise<Record> {
-    const thingQuads = await extractor.extract(store, data, shape);
+  ): Record {
+    const quads = store
+      .getQuads()
+      .filter((q) => q.graph.value !== SDS.custom("DataDescription"));
 
     let actual_bucket: Bucket | undefined;
     if (bucket) {
       actual_bucket = Bucket.parse(bucket, bucket_cache);
     }
 
-    return new Record({ id: data, quads: thingQuads }, stream, actual_bucket);
+    return new Record({ id: data, quads }, stream, actual_bucket);
   }
 
   write(writer: Writer) {
     const id = blankNode();
 
     const quads = [
-      quad(id, SDS.terms.payload, <Quad_Object>this.data.id),
-      quad(id, SDS.terms.stream, <Quad_Object>this.stream),
+      quad(
+        id,
+        SDS.terms.payload,
+        <Quad_Object>this.data.id,
+        SDS.terms.custom("DataDescription"),
+      ),
+      quad(
+        id,
+        SDS.terms.stream,
+        <Quad_Object>this.stream,
+        SDS.terms.custom("DataDescription"),
+      ),
     ];
     if (this.bucket) {
-      quads.push(quad(id, SDS.terms.bucket, <Quad_Object>this.bucket.id));
+      quads.push(
+        quad(
+          id,
+          SDS.terms.bucket,
+          <Quad_Object>this.bucket.id,
+          SDS.terms.custom("DataDescription"),
+        ),
+      );
       this.bucket.write(writer);
     }
     writer.addQuads(quads);
@@ -218,13 +272,8 @@ export class Extractor {
 
     return await Promise.all(
       dtos.map((dto) => {
-        return Record.parse(
-          dto,
-          store,
-          this.extractor,
-          this.bucket_cache,
-          this.shape,
-        );
+        // This can be an apply like #Bucket
+        return Record.parse(dto, store, this.bucket_cache);
       }),
     );
   }

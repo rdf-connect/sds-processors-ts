@@ -1,6 +1,6 @@
 import { describe, expect, test } from "@jest/globals";
 import { extractShapes } from "rdf-lens";
-import { DataFactory, Parser } from "n3";
+import { DataFactory, Parser, Writer } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
 import { Bucket, Extractor, SHAPES_TEXT } from "../src/utils/index";
@@ -110,21 +110,25 @@ describe("Extracting defined shapes", async () => {
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
 
-<record> a sds:Record;
-  sds:stream <#stream>;
-  sds:bucket <bucket>;
-  sds:payload [
-    <x> 42;
-    <y> 45;
-  ].
+sds:DataDescription {
+  <record> a sds:Record;
+    sds:stream <#stream>;
+    sds:bucket <bucket>;
+    sds:payload _:data.
 
-<bucket> sds:relation <a>.
-<a>
-  sds:relationType tree:GreaterThanRelation ;
-  sds:relationBucket <bucket2> ;
-  sds:relationValue 1;
-  sds:relationPath ex:x.
+  <bucket> sds:relation <a>.
+  <a>
+    sds:relationType tree:GreaterThanRelation ;
+    sds:relationBucket <bucket2> ;
+    sds:relationValue 1;
+    sds:relationPath ex:x.
+}
+
+_:data 
+    <x> 42;
+    <y> 45.
 `;
+
     const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
 
     const out = await extractor.parse_records(quads);
@@ -141,27 +145,28 @@ describe("Extracting defined shapes", async () => {
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
 
-<record> a sds:Record;
-  sds:stream <#stream>;
-  sds:bucket <bucket3>;
-  sds:payload [
-    <x> 42;
-    <y> 45;
-  ].
+sds:DataDescription {
+  <record> a sds:Record;
+    sds:stream <#stream>;
+    sds:bucket <bucket3>;
+    sds:payload _:data.
 
-<bucket> sds:relation <a>; a sds:Bucket.
-<a>
-  sds:relationType tree:GreaterThanRelation ;
-  sds:relationBucket <bucket2> ;
-  sds:relationValue 1;
-  sds:relationPath ex:x.
+  <bucket> sds:relation <a>; a sds:Bucket.
+  <a>
+    sds:relationType tree:GreaterThanRelation ;
+    sds:relationBucket <bucket2> ;
+    sds:relationValue 1;
+    sds:relationPath ex:x.
 
-<bucket2> sds:relation <b>; a sds:Bucket.
-<b>
-  sds:relationType tree:GreaterThanRelation ;
-  sds:relationBucket <bucket3> ;
-  sds:relationValue 1;
-  sds:relationPath ex:x.
+  <bucket2> sds:relation <b>; a sds:Bucket.
+  <b>
+    sds:relationType tree:GreaterThanRelation ;
+    sds:relationBucket <bucket3> ;
+    sds:relationValue 1;
+    sds:relationPath ex:x.
+}
+
+_:data <x> 42; <y> 45.
 `;
     const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
 

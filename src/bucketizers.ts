@@ -8,8 +8,6 @@ import {
   getLatestShape,
   getLatestStream,
   literal,
-  SR,
-  SW,
   transformMetadata,
 } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
@@ -21,7 +19,6 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Cleanup } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
 
-type Data = { data: Quad[]; metadata: Quad[] };
 const { namedNode, quad } = DataFactory;
 
 async function readState(path: string): Promise<any | undefined> {
@@ -197,12 +194,29 @@ function record_to_quads(
 ): Quad[] {
   const id = blankNode();
   const out: Quad[] = [
-    quad(id, SDS.terms.payload, <N3.Quad_Object>record.data.id),
-    quad(id, SDS.terms.stream, <N3.Quad_Object>resultingStream),
-    ...record.data.quads,
+    quad(
+      id,
+      SDS.terms.payload,
+      <N3.Quad_Object>record.data.id,
+      SDS.terms.custom("DataDescription"),
+    ),
+    quad(
+      id,
+      SDS.terms.stream,
+      <N3.Quad_Object>resultingStream,
+      SDS.terms.custom("DataDescription"),
+    ),
     ...buckets
       .map((bucket) => bucket.id)
-      .map((bucket) => quad(id, SDS.terms.bucket, <N3.Quad_Object>bucket)),
+      .map((bucket) =>
+        quad(
+          id,
+          SDS.terms.bucket,
+          <N3.Quad_Object>bucket,
+          SDS.terms.custom("DataDescription"),
+        ),
+      ),
+    ...record.data.quads,
   ];
   return out;
 }
@@ -213,6 +227,7 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
       <N3.Quad_Subject>bucket.id,
       RDF.terms.type,
       SDS.terms.custom("Bucket"),
+      SDS.terms.custom("DataDescription"),
     ),
   ];
   out.push(
@@ -220,6 +235,7 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
       <N3.Quad_Subject>bucket.id,
       SDS.terms.custom("immutable"),
       literal((bucket.immutable || false) + ""),
+      SDS.terms.custom("DataDescription"),
     ),
   );
 
@@ -229,6 +245,7 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
         <N3.Quad_Subject>bucket.id,
         SDS.terms.custom("isRoot"),
         literal("true"),
+        SDS.terms.custom("DataDescription"),
       ),
     );
   }
@@ -236,23 +253,55 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
   for (let rel of bucket.links) {
     const id = blankNode();
     out.push(
-      quad(<N3.Quad_Subject>bucket.id, SDS.terms.relation, id),
-      quad(id, SDS.terms.relationType, <N3.Quad_Object>rel.type),
-      quad(id, SDS.terms.relationBucket, <N3.Quad_Object>rel.target),
+      quad(
+        <N3.Quad_Subject>bucket.id,
+        SDS.terms.relation,
+        id,
+        SDS.terms.custom("DataDescription"),
+      ),
+      quad(
+        id,
+        SDS.terms.relationType,
+        <N3.Quad_Object>rel.type,
+        SDS.terms.custom("DataDescription"),
+      ),
+      quad(
+        id,
+        SDS.terms.relationBucket,
+        <N3.Quad_Object>rel.target,
+        SDS.terms.custom("DataDescription"),
+      ),
     );
 
     if (rel.path) {
       out.push(
-        quad(id, SDS.terms.relationPath, <N3.Quad_Object>rel.path.id),
-        ...rel.path.quads,
+        quad(
+          id,
+          SDS.terms.relationPath,
+          <N3.Quad_Object>rel.path.id,
+          SDS.terms.custom("DataDescription"),
+        ),
+        ...rel.path.quads.map((x) =>
+          quad(
+            x.subject,
+            x.predicate,
+            x.object,
+            SDS.terms.custom("DataDescription"),
+          ),
+        ),
       );
     }
 
     if (rel.value) {
-      out.push(quad(id, SDS.terms.relationValue, <N3.Quad_Object>rel.value));
+      out.push(
+        quad(
+          id,
+          SDS.terms.relationValue,
+          <N3.Quad_Object>rel.value,
+          SDS.terms.custom("DataDescription"),
+        ),
+      );
     }
-
-    out.push();
   }
 
   return out;
@@ -325,16 +374,10 @@ export async function bucketize(
     const outputQuads: Quad[] = [];
     const quads = new Parser().parse(x);
 
-    // Strange, this should be doable with just shacl shape definitions
-    // But it is a good question to ask, what if an sds:Record is not only cbd?
     const records = await extractor.parse_records(quads);
     const relatedBuckets = new Set<string>();
-    for (let record of records) {
-      if (records.length === 1) {
-        console.log("Quads is all quads for this juicy record!");
-        record.data.quads = quads;
-      }
 
+    for (let record of records) {
       const record_buckets = orchestrator.bucketize(
         record,
         buckets,
@@ -362,10 +405,6 @@ export async function bucketize(
       outputQuads.push(...bucket_to_quads(buckets[relatedBucket]));
     }
 
-    console.log(
-      "Bucketizer output\n",
-      new N3.Writer().quadsToString(outputQuads),
-    );
     await channels.dataOutput.push(new N3.Writer().quadsToString(outputQuads));
   });
 }

@@ -192,6 +192,60 @@ describe("Bucketizer behavior", () => {
     expect(buckets[""].links.length).toBe(2);
   });
 
+  test("Subject with name", () => {
+    const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+<a> a tree:SubjectFragmentation;
+  tree:fragmentationPath ( );
+  tree:fragmentationPathName ex:test.
+`;
+    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+    const output: Config = lens.execute({ id: namedNode("a"), quads });
+
+    const orchestrator = new BucketizerOrchestrator([output]);
+    const stream = namedNode("MyStream");
+
+    const buckets: { [id: string]: Bucket } = {};
+    const recordBuckets: string[] = [];
+    const pred = namedNode("http://example.org/test");
+    for (let member of [
+      new Record(
+        {
+          id: namedNode("a1"),
+          quads: [quad(namedNode("a1"), pred, literal("test-a1"))],
+        },
+        stream,
+      ),
+      new Record(
+        {
+          id: namedNode("a2"),
+          quads: [quad(namedNode("a2"), pred, literal("test-a1"))],
+        },
+        stream,
+      ),
+      new Record(
+        {
+          id: namedNode("a3"),
+          quads: [quad(namedNode("a3"), pred, literal("test-a2"))],
+        },
+        stream,
+      ),
+    ]) {
+      recordBuckets.push(...orchestrator.bucketize(member, buckets));
+    }
+
+    expect(recordBuckets).toEqual([
+      "/bucket-test-a1",
+      "/bucket-test-a1",
+      "/bucket-test-a2",
+    ]);
+    expect(buckets[""].root).toBeTruthy();
+    expect(buckets[""].links.length).toBe(2);
+  });
+
   test("Combined", () => {
     const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
@@ -213,6 +267,7 @@ describe("Bucketizer behavior", () => {
 
     const buckets: { [id: string]: Bucket } = {};
     const recordBuckets: string[] = [];
+
     for (let member of [
       new Record({ id: namedNode("a1"), quads: [] }, stream),
       new Record({ id: namedNode("a2"), quads: [] }, stream),
@@ -222,7 +277,7 @@ describe("Bucketizer behavior", () => {
       recordBuckets.push(...orchestrator.bucketize(member, buckets));
     }
 
-    expect(Object.keys(buckets).length).toBe(4)
+    expect(Object.keys(buckets).length).toBe(4);
     expect(recordBuckets).toEqual([
       "/bucket-a1",
       "/bucket-a2",
