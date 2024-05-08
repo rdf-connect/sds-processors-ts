@@ -59,7 +59,6 @@ export function sdsify(
     quads: RDF.Quad[];
   },
 ) {
-  console.log("Shape input:", shape?.quads.length, shape?.id.value);
   const extractor: CBDShapeExtractor = getExtractor(shape);
 
   input.data(async (input) => {
@@ -95,7 +94,6 @@ export function sdsify(
 
     let first = true;
 
-    console.log("sdsify input\n", new NWriter().quadsToString(quads));
     for (let key of Object.keys(members)) {
       const quads = members[key];
       if (first) {
@@ -118,7 +116,6 @@ export function sdsify(
       );
 
       const str = new NWriter().quadsToString(quads);
-      console.log("sdsify\n", str);
       await output.push(str);
       membersCount += 1;
     }
