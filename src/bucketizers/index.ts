@@ -6,9 +6,12 @@ import { Bucket, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
 import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
+import { fileURLToPath } from "url";
 
 const df = new DataFactory();
 
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export const SHAPES_FILE_LOCATION = path.join(
     __dirname,
     "../../configs/bucketizer_configs.ttl",
