@@ -28,6 +28,7 @@
     "extract-cbd-shape": "^0.1.4",
     "jsonld": "^8.3.1",
     "n3": "^1.17.2",
+    "rdf-dereference": "^2.2.0",
     "rdf-lens": "^1.2.6",
     "rdf-stores": "^1.0.0"
   },
