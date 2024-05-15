@@ -1,26 +1,26 @@
-import { describe, expect, test } from "@jest/globals";
+import { describe, expect, test } from "vitest";
 import { DataFactory, Parser } from "n3";
 import { extractShapes } from "rdf-lens";
 import {
-  BucketizerOrchestrator,
-  Config,
-  PageFragmentation,
-  SHAPES_TEXT,
-  SubjectFragmentation,
-  TimebasedFragmentation,
+    BucketizerConfig,
+    BucketizerOrchestrator,
+    PageFragmentation,
+    SHAPES_TEXT,
+    SubjectFragmentation,
+    TimebasedFragmentation,
 } from "../src/bucketizers/index";
 import { Bucket, Record } from "../src/utils";
 
 const { namedNode, blankNode, literal, quad } = DataFactory;
 
 describe("Bucketizer configs", () => {
-  const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
+    const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
 
-  const shapes = extractShapes(quads);
-  const lens = shapes.lenses["https://w3id.org/tree#FragmentationStrategy"];
+    const shapes = extractShapes(quads);
+    const lens = shapes.lenses["https://w3id.org/tree#FragmentationStrategy"];
 
-  test("Subject Page", () => {
-    const quadsStr = `
+    test("Subject Page", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -32,25 +32,28 @@ describe("Bucketizer configs", () => {
 <a> a tree:SubjectFragmentation;
   tree:fragmentationPath (<b> <c>).
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    expect(output.type.value).toBe(
-      "https://w3id.org/tree#SubjectFragmentation",
-    );
-    const config = <SubjectFragmentation>output.config;
-    expect(config.path).toBeDefined();
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#SubjectFragmentation",
+        );
+        const config = <SubjectFragmentation>output.config;
+        expect(config.path).toBeDefined();
 
-    const applied = config.path.execute({ id: namedNode("test"), quads });
-    expect(applied.map((x) => x.id.value)).toEqual(["42"]);
+        const applied = config.path.execute({ id: namedNode("test"), quads });
+        expect(applied.map((x) => x.id.value)).toEqual(["42"]);
 
-    expect(config.pathQuads).toBeDefined();
-    expect(config.pathQuads.id.termType).toBe("BlankNode");
-    expect(config.pathQuads.quads.length).toBe(4);
-  });
+        expect(config.pathQuads).toBeDefined();
+        expect(config.pathQuads.id.termType).toBe("BlankNode");
+        expect(config.pathQuads.quads.length).toBe(4);
+    });
 
-  test("Subject Page - simple path", () => {
-    const quadsStr = `
+    test("Subject Page - simple path", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -62,22 +65,25 @@ describe("Bucketizer configs", () => {
 <a> a tree:SubjectFragmentation;
   tree:fragmentationPath <b>.
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    expect(output.type.value).toBe(
-      "https://w3id.org/tree#SubjectFragmentation",
-    );
-    const config = <SubjectFragmentation>output.config;
-    expect(config.path).toBeDefined();
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#SubjectFragmentation",
+        );
+        const config = <SubjectFragmentation>output.config;
+        expect(config.path).toBeDefined();
 
-    expect(config.pathQuads).toBeDefined();
-    expect(config.pathQuads.id.termType).toBe("NamedNode");
-    expect(config.pathQuads.quads.length).toBe(0);
-  });
+        expect(config.pathQuads).toBeDefined();
+        expect(config.pathQuads.id.termType).toBe("NamedNode");
+        expect(config.pathQuads.quads.length).toBe(0);
+    });
 
-  test("Timebased", () => {
-    const quadsStr = `
+    test("Timebased", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -90,23 +96,26 @@ describe("Bucketizer configs", () => {
   tree:maxGranularity "hour";
   tree:fragmentationPath (<b> <c>).
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    expect(output.type.value).toBe(
-      "https://w3id.org/tree#TimebasedFragmentation",
-    );
-    const config = <TimebasedFragmentation>output.config;
-    expect(config.path).toBeDefined();
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#TimebasedFragmentation",
+        );
+        const config = <TimebasedFragmentation>output.config;
+        expect(config.path).toBeDefined();
 
-    expect(config.maxGranularity).toEqual("hour");
+        expect(config.maxGranularity).toEqual("hour");
 
-    const applied = config.path.execute({ id: namedNode("test"), quads });
-    expect(applied.map((x) => x.id.value)).toEqual(["42"]);
-  });
+        const applied = config.path.execute({ id: namedNode("test"), quads });
+        expect(applied.map((x) => x.id.value)).toEqual(["42"]);
+    });
 
-  test("Paged", () => {
-    const quadsStr = `
+    test("Paged", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -115,23 +124,28 @@ describe("Bucketizer configs", () => {
 <a> a tree:PageFragmentation;
   tree:pageSize 42.
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    expect(output.type.value).toBe("https://w3id.org/tree#PageFragmentation");
-    const config = <PageFragmentation>output.config;
-    expect(config.pageSize).toBe(42);
-  });
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#PageFragmentation",
+        );
+        const config = <PageFragmentation>output.config;
+        expect(config.pageSize).toBe(42);
+    });
 });
 
 describe("Bucketizer behavior", () => {
-  const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
+    const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
 
-  const shapes = extractShapes(quads);
-  const lens = shapes.lenses["https://w3id.org/tree#FragmentationStrategy"];
+    const shapes = extractShapes(quads);
+    const lens = shapes.lenses["https://w3id.org/tree#FragmentationStrategy"];
 
-  test("Paged", () => {
-    const quadsStr = `
+    test("Paged", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -140,30 +154,33 @@ describe("Bucketizer behavior", () => {
 <a> a tree:PageFragmentation;
   tree:pageSize 2.
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    const orchestrator = new BucketizerOrchestrator([output]);
-    const stream = namedNode("MyStream");
+        const orchestrator = new BucketizerOrchestrator([output]);
+        const stream = namedNode("MyStream");
 
-    const buckets: { [id: string]: Bucket } = {};
-    const recordBuckets: string[] = [];
-    for (let member of [
-      new Record({ id: namedNode("a1"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-      new Record({ id: namedNode("a3"), quads: [] }, stream),
-    ]) {
-      recordBuckets.push(...orchestrator.bucketize(member, buckets));
-    }
+        const buckets: { [id: string]: Bucket } = {};
+        const recordBuckets: string[] = [];
+        for (const member of [
+            new Record({ id: namedNode("a1"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+            new Record({ id: namedNode("a3"), quads: [] }, stream),
+        ]) {
+            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+        }
 
-    expect(recordBuckets).toEqual(["", "", "/page-1"]);
-    expect(buckets[""].root).toBeTruthy();
-    expect(buckets[""].links.length).toBe(1);
-    expect(buckets["/page-1"].links.length).toBe(0);
-  });
+        expect(recordBuckets).toEqual(["", "", "/page-1"]);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets[""].links.length).toBe(1);
+        expect(buckets["/page-1"].links.length).toBe(0);
+    });
 
-  test("Subject", () => {
-    const quadsStr = `
+    test("Subject", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -171,29 +188,32 @@ describe("Bucketizer behavior", () => {
 <a> a tree:SubjectFragmentation;
   tree:fragmentationPath ( ).
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    const orchestrator = new BucketizerOrchestrator([output]);
-    const stream = namedNode("MyStream");
+        const orchestrator = new BucketizerOrchestrator([output]);
+        const stream = namedNode("MyStream");
 
-    const buckets: { [id: string]: Bucket } = {};
-    const recordBuckets: string[] = [];
-    for (let member of [
-      new Record({ id: namedNode("a1"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-    ]) {
-      recordBuckets.push(...orchestrator.bucketize(member, buckets));
-    }
+        const buckets: { [id: string]: Bucket } = {};
+        const recordBuckets: string[] = [];
+        for (const member of [
+            new Record({ id: namedNode("a1"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+        ]) {
+            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+        }
 
-    expect(recordBuckets).toEqual(["/bucket-a1", "/bucket-a2", "/bucket-a2"]);
-    expect(buckets[""].root).toBeTruthy();
-    expect(buckets[""].links.length).toBe(2);
-  });
+        expect(recordBuckets).toEqual(["/a1", "/a2", "/a2"]);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets[""].links.length).toBe(2);
+    });
 
-  test("Subject with name", () => {
-    const quadsStr = `
+    test("Subject with name", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -202,52 +222,51 @@ describe("Bucketizer behavior", () => {
   tree:fragmentationPath ( );
   tree:fragmentationPathName ex:test.
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const output: Config = lens.execute({ id: namedNode("a"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
 
-    const orchestrator = new BucketizerOrchestrator([output]);
-    const stream = namedNode("MyStream");
+        const orchestrator = new BucketizerOrchestrator([output]);
+        const stream = namedNode("MyStream");
 
-    const buckets: { [id: string]: Bucket } = {};
-    const recordBuckets: string[] = [];
-    const pred = namedNode("http://example.org/test");
-    for (let member of [
-      new Record(
-        {
-          id: namedNode("a1"),
-          quads: [quad(namedNode("a1"), pred, literal("test-a1"))],
-        },
-        stream,
-      ),
-      new Record(
-        {
-          id: namedNode("a2"),
-          quads: [quad(namedNode("a2"), pred, literal("test-a1"))],
-        },
-        stream,
-      ),
-      new Record(
-        {
-          id: namedNode("a3"),
-          quads: [quad(namedNode("a3"), pred, literal("test-a2"))],
-        },
-        stream,
-      ),
-    ]) {
-      recordBuckets.push(...orchestrator.bucketize(member, buckets));
-    }
+        const buckets: { [id: string]: Bucket } = {};
+        const recordBuckets: string[] = [];
+        const pred = namedNode("http://example.org/test");
+        for (const member of [
+            new Record(
+                {
+                    id: namedNode("a1"),
+                    quads: [quad(namedNode("a1"), pred, literal("test-a1"))],
+                },
+                stream,
+            ),
+            new Record(
+                {
+                    id: namedNode("a2"),
+                    quads: [quad(namedNode("a2"), pred, literal("test-a1"))],
+                },
+                stream,
+            ),
+            new Record(
+                {
+                    id: namedNode("a3"),
+                    quads: [quad(namedNode("a3"), pred, literal("test-a2"))],
+                },
+                stream,
+            ),
+        ]) {
+            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+        }
 
-    expect(recordBuckets).toEqual([
-      "/bucket-test-a1",
-      "/bucket-test-a1",
-      "/bucket-test-a2",
-    ]);
-    expect(buckets[""].root).toBeTruthy();
-    expect(buckets[""].links.length).toBe(2);
-  });
+        expect(recordBuckets).toEqual(["/test-a1", "/test-a1", "/test-a2"]);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets[""].links.length).toBe(2);
+    });
 
-  test("Combined", () => {
-    const quadsStr = `
+    test("Combined", () => {
+        const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
@@ -258,36 +277,36 @@ describe("Bucketizer behavior", () => {
 <b> a tree:PageFragmentation;
   tree:pageSize 2.
 `;
-    const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-    const config1: Config = lens.execute({ id: namedNode("a"), quads });
-    const config2: Config = lens.execute({ id: namedNode("b"), quads });
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const config1: BucketizerConfig = lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+        const config2: BucketizerConfig = lens.execute({
+            id: namedNode("b"),
+            quads,
+        });
 
-    const orchestrator = new BucketizerOrchestrator([config1, config2]);
-    const stream = namedNode("MyStream");
+        const orchestrator = new BucketizerOrchestrator([config1, config2]);
+        const stream = namedNode("MyStream");
 
-    const buckets: { [id: string]: Bucket } = {};
-    const recordBuckets: string[] = [];
+        const buckets: { [id: string]: Bucket } = {};
+        const recordBuckets: string[] = [];
 
-    for (let member of [
-      new Record({ id: namedNode("a1"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-      new Record({ id: namedNode("a2"), quads: [] }, stream),
-    ]) {
-      recordBuckets.push(...orchestrator.bucketize(member, buckets));
-    }
+        for (const member of [
+            new Record({ id: namedNode("a1"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+        ]) {
+            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+        }
 
-    expect(Object.keys(buckets).length).toBe(4);
-    expect(recordBuckets).toEqual([
-      "/bucket-a1",
-      "/bucket-a2",
-      "/bucket-a2",
-      "/bucket-a2/page-1",
-    ]);
-    expect(buckets[""].root).toBeTruthy();
-    expect(buckets[""].links.length).toBe(2);
-    expect(buckets["/bucket-a2"].links.length).toBe(1);
-    expect(buckets["/bucket-a2/page-1"].links.length).toBe(0);
-    expect(buckets["/bucket-a1"].links.length).toBe(0);
-  });
+        expect(Object.keys(buckets).length).toBe(4);
+        expect(recordBuckets).toEqual(["/a1", "/a2", "/a2", "/a2/page-1"]);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets["/a2"].parent!.id.value).toBe("");
+        expect(buckets["/a2/page-1"].parent!.id.value).toBe("/a2");
+        expect(buckets["/a1"].parent!.id.value).toBe("");
+    });
 });

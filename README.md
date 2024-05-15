@@ -41,3 +41,4 @@ This processor takes a stream of raw entities (e.g., out from a RML transformati
 ### [`js:Generate`](https://github.com/ajuvercr/sds-processors/blob/be7134a295eb63e17034b2e3ceea0eaf6ad01770/configs/generator.ttl#L19)
 
 This a simple RDF data generator function used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.
+
