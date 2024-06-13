@@ -1,10 +1,10 @@
 # sds-processors
 
-[![Bun CI](https://github.com/ajuvercr/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/ajuvercr/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/sds-processors.svg?style=popout)](https://npmjs.com/package/sds-processors)
+[![Bun CI](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors)
 
-[Connector Architecture](https://the-connector-architecture.github.io/site/docs/1_Home) Typescript processors for handling operations over [SDS streams](https://treecg.github.io/SmartDataStreams-Spec/). It currently exposes 5 functions:
+Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 5 functions:
 
-### [`js:Sdsify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/sdsify.ttl#L10)
+### [`js:Sdsify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/sdsify.ttl#L10)
 
 This processor takes as input a stream of (batched) RDF data entities and wraps them as individual SDS records to be further processed downstream. By default, it will extract individual entities by taking every single named node subject and extracting a [Concise Bounded Description](https://www.w3.org/Submission/CBD/) (CBD) of that entity with respect to the input RDF graph.
 
@@ -12,7 +12,7 @@ Alternatively, a set of SHACL shapes can be given to concretely define and filte
 
 If the `js:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
 
-An example of how to use this processor within a Connector Architecture pipeline definition is shown next:
+An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
 
 ```turtle
 @prefix : <https://w3id.org/conn#>.
@@ -42,9 +42,9 @@ An example of how to use this processor within a Connector Architecture pipeline
     """.
 ```
 
-### [`js:Bucketize`](https://github.com/ajuvercr/sds-processors/blob/master/configs/bucketizer.ttl#L10)
+### [`js:Bucketize`](https://github.com/rdf-connect/sds-processors/blob/master/configs/bucketizer.ttl#L10)
 
-This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/ajuvercr/sds-processors/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
+This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/rdf-connect/sds-processors/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
 
 You can define bucketizers as follows:
 
@@ -68,14 +68,14 @@ You can define bucketizers as follows:
 ```
 
 
-### [`js:Ldesify`](https://github.com/ajuvercr/sds-processors/blob/master/configs/ldesify.ttl#L10)
+### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
 
-### [`js:StreamJoin`](https://github.com/ajuvercr/sds-processors/blob/master/configs/stream_join.ttl#L10)
+### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)
 
 This processor can be used to join multiple input streams or Reader Channels (`js:input`) and pipe their data flow into a single output stream or Writer Channel (`js:output`). The processor will guarantee that all data elements are delivered downstream and will close the output if all inputs are closed.
 
-### [`js:Generate`](https://github.com/ajuvercr/sds-processors/blob/be7134a295eb63e17034b2e3ceea0eaf6ad01770/configs/generator.ttl#L19)
+### [`js:Generate`](https://github.com/rdf-connect/sds-processors/blob/master/configs/generator.ttl#L19)
 
 This a simple RDF data generator function used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.

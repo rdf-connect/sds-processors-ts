@@ -1,5 +1,5 @@
 {
-  "name": "sds-processors",
+  "name": "@rdfc/sds-processors-ts",
   "version": "0.3.2",
   "type": "module",
   "scripts": {
@@ -15,7 +15,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/ajuvercr/sds-processors.git"
+    "url": "git+https://github.com/rdf-connect/sds-processors.git"
   },
   "author": "Arthur Vercruysse",
   "contributors": [
