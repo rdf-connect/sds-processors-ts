@@ -1,6 +1,6 @@
 # sds-processors
 
-[![Bun CI](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors)
+[![Bun CI](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors-ts)
 
 Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 5 functions:
 
