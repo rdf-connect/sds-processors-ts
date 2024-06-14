@@ -11,7 +11,7 @@ import {
 } from "../src/bucketizers/index";
 import { Bucket, Record } from "../src/utils";
 
-const { namedNode, blankNode, literal, quad } = DataFactory;
+const { namedNode, literal, quad } = DataFactory;
 
 describe("Bucketizer configs", () => {
     const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);

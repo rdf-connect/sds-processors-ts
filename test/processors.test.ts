@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { extractProcessors, extractSteps, Source } from "@ajuvercr/js-runner";
+import { extractProcessors, extractSteps, Source } from "@rdfc/js-runner";
 
 describe("SDS processors tests", async () => {
     const pipeline = `
@@ -12,17 +12,22 @@ describe("SDS processors tests", async () => {
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
-<> owl:imports <./node_modules/@ajuvercr/js-runner/ontology.ttl>, 
+<> owl:imports <./node_modules/@rdfc/js-runner/ontology.ttl>, 
   <./configs/bucketizer.ttl>,
   <./configs/generator.ttl>,
   <./configs/ldesify.ttl>,
-  <./configs/sdsify.ttl>.
+  <./configs/sdsify.ttl>,
+  <./configs/stream_join.ttl>.
 
 [ ] a :Channel;
   :reader <jr>;
   :writer <jw>.
 <jr> a js:JsReaderChannel.
 <jw> a js:JsWriterChannel.
+
+[ ] a :Channel;
+  :reader <jr2>.
+<jr2> a js:JsReaderChannel.
 `;
 
     const baseIRI = process.cwd() + "/config.ttl";
@@ -159,7 +164,14 @@ describe("SDS processors tests", async () => {
       js:input <jr>;
       js:output <jw>;
       js:stream <http://me.com/stream>;
-      js:objectType <http://myType.com>.
+      js:timestampPath <http://ex.org/timestamp>;
+      js:shapeFilter """
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+          sh:targetClass ex:SomeClass.
+      """.
     `;
 
         const source: Source = {

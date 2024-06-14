@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { BlankNode, DataFactory, DefaultGraph, NamedNode, Store } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 import { Quad, Quad_Object, Quad_Subject, Term } from "rdf-js";
@@ -17,144 +17,144 @@ export type DatasetTransform = (used: Term | undefined, store: Store) => Term;
 export type QuadsTransform = (quads: Quad[]) => Quad[];
 
 export function getLatestStream(store: Store): NBNode | undefined {
-  const streams = store
-    .getSubjects(RDF.terms.type, SDS.terms.Stream, null)
-    .filter(
-      (sub) => store.getQuads(null, PROV.terms.used, sub, null).length === 0,
-    );
+    const streams = store
+        .getSubjects(RDF.terms.type, SDS.terms.Stream, null)
+        .filter(
+            (sub) => store.getQuads(null, PROV.terms.used, sub, null).length === 0,
+        );
 
-  if (streams.length != 1) {
-    console.error(
-      `Couldn't determine previous stream, extected one got ${streams.length}`,
-    );
-    return undefined;
-  }
+    if (streams.length != 1) {
+        console.error(
+            `Couldn't determine previous stream, extected one got ${streams.length}`,
+        );
+        return undefined;
+    }
 
-  return <NBNode>streams[0];
+    return <NBNode>streams[0];
 }
 
 export function getLatestShape(streamId: Term, store: Store): NBNode | undefined {
-  const shapes = store.getObjects(
-    streamId,
-    SDS.terms.carries,
-    new DefaultGraph(),
-  );
-
-  if (shapes.length !== 1) {
-    console.error(
-      `A sds:stream should carry one type of members, not ${shapes.length}`,
+    const shapes = store.getObjects(
+        streamId,
+        SDS.terms.carries,
+        new DefaultGraph(),
     );
-    if (shapes.length == 0) return;
-  }
 
-  const shapeIds = shapes.flatMap((id) =>
-    store.getObjects(id, SDS.terms.shape, null),
-  );
+    if (shapes.length !== 1) {
+        console.error(
+            `A sds:stream should carry one type of members, not ${shapes.length}`,
+        );
+        if (shapes.length == 0) return;
+    }
 
-  if (shapeIds.length !== 1) {
-    console.error(
-      `A sds:stream can only carry one specified shape, not ${shapeIds.length}`,
+    const shapeIds = shapes.flatMap((id) =>
+        store.getObjects(id, SDS.terms.shape, null),
     );
-    return;
-  }
 
-  return <NBNode>shapeIds[0];
+    if (shapeIds.length !== 1) {
+        console.error(
+            `A sds:stream can only carry one specified shape, not ${shapeIds.length}`,
+        );
+        return;
+    }
+
+    return <NBNode>shapeIds[0];
 }
 
 function getLatestDataset(streamId: Term, store: Store): Term | undefined {
-  const datasets = store.getObjects(streamId, SDS.terms.dataset, null);
+    const datasets = store.getObjects(streamId, SDS.terms.dataset, null);
 
-  if (datasets.length !== 1) {
-    console.error(
-      `A sds:stream should be derived from one dataset, not ${datasets.length}`,
-    );
-    if (datasets.length == 0) return;
-  }
+    if (datasets.length !== 1) {
+        console.error(
+            `A sds:stream should be derived from one dataset, not ${datasets.length}`,
+        );
+        if (datasets.length == 0) return;
+    }
 
-  return datasets[0];
+    return datasets[0];
 }
 
 export function transformMetadata(
-  streamId: Term,
-  sourceStream: Term | undefined,
-  itemType: string,
-  gp: AddProcess,
-  shT?: ShapeTransform,
-  datasetT?: DatasetTransform,
+    streamId: Term,
+    sourceStream: Term | undefined,
+    itemType: string,
+    gp: AddProcess,
+    shT?: ShapeTransform,
+    datasetT?: DatasetTransform,
 ): QuadsTransform {
-  return (quads: Quad[]) => {
-    const store = new Store();
-    store.addQuads(quads);
+    return (quads: Quad[]) => {
+        const store = new Store();
+        store.addQuads(quads);
 
-    const latest = sourceStream || getLatestStream(store);
-    const latestShape = !!latest ? getLatestShape(latest, store) : undefined;
+        const latest = sourceStream || getLatestStream(store);
+        const latestShape = latest ? getLatestShape(latest, store) : undefined;
 
-    const activityId = gp(latest, store);
+        const activityId = gp(latest, store);
 
-    const newShape = (shT && shT(latestShape, store)) || undefined;
+        const newShape = (shT && shT(latestShape, store)) || undefined;
 
-    let datasetId = !!latest ? getLatestDataset(latest, store) : undefined;
-    if (datasetId && datasetT) {
-      datasetId = datasetT(datasetId, store);
-    }
+        let datasetId = latest ? getLatestDataset(latest, store) : undefined;
+        if (datasetId && datasetT) {
+            datasetId = datasetT(datasetId, store);
+        }
 
-    const blank = store.createBlankNode();
+        const blank = store.createBlankNode();
 
-    store.addQuad(<Quad_Subject>streamId, RDF.terms.type, SDS.terms.Stream);
-    if (datasetId) {
-      store.addQuad(
+        store.addQuad(<Quad_Subject>streamId, RDF.terms.type, SDS.terms.Stream);
+        if (datasetId) {
+            store.addQuad(
         <Quad_Subject>streamId,
         SDS.terms.dataset,
         <Quad_Object>datasetId,
-      );
-    }
-    store.addQuad(<Quad_Subject>streamId, SDS.terms.carries, blank);
-    store.addQuad(
+            );
+        }
+        store.addQuad(<Quad_Subject>streamId, SDS.terms.carries, blank);
+        store.addQuad(
       <Quad_Subject>streamId,
       PROV.terms.wasGeneratedBy,
       <Quad_Object>activityId,
-    );
+        );
 
-    store.addQuad(blank, RDF.terms.type, namedNode(itemType));
+        store.addQuad(blank, RDF.terms.type, namedNode(itemType));
 
-    if (newShape) {
-      store.addQuad(blank, SDS.terms.shape, <Quad_Object>newShape);
-    }
+        if (newShape) {
+            store.addQuad(blank, SDS.terms.shape, <Quad_Object>newShape);
+        }
 
-    const out: Quad[] = [];
-    for (let q of store) out.push(<any>q);
+        const out: Quad[] = [];
+        for (const q of store) out.push(<any>q);
 
-    return out;
-  };
+        return out;
+    };
 }
 
 export function createProperty(
-  store: Store,
-  path: NBNode,
-  dataType?: NBNode,
-  nodeKind?: NBNode,
-  minCount?: number,
-  maxCount?: number,
+    store: Store,
+    path: NBNode,
+    dataType?: NBNode,
+    nodeKind?: NBNode,
+    minCount?: number,
+    maxCount?: number,
 ): BlankNode | NamedNode {
-  const newId = store.createBlankNode();
+    const newId = store.createBlankNode();
 
-  store.addQuad(newId, SHACL.terms.path, path);
-  if (dataType) {
-    store.addQuad(newId, SHACL.terms.datatype, dataType);
-  }
+    store.addQuad(newId, SHACL.terms.path, path);
+    if (dataType) {
+        store.addQuad(newId, SHACL.terms.datatype, dataType);
+    }
 
-  if (nodeKind) {
-    store.addQuad(newId, SHACL.terms.nodeKind, nodeKind);
-  }
+    if (nodeKind) {
+        store.addQuad(newId, SHACL.terms.nodeKind, nodeKind);
+    }
 
-  if (minCount !== undefined) {
-    store.addQuad(newId, SHACL.terms.minCount, literal(minCount));
-  }
-  if (maxCount !== undefined) {
-    store.addQuad(newId, SHACL.terms.maxCount, literal(maxCount));
-  }
+    if (minCount !== undefined) {
+        store.addQuad(newId, SHACL.terms.minCount, literal(minCount));
+    }
+    if (maxCount !== undefined) {
+        store.addQuad(newId, SHACL.terms.maxCount, literal(maxCount));
+    }
 
-  return newId;
+    return newId;
 }
 
 export type SR<T> = {

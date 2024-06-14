@@ -9,7 +9,7 @@ import {
     transformMetadata,
 } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Quad, Quad_Object, Term } from "rdf-js";
 import { Bucket, Extractor, Record } from "./utils/index";
