@@ -1,5 +1,5 @@
-import { describe, test, expect } from "@jest/globals";
-import { SimpleStream } from "@ajuvercr/js-runner";
+import { describe, test, expect } from "vitest";
+import { SimpleStream } from "@rdfc/js-runner";
 import { DataFactory, Parser, Store } from "n3";
 import { sdsify } from "../src/sdsify";
 import { LDES, RDF, SDS } from "@treecg/types";
@@ -143,7 +143,7 @@ describe("Functional tests for the sdsify function", () => {
         // Push some data in
         await input.push(INPUT_1);
         await input.end();
-    })
+    });
 
     test("Extraction of particular entity type based on a SHACL shape", async () => {
         const input = new SimpleStream<string>();

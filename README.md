@@ -79,3 +79,4 @@ This processor can be used to join multiple input streams or Reader Channels (`j
 ### [`js:Generate`](https://github.com/rdf-connect/sds-processors/blob/master/configs/generator.ttl#L19)
 
 This a simple RDF data generator function used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.
+

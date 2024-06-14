@@ -1,12 +1,31 @@
 {
-  "compilerOptions": {
-    "module": "esnext",
-    "target": "esnext",
-    "moduleResolution": "node",
-    "declaration": true,
-    "outDir": "./lib",
-    "strict": true
-  },
-  "include": ["src"],
-  "exclude": ["node_modules", "**/__tests__/*"]
+    "compilerOptions": {
+       "declaration": true,
+        "outDir": "lib/",
+        "lib": ["ES2022"],
+        "target": "ES2022",
+        "module": "ES2022",
+        "moduleResolution": "node",
+        "preserveConstEnums": true,
+        "downlevelIteration": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "strictFunctionTypes": false,
+        "strictPropertyInitialization": false,
+        "experimentalDecorators": true,
+        "allowSyntheticDefaultImports": true,
+        "incremental": true,
+        "esModuleInterop": true,
+        "removeComments": true
+    },
+    "ts-node": {
+        "esm": true,
+        "experimentalSpecifierResolution": "node"
+    },
+    "tsc-alias": {
+        "resolveFullPaths": true,
+        "verbose": false
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules/**/*"]
 }

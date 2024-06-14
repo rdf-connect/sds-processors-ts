@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@ajuvercr/js-runner";
+import { Stream, Writer } from "@rdfc/js-runner";
 
 export function streamJoin(inputs: Stream<string>[], output: Writer<string>) {
     let count = 0;

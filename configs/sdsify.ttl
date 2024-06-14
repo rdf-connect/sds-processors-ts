@@ -70,4 +70,3 @@ js:Sdsify a js:JsProcess;
     sh:name "Shape filters";
     sh:minCount 0;
   ].
-

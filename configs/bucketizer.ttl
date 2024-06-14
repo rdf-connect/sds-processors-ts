@@ -13,7 +13,7 @@
 js:Bucketize a js:JsProcess;
   dc:title "Bucketizer processor";
   dc:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
-  js:file <../src/bucketizers.ts>;
+  js:file <../lib/bucketizers.js>;
   js:function "bucketize";
   js:location <../>;
   js:mapping [

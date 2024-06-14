@@ -1,5 +1,5 @@
-import { describe, test, expect } from "@jest/globals";
-import { SimpleStream } from "@ajuvercr/js-runner";
+import { describe, test, expect } from "vitest";
+import { SimpleStream } from "@rdfc/js-runner";
 import { streamJoin } from "../src/streamJoin";
 
 describe("Functional tests for streamJoin function", () => {

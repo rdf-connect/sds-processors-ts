@@ -55,7 +55,7 @@
   ], [
     sh:name "namePath";
     sh:path tree:fragmentationPathName;
-    sh:class rdfl:pathLens;
+    sh:class rdfl:PathLens;
     sh:maxCount 1;
   ], [
     sh:name "defaultName";
