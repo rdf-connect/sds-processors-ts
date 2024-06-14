@@ -1,11 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { extractShapes } from "rdf-lens";
-import { DataFactory, Parser, Writer } from "n3";
+import { DataFactory, Parser } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
 import { Bucket, Extractor, SHAPES_TEXT } from "../src/utils/index";
 
-const { namedNode, blankNode, literal, quad } = DataFactory;
+const { namedNode } = DataFactory;
 
 describe("Extracting defined shapes", async () => {
     const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);

@@ -1,5 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { extractProcessors, extractSteps, Source } from "@rdfc/js-runner";
+import { Parser } from "n3";
 
 describe("SDS processors tests", async () => {
     const pipeline = `
@@ -160,19 +161,19 @@ describe("SDS processors tests", async () => {
 
     test("sdsify", async () => {
         const processor = `
-    [ ] a js:Sdsify;
-      js:input <jr>;
-      js:output <jw>;
-      js:stream <http://me.com/stream>;
-      js:timestampPath <http://ex.org/timestamp>;
-      js:shapeFilter """
-        @prefix sh: <http://www.w3.org/ns/shacl#>.
-        @prefix ex: <http://ex.org/>.
-
-        [ ] a sh:NodeShape;
-          sh:targetClass ex:SomeClass.
-      """.
-    `;
+      [ ] a js:Sdsify;
+        js:input <jr>;
+        js:output <jw>;
+        js:stream <http://me.com/stream>;
+        js:timestampPath <http://ex.org/timestamp>;
+        js:shapeFilter """
+          @prefix sh: <http://www.w3.org/ns/shacl#>.
+          @prefix ex: <http://ex.org/>.
+  
+          [ ] a sh:NodeShape;
+            sh:targetClass ex:SomeClass.
+        """.
+      `;
 
         const source: Source = {
             value: pipeline + processor,
@@ -193,11 +194,13 @@ describe("SDS processors tests", async () => {
         expect(argss.length).toBe(1);
         expect(argss[0].length).toBe(5);
 
-        const [[input, output, stream, ty]] = argss;
+        const [[input, output, stream, timestamp, shapeFilters]] = argss;
+
         testReader(input);
         testWriter(output);
         expect(stream.value).toBe("http://me.com/stream");
-        expect(ty.value).toBe("http://myType.com");
+        expect(timestamp.value).toBe("http://ex.org/timestamp");
+        expect(new Parser().parse(shapeFilters[0]).length).toBe(2);
 
         await checkProc(proc.file, proc.func);
     });
