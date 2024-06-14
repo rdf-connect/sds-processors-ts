@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import * as n3 from "n3";

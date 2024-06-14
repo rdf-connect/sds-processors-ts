@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Term } from "@rdfjs/types";
 import { blankNode } from "./core.js";

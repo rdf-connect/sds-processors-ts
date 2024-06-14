@@ -5,7 +5,7 @@ import { DataFactory, Parser, Store } from "n3";
 import * as N3 from "n3";
 import { blankNode, getLatestShape, getLatestStream, literal, SR, SW, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Quad, Quad_Object, Term } from "rdf-js";
 import { Bucket, Extractor, Record } from "./utils/index";

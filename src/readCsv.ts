@@ -4,7 +4,7 @@ import { createReadStream } from "fs";
 import { DataFactory, Quad } from "n3";
 import { blankNode, SW } from "./core.js";
 
-import type { Writer } from "@ajuvercr/js-runner";
+import type { Writer } from "@rdfc/js-runner";
 import { join } from "path";
 
 const { namedNode, literal, quad } = DataFactory;

@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@ajuvercr/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { BlankNode, DataFactory, DefaultGraph, NamedNode, Store } from "n3";
 import { PROV, RDF, SDS, SHACL } from "@treecg/types";
 import { Quad, Quad_Object, Quad_Subject, Term } from "rdf-js";

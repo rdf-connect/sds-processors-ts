@@ -1,4 +1,4 @@
-import type { Writer } from "@ajuvercr/js-runner";
+import type { Writer } from "@rdfc/js-runner";
 import { randomInt } from "crypto";
 
 import { DataFactory } from "n3";
