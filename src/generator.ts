@@ -1,12 +1,10 @@
 import type { Writer } from "@rdfc/js-runner";
 import { randomInt } from "crypto";
+import { DataFactory } from "rdf-data-factory";
+import { Writer as N3Writer } from "n3";
+import { Term, Quad_Predicate } from "@rdfjs/types";
 
-import { DataFactory } from "n3";
-import * as N3 from "n3";
-
-import { Term } from "@rdfjs/types";
-
-const { namedNode, literal, quad } = DataFactory;
+const df = new DataFactory();
 const NS = "http://time.is/ns#";
 
 const types = [
@@ -20,8 +18,8 @@ const types = [
 ];
 
 function generateMember(i: number, timestampPath?: Term) {
-    const id = namedNode(NS + i);
-    const q = (p: string, o: string) => quad(id, namedNode(p), literal(o));
+    const id = df.namedNode(NS + i);
+    const q = (p: string, o: string) => df.quad(id, df.namedNode(p), df.literal(o));
 
     const { x, y } = types[i % types.length];
 
@@ -33,11 +31,11 @@ function generateMember(i: number, timestampPath?: Term) {
 
     if (timestampPath) {
         quads.push(
-            quad(id, <N3.Quad_Predicate>timestampPath, literal(Date.now() + "")),
+            df.quad(id, <Quad_Predicate>timestampPath, df.literal(Date.now() + "")),
         );
     }
 
-    return new N3.Writer().quadsToString(quads);
+    return new N3Writer().quadsToString(quads);
 }
 
 export async function generate(

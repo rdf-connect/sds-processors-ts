@@ -165,8 +165,9 @@ describe("SDS processors tests", async () => {
         js:input <jr>;
         js:output <jw>;
         js:stream <http://me.com/stream>;
+        js:typeFilter <http://ex.org/Type>, <http://ex.org/AnotherType>;
         js:timestampPath <http://ex.org/timestamp>;
-        js:shapeFilter """
+        js:shape """
           @prefix sh: <http://www.w3.org/ns/shacl#>.
           @prefix ex: <http://ex.org/>.
   
@@ -192,32 +193,36 @@ describe("SDS processors tests", async () => {
 
         const argss = extractSteps(proc, quads, config);
         expect(argss.length).toBe(1);
-        expect(argss[0].length).toBe(5);
+        expect(argss[0].length).toBe(6);
 
-        const [[input, output, stream, timestamp, shapeFilters]] = argss;
+        const [[input, output, stream, typeFilters, timestamp, shape]] = argss;
 
         testReader(input);
         testWriter(output);
         expect(stream.value).toBe("http://me.com/stream");
+        expect(typeFilters[0].value).toBe("http://ex.org/Type");
+        expect(typeFilters[1].value).toBe("http://ex.org/AnotherType");
         expect(timestamp.value).toBe("http://ex.org/timestamp");
-        expect(new Parser().parse(shapeFilters[0]).length).toBe(2);
+        expect(new Parser().parse(shape).length).toBe(2);
 
         await checkProc(proc.file, proc.func);
     });
 });
 
-function testReader(arg: { ty: string }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function testReader(arg: any) {
     expect(arg).toBeInstanceOf(Object);
-    // expect(arg.config.channel).toBeDefined();
-    // expect(arg.config.channel.id).toBeDefined();
     expect(arg.ty).toBeDefined();
+    expect(arg.config.channel).toBeDefined();
+    expect(arg.config.channel.id).toBeDefined();
 }
 
-function testWriter(arg: { ty: string }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function testWriter(arg: any) {
     expect(arg).toBeInstanceOf(Object);
-    // expect(arg.config.channel).toBeDefined();
-    // expect(arg.config.channel.id).toBeDefined();
     expect(arg.ty).toBeDefined();
+    expect(arg.config.channel).toBeDefined();
+    expect(arg.config.channel.id).toBeDefined();
 }
 
 async function checkProc(location: string, func: string) {

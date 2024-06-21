@@ -1,23 +1,17 @@
 import { readFileSync, writeFileSync } from "fs";
-import { DataFactory, Parser, Store } from "n3";
-import * as N3 from "n3";
-import {
-    blankNode,
-    getLatestShape,
-    getLatestStream,
-    literal,
-    transformMetadata,
-} from "./core";
+import { Parser, Writer as N3Writer } from "n3";
+import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
+import { DataFactory } from "rdf-data-factory";
+import { getLatestShape, getLatestStream, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
-import { Quad, Quad_Object, Term } from "rdf-js";
 import { Bucket, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Cleanup } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
 
-const { quad } = DataFactory;
+const df = new DataFactory();
 
 async function writeState(
     path: string | undefined,
@@ -30,22 +24,22 @@ async function writeState(
 
 function addProcess(
     id: Term | undefined,
-    store: Store,
+    store: RdfStore,
     strategyId: Term,
     bucketizeConfig: Quad[],
 ): Term {
-    const newId = store.createBlankNode();
+    const newId = df.blankNode();
     const time = new Date().toISOString();
 
-    store.addQuad(newId, RDF.terms.type, PPLAN.terms.Activity);
-    store.addQuad(newId, RDF.terms.type, LDES.terms.Bucketization);
+    store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
+    store.addQuad(df.quad(newId, RDF.terms.type, LDES.terms.Bucketization));
 
-    store.addQuads(bucketizeConfig);
+    bucketizeConfig.forEach(q => store.addQuad(q));
 
-    store.addQuad(newId, PROV.terms.startedAtTime, literal(time));
-    store.addQuad(newId, PROV.terms.used, <Quad_Object>strategyId);
+    store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
+    store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>strategyId));
     if (id) {
-        store.addQuad(newId, PROV.terms.used, <Quad_Object>id);
+        store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>id));
     }
 
     return newId;
@@ -53,12 +47,12 @@ function addProcess(
 
 function parseQuads(quads: string | Quad[]): Quad[] {
     if (quads instanceof Array) return <Quad[]>quads;
-    const parser = new N3.Parser();
+    const parser = new Parser();
     return parser.parse(quads);
 }
 
 function serializeQuads(quads: Quad[]): string {
-    const writer = new N3.Writer();
+    const writer = new N3Writer();
     return writer.quadsToString(quads);
 }
 
@@ -79,27 +73,27 @@ function record_to_quads(
     resultingStream: Term,
     buckets: Bucket[],
 ): Quad[] {
-    const id = blankNode();
+    const id = df.blankNode();
     const out: Quad[] = [
-        quad(
+        df.quad(
             id,
             SDS.terms.payload,
-            <N3.Quad_Object>record.data.id,
+            <Quad_Object>record.data.id,
             SDS.terms.custom("DataDescription"),
         ),
-        quad(
+        df.quad(
             id,
             SDS.terms.stream,
-            <N3.Quad_Object>resultingStream,
+            <Quad_Object>resultingStream,
             SDS.terms.custom("DataDescription"),
         ),
         ...buckets
             .map((bucket) => bucket.id)
             .map((bucket) =>
-                quad(
+                df.quad(
                     id,
                     SDS.terms.bucket,
-                    <N3.Quad_Object>bucket,
+                    <Quad_Object>bucket,
                     SDS.terms.custom("DataDescription"),
                 ),
             ),
@@ -110,66 +104,66 @@ function record_to_quads(
 
 function bucket_to_quads(bucket: Bucket): Quad[] {
     const out: Quad[] = [
-        quad(
-            <N3.Quad_Subject>bucket.id,
+        df.quad(
+            <Quad_Subject>bucket.id,
             RDF.terms.type,
             SDS.terms.custom("Bucket"),
             SDS.terms.custom("DataDescription"),
         ),
     ];
     out.push(
-        quad(
-            <N3.Quad_Subject>bucket.id,
+        df.quad(
+            <Quad_Subject>bucket.id,
             SDS.terms.custom("immutable"),
-            literal((bucket.immutable || false) + ""),
+            df.literal((bucket.immutable || false) + ""),
             SDS.terms.custom("DataDescription"),
         ),
     );
 
     if (bucket.root) {
         out.push(
-            quad(
-                <N3.Quad_Subject>bucket.id,
+            df.quad(
+                <Quad_Subject>bucket.id,
                 SDS.terms.custom("isRoot"),
-                literal("true"),
+                df.literal("true"),
                 SDS.terms.custom("DataDescription"),
             ),
         );
     }
 
     for (const rel of bucket.links) {
-        const id = blankNode();
+        const id = df.blankNode();
         out.push(
-            quad(
-                <N3.Quad_Subject>bucket.id,
+            df.quad(
+                <Quad_Subject>bucket.id,
                 SDS.terms.relation,
                 id,
                 SDS.terms.custom("DataDescription"),
             ),
-            quad(
+            df.quad(
                 id,
                 SDS.terms.relationType,
-                <N3.Quad_Object>rel.type,
+                <Quad_Object>rel.type,
                 SDS.terms.custom("DataDescription"),
             ),
-            quad(
+            df.quad(
                 id,
                 SDS.terms.relationBucket,
-                <N3.Quad_Object>rel.target,
+                <Quad_Object>rel.target,
                 SDS.terms.custom("DataDescription"),
             ),
         );
 
         if (rel.path) {
             out.push(
-                quad(
+                df.quad(
                     id,
                     SDS.terms.relationPath,
-                    <N3.Quad_Object>rel.path.id,
+                    <Quad_Object>rel.path.id,
                     SDS.terms.custom("DataDescription"),
                 ),
                 ...rel.path.quads.map((x) =>
-                    quad(
+                    df.quad(
                         x.subject,
                         x.predicate,
                         x.object,
@@ -181,10 +175,10 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
 
         if (rel.value) {
             out.push(
-                quad(
+                df.quad(
                     id,
                     SDS.terms.relationValue,
-                    <N3.Quad_Object>rel.value,
+                    <Quad_Object>rel.value,
                     SDS.terms.custom("DataDescription"),
                 ),
             );
@@ -206,8 +200,8 @@ function set_metadata(
         "sds:Member",
         (x, y) => addProcess(x, y, config.quads.id, config.quads.quads),
     );
-    channels.metadataInput.data((quads) =>
-        channels.metadataOutput.push(serializeQuads(f(parseQuads(quads)))),
+    channels.metadataInput.data(async (quads) =>
+        channels.metadataOutput.push(serializeQuads(await f(parseQuads(quads)))),
     );
 }
 
@@ -233,14 +227,14 @@ export async function bucketize(
     const orchestrator = new BucketizerOrchestrator(config.strategy, save);
     const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
 
-    channels.metadataInput.data((x) => {
+    channels.metadataInput.data(async (x) => {
         const quads = new Parser().parse(x);
 
-        const store = new Store();
-        store.addQuads(quads);
+        const store = RdfStore.createDefault();
+        quads.forEach(q => store.addQuad(q));
 
-        const latest = sourceStream || getLatestStream(store);
-        const latestShape = latest ? getLatestShape(latest, store) : undefined;
+        const latest = sourceStream || await getLatestStream(store);
+        const latestShape = latest ? await getLatestShape(latest, store) : undefined;
 
         if (latestShape) {
             const rdfStore = RdfStore.createDefault();
@@ -294,7 +288,7 @@ export async function bucketize(
         }
 
         await channels.dataOutput.push(
-            new N3.Writer().quadsToString(outputQuads),
+            new N3Writer().quadsToString(outputQuads),
         );
     });
 }

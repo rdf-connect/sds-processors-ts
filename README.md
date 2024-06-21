@@ -8,7 +8,7 @@ Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Types
 
 This processor takes as input a stream of (batched) RDF data entities and wraps them as individual SDS records to be further processed downstream. By default, it will extract individual entities by taking every single named node subject and extracting a [Concise Bounded Description](https://www.w3.org/Submission/CBD/) (CBD) of that entity with respect to the input RDF graph.
 
-Alternatively, a set of SHACL shapes can be given to concretely define and filter the type of entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
+Alternatively, a set of types may be specified (`js:typeFilter`) to target concrete entities. A SHACL shape can be given to concretely define the bounds target entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
 
 If the `js:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
 
@@ -23,22 +23,30 @@ An example of how to use this processor within a RDF-Connect pipeline definition
     js:input <inputChannelReader>;
     js:output <outputChannerWriter>;
     js:stream <http://ex.org/myStream>;
+    js:typeFilter ex:SomeClass, ex:SomeOtherClass;
     js:timestampPath <http://ex.org/timestamp>;
-    js:shapeFilter """
+    js:shape """
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
 
         [ ] a sh:NodeShape;
+            sh:xone (<shape1> <shape2>).
+
+        <shape1> a sh:NodeShape;
             sh:targetClass ex:SomeClass;
             sh:property [ sh:path ex:someProperty ].
-    """,
-    """
-        @prefix sh: <http://www.w3.org/ns/shacl#>.
-        @prefix ex: <http://ex.org/>.
 
-        [ ] a sh:NodeShape;
+        <shape2> a sh:NodeShape;
             sh:targetClass ex:SomeOtherClass;
-            sh:property [ sh:path ex:someOtherProperty ].
+            sh:property [ 
+                sh:path ex:someProperty 
+            ], [
+                sh:path ex:someOtherProperty;
+                sh:node [
+                    a sh:NodeShape;
+                    sh:targetClass ex:YetAnotherClass
+                ]
+            ].
     """.
 ```
 

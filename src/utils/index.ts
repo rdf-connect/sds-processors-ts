@@ -1,12 +1,15 @@
-import { Quad, Term } from "@rdfjs/types";
-import { blankNode, literal, NBNode, quad } from "../core";
-import { Parser, Quad_Object, Quad_Subject, Writer } from "n3";
+import { Quad, Term, Quad_Object, Quad_Subject, } from "@rdfjs/types";
+import { DataFactory } from "rdf-data-factory";
+import { NBNode } from "../core";
+import { Parser, Writer } from "n3";
 import { SDS, XSD } from "@treecg/types";
 import { BasicLensM, extractShapes, match, Shapes, subject } from "rdf-lens";
 import { readFileSync } from "fs";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
+
+const df = new DataFactory();
 
 export const SDS_GRAPH = SDS.terms.custom("DataDescription");
 export const SHAPES_FILE_LOCATION = path.join(
@@ -25,7 +28,7 @@ export type RdfThing = {
 export type RelationDTO = {
   type: Term;
   target: Term;
-  value?: any;
+  value?: Term | undefined;
   path?: RdfThing;
 };
 
@@ -45,15 +48,15 @@ export type BucketRelation = {
 };
 
 function writeRelation(rel: BucketRelation, writer: Writer): Term {
-    const id = blankNode();
+    const id = df.blankNode();
     writer.addQuads([
-        quad(
+        df.quad(
             id,
             SDS.terms.relationType,
       <Quad_Object>rel.type,
       SDS.terms.custom("DataDescription"),
         ),
-        quad(
+        df.quad(
             id,
             SDS.terms.relationBucket,
       <Quad_Object>rel.target,
@@ -63,7 +66,7 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
 
     if (rel.value) {
         writer.addQuad(
-            quad(
+            df.quad(
                 id,
                 SDS.terms.relationValue,
         <Quad_Object>rel.value,
@@ -73,14 +76,14 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
     }
     if (rel.path) {
         writer.addQuads([
-            quad(
+            df.quad(
                 id,
                 SDS.terms.relationPath,
         <Quad_Object>rel.path.id,
         SDS.terms.custom("DataDescription"),
             ),
             ...rel.path.quads.map((x) =>
-                quad(
+                df.quad(
                     x.subject,
                     x.predicate,
                     x.object,
@@ -147,7 +150,7 @@ export class Bucket {
         const relations = this.links
             .map((rel) => writeRelation(rel, writer))
             .map((rel) =>
-                quad(
+                df.quad(
                     id,
                     SDS.terms.relation,
           <Quad_Object>rel,
@@ -157,10 +160,10 @@ export class Bucket {
 
         if (this.root) {
             relations.push(
-                quad(
+                df.quad(
                     id,
                     SDS.terms.custom("isRoot"),
-                    literal("true", XSD.terms.custom("boolean")),
+                    df.literal("true", XSD.terms.custom("boolean")),
                     SDS.terms.custom("DataDescription"),
                 ),
             );
@@ -205,16 +208,16 @@ export class Record {
     }
 
     write(writer: Writer) {
-        const id = blankNode();
+        const id = df.blankNode();
 
         const quads = [
-            quad(
+            df.quad(
                 id,
                 SDS.terms.payload,
         <Quad_Object>this.data.id,
         SDS.terms.custom("DataDescription"),
             ),
-            quad(
+            df.quad(
                 id,
                 SDS.terms.stream,
         <Quad_Object>this.stream,
@@ -223,7 +226,7 @@ export class Record {
         ];
         if (this.bucket) {
             quads.push(
-                quad(
+                df.quad(
                     id,
                     SDS.terms.bucket,
           <Quad_Object>this.bucket.id,
@@ -277,4 +280,24 @@ export class Extractor {
             }),
         );
     }
+}
+
+export async function getSubjects(
+    store: RdfStore,
+    pred?: Term,
+    object?: Term,
+    graph?: Term,
+): Promise<Term[]> {
+    const quads = await store.match(null, pred, object, graph).toArray();
+    return quads.map((x) => x.subject);
+}
+
+export async function getObjects(
+    store: RdfStore,
+    subject?: Term,
+    pred?: Term,
+    graph?: Term,
+): Promise<Term[]> {
+    const quads = await store.match(subject, pred, null, graph).toArray();
+    return quads.map((x) => x.object);
 }

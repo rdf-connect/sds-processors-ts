@@ -1,14 +1,17 @@
 import { describe, test, expect } from "vitest";
 import { SimpleStream } from "@rdfc/js-runner";
-import { DataFactory, Parser, Store } from "n3";
+import { DataFactory } from "rdf-data-factory";
+import { RdfStore } from "rdf-stores";
+import { Parser } from "n3";
+import { getObjects } from "../src/utils";
 import { sdsify } from "../src/sdsify";
-import { LDES, RDF, SDS } from "@treecg/types";
+import { LDES, RDF, SDS, XSD } from "@treecg/types";
 
-const { namedNode, literal } = DataFactory;
+const df = new DataFactory();
 
 describe("Functional tests for the sdsify function", () => {
 
-    const STREAM_ID = namedNode("http://ex.org/myStream");
+    const STREAM_ID = df.namedNode("http://ex.org/myStream");
     const INPUT_1 = `
         @prefix ex: <http://ex.org/>.
 
@@ -97,10 +100,31 @@ describe("Functional tests for the sdsify function", () => {
     const SHAPE_4 = `
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
-        @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
 
         [ ] a sh:NodeShape;
             sh:targetClass ex:SomeClass.
+    `;
+    const MULTI_SHAPE = `
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+        @prefix ex: <http://ex.org/>.
+
+        [ ] a sh:NodeShape;
+            sh:xone (<A> <B>).
+
+        <A> a sh:NodeShape;
+            sh:targetClass ex:SomeOtherClass;
+            sh:property [
+                sh:path ex:prop4
+            ], [
+                sh:path ex:prop5
+            ].
+
+        <B> a sh:NodeShape;
+            sh:targetClass ex:SomeClass;
+            sh:closed true;
+            sh:property [
+                sh:path ex:prop2
+            ].
     `;
     const BAD_SHAPE_1 = `
         @prefix sh: <http://www.w3.org/ns/shacl#>.
@@ -121,20 +145,20 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
 
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
-        }).on("end", () => {
+            new Parser().parse(data).forEach(q => store.addQuad(q));
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(2);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(2);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop2", literal("some other value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/nestedProp1", literal(50), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop4", literal("some value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop5", literal(15), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop1"), df.literal("some value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop2"), df.literal("some other value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/nestedProp1"), df.literal("50", XSD.terms.integer), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop4"), df.literal("some value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop5"), df.literal("15", XSD.terms.integer), null).length).toBe(1);
         });
 
         // Execute function
@@ -149,21 +173,21 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
 
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
-        }).on("end", () => {
+            new Parser().parse(data).forEach(q => store.addQuad(q));
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(1);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(1);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, "http://ex.org/prop4", literal("some value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop5", literal(15), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop4"), df.literal("some value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop5"), df.literal("15", XSD.terms.integer), null).length).toBe(1);
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, [SHAPE_1]);
+        sdsify(input, output, STREAM_ID, [df.namedNode("http://ex.org/SomeOtherClass")], undefined, SHAPE_1);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -174,20 +198,23 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
 
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
-        }).on("end", () => {
+            new Parser().parse(data).forEach(q => store.addQuad(q));
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(1);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(1);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, "http://ex.org/prop2", literal("some other value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop2"), df.literal("some other value"), null).length).toBe(1);
+
+            // Check some properties were excluded
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop1"), null, null).length).toBe(0);
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, [SHAPE_2]);
+        sdsify(input, output, STREAM_ID, [df.namedNode("http://ex.org/SomeClass")], undefined, SHAPE_2);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -198,23 +225,23 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
 
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
-        }).on("end", () => {
+            new Parser().parse(data).forEach(q => store.addQuad(q));
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(1);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(1);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, RDF.type, namedNode("http://ex.org/SomeClass"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop2", namedNode("B"), null).length).toBe(1);
-            expect(store.getQuads(null, RDF.type, namedNode("http://ex.org/SomeOtherClass"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop3", literal("another value"), null).length).toBe(1);
+            expect(store.getQuads(null, RDF.terms.type, df.namedNode("http://ex.org/SomeClass"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop2"), df.namedNode("B"), null).length).toBe(1);
+            expect(store.getQuads(null, RDF.terms.type, df.namedNode("http://ex.org/SomeOtherClass"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop3"), df.literal("another value"), null).length).toBe(1);
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, [SHAPE_3]);
+        sdsify(input, output, STREAM_ID, [df.namedNode("http://ex.org/SomeClass")], undefined, SHAPE_3);
 
         // Push some data in
         await input.push(INPUT_2);
@@ -225,22 +252,22 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
 
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
-        }).on("end", () => {
+            new Parser().parse(data).forEach(q => store.addQuad(q));
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(2);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(2);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, "http://ex.org/prop2", literal("some other value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop4", literal("some value"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop5", literal(15), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop2"), df.literal("some other value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop4"), df.literal("some value"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop5"), df.literal("15", XSD.terms.integer), null).length).toBe(1);
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, [SHAPE_1, SHAPE_2]);
+        sdsify(input, output, STREAM_ID, undefined, undefined, MULTI_SHAPE);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -251,18 +278,19 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
         output.data(data => {
-            store.addQuads(new Parser().parse(data));
+            new Parser().parse(data).forEach(q => store.addQuad(q));
         }).on("end", () => { });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, [BAD_SHAPE_1]);
+        sdsify(input, output, STREAM_ID, undefined, undefined, BAD_SHAPE_1);
         try {
             // Push some data in
             expect(await input.push(INPUT_1)).toThrow(Error);
         } catch (err) {
-            expect(err.message).toBe("There are multiple main node shapes in a given shape. Unrelated shapes must be given as separate shape filters");
+            expect(err.message).toBe("There are multiple main node shapes in a given shape." 
+                + " Use sh:xone or sh:or to provide multiple unrelated shapes together.");
         }
     });
 
@@ -270,28 +298,28 @@ describe("Functional tests for the sdsify function", () => {
         const input = new SimpleStream<string>();
         const output = new SimpleStream<string>();
 
-        const store = new Store();
+        const store = RdfStore.createDefault();
         const timestamps: string[] = [];
 
-        output.data(data => {
+        output.data(async data => {
             const quads = new Parser().parse(data);
             const subj = quads[0].subject;
-            store.addQuads(quads);
-            timestamps.push(store.getObjects(subj, "http://ex.org/timestamp", null)[0].value);
-        }).on("end", () => {
+            quads.forEach(q => store.addQuad(q));
+            timestamps.push((await getObjects(store, subj, df.namedNode("http://ex.org/timestamp")))[0].value);
+        }).on("end", async () => {
             // Check there number of members
-            expect(store.getObjects(null, SDS.payload, null).length).toBe(3);
+            expect((await getObjects(store, undefined, SDS.terms.payload)).length).toBe(3);
 
             // Check all properties are extracted for members
-            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value A"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value B"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/prop1", literal("some value C"), null).length).toBe(1);
-            expect(store.getQuads(null, "http://ex.org/timestamp", null, null).length).toBe(3);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop1"), df.literal("some value A"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop1"), df.literal("some value B"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/prop1"), df.literal("some value C"), null).length).toBe(1);
+            expect(store.getQuads(null, df.namedNode("http://ex.org/timestamp"), null, null).length).toBe(3);
 
             // Check all members belong to the same transaction and last one is marked as such
-            const tIds = store.getObjects(null, LDES.terms.custom("transactionId"), null);
+            const tIds = await getObjects(store, undefined, LDES.terms.custom("transactionId"));
             expect(tIds.every(id => id.value === tIds[0].value));
-            expect(store.getObjects(null, LDES.terms.custom("isLastOfTransaction"), null).length).toBe(1);
+            expect((await getObjects(store, undefined, LDES.terms.custom("isLastOfTransaction"))).length).toBe(1);
 
             let currT = 0;
             for (const ts of timestamps) {
@@ -302,7 +330,7 @@ describe("Functional tests for the sdsify function", () => {
         });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, namedNode("http://ex.org/timestamp"), [SHAPE_4]);
+        sdsify(input, output, STREAM_ID, undefined, df.namedNode("http://ex.org/timestamp"), SHAPE_4);
 
         // Push some data in
         await input.push(INPUT_3);
