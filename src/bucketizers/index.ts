@@ -4,8 +4,10 @@ import { Term } from "rdf-js";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Bucket, Record } from "../utils";
 import { TREE } from "@treecg/types";
-import { namedNode } from "../core";
+import { DataFactory } from "rdf-data-factory";
 import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
+
+const df = new DataFactory();
 
 export const SHAPES_FILE_LOCATION = path.join(
     __dirname,
@@ -94,7 +96,7 @@ export class BucketizerOrchestrator {
                     // If the requested bucket is the root, it actually is the previous bucket
                     const id = root ? prefix : prefix + "/" + key;
                     if (!buckets[id]) {
-                        buckets[id] = new Bucket(namedNode(id), [], false);
+                        buckets[id] = new Bucket(df.namedNode(id), [], false);
                     }
                     return buckets[id];
                 };

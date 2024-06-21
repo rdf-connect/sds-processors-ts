@@ -1,25 +1,25 @@
-import { BlankNode, DataFactory, NamedNode, Store } from "n3";
+import { RdfStore } from "rdf-stores";
+import { DataFactory } from "rdf-data-factory";
 import {
     createProperty,
-    literal,
     NBNode,
     SR,
     SW,
     transformMetadata,
 } from "./core.js";
 import { EX, PPLAN, PROV, RDF, SHACL, XSD } from "@treecg/types";
-import { Quad, Quad_Object, Term } from "rdf-js";
+import { BlankNode, NamedNode, Quad, Quad_Object, Term } from "@rdfjs/types";
 
-const { namedNode } = DataFactory;
+const df = new DataFactory();
 
 function shapeTransform(
     id: Term | undefined,
-    store: Store,
+    store: RdfStore,
 ): BlankNode | NamedNode {
-    const newId = store.createBlankNode();
+    const newId = df.blankNode();
     if (id) {
-        const quads = store.getQuads(id, null, null, null);
-        store.addQuads(quads);
+        const quads = store.getQuads(id);
+        quads.forEach(q => store.addQuad(q));
         return newId;
     }
 
@@ -42,24 +42,24 @@ function shapeTransform(
     1,
     );
 
-    store.addQuad(newId, RDF.terms.type, SHACL.terms.NodeShape);
-    store.addQuad(newId, SHACL.terms.targetClass, EX.terms.custom("Point"));
+    store.addQuad(df.quad(newId, RDF.terms.type, SHACL.terms.NodeShape));
+    store.addQuad(df.quad(newId, SHACL.terms.targetClass, EX.terms.custom("Point")));
 
-    store.addQuad(newId, SHACL.terms.property, p1);
-    store.addQuad(newId, SHACL.terms.property, p2);
+    store.addQuad(df.quad(newId, SHACL.terms.property, p1));
+    store.addQuad(df.quad(newId, SHACL.terms.property, p2));
 
     return newId;
 }
 
-function addProcess(id: Term | undefined, store: Store): Term {
-    const newId = store.createBlankNode();
+function addProcess(id: Term | undefined, store: RdfStore): Term {
+    const newId = df.blankNode();
     const time = new Date().toISOString();
 
-    store.addQuad(newId, RDF.terms.type, PPLAN.terms.Activity);
+    store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
     if (id) {
-        store.addQuad(newId, PROV.terms.used, <Quad_Object>id);
+        store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>id));
     }
-    store.addQuad(newId, PROV.terms.startedAtTime, literal(time));
+    store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
 
     return newId;
 }
@@ -71,8 +71,8 @@ export function updateMetadata(
     sourceStream: string | undefined,
     newStream: string,
 ) {
-    const sourceStreamName = sourceStream ? namedNode(sourceStream) : undefined;
-    const newStreamName = namedNode(newStream);
+    const sourceStreamName = sourceStream ? df.namedNode(sourceStream) : undefined;
+    const newStreamName = df.namedNode(newStream);
     const f = transformMetadata(
         newStreamName,
         sourceStreamName,
@@ -81,6 +81,6 @@ export function updateMetadata(
         shapeTransform,
     );
 
-    sr.metadata.data((quads) => sw.metadata.push(f(quads)));
+    sr.metadata.data(async (quads) => sw.metadata.push(await f(quads)));
 }
 

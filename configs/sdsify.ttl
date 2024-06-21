@@ -29,12 +29,16 @@ js:Sdsify a js:JsProcess;
       fnom:implementationParameterPosition "2"^^xsd:int;
     ], [
       a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp path";
+      fnom:functionParameter "Type filter";
       fnom:implementationParameterPosition "3"^^xsd:int;
     ], [
       a fnom:PositionParameterMapping;
-      fnom:functionParameter "Shape filters";
+      fnom:functionParameter "Timestamp path";
       fnom:implementationParameterPosition "4"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Shape";
+      fnom:implementationParameterPosition "5"^^xsd:int;
     ];
   ].
 
@@ -60,13 +64,19 @@ js:Sdsify a js:JsProcess;
     sh:minCount 1;
   ], [
     sh:datatype xsd:iri;
+    sh:path js:typeFilter;
+    sh:name "Type filter";
+    sh:minCount 0;
+  ], [
+    sh:datatype xsd:iri;
     sh:path js:timestampPath;
     sh:name "Timestamp path";
     sh:minCount 0;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:shapeFilter;
-    sh:name "Shape filters";
+    sh:path js:shape;
+    sh:name "Shape";
     sh:minCount 0;
+    sh:maxCount 1;
   ].

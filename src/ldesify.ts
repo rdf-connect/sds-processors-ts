@@ -1,11 +1,12 @@
 import type { Stream, Writer } from "@rdfc/js-runner";
-import { Term } from "@rdfjs/types";
+import { Term, Quad, Quad_Predicate } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
-import * as n3 from "n3";
+import { DataFactory } from "rdf-data-factory";
+import { Parser, Writer as N3Writer } from "n3";
 
-const { namedNode, quad, literal } = n3.DataFactory;
+const df = new DataFactory();
 
-type StateDict = { [identify: string]: n3.Quad[] };
+type StateDict = { [identify: string]: Quad[] };
 type StateCache = { [identify: string]: string };
 
 function getPrevState(path: string): StateCache {
@@ -16,7 +17,7 @@ function getPrevState(path: string): StateCache {
     }
 }
 
-function createCache(quads: n3.Quad[], keys: string[]): string {
+function createCache(quads: Quad[], keys: string[]): string {
     let out = "";
     for (const key of keys) {
         const v = quads.find((v) => v.predicate.value === key);
@@ -31,9 +32,9 @@ function createCache(quads: n3.Quad[], keys: string[]): string {
     return out.slice(0, -1);
 }
 
-const IS_VERSION_OF = namedNode("http://purl.org/dc/terms/isVersionOf");
-const MODIFIED = namedNode("http://purl.org/dc/terms/modified");
-const TIMESTAMP = namedNode("http://www.w3.org/2001/XMLSchema#dateTime");
+const IS_VERSION_OF = df.namedNode("http://purl.org/dc/terms/isVersionOf");
+const MODIFIED = df.namedNode("http://purl.org/dc/terms/modified");
+const TIMESTAMP = df.namedNode("http://www.w3.org/2001/XMLSchema#dateTime");
 
 class Transformer {
     private readonly modifiedPath: Term;
@@ -56,13 +57,13 @@ class Transformer {
     }
 
     simpleTransform(input: string): string {
-        const quads = new n3.Parser().parse(input);
+        const quads = new Parser().parse(input);
 
         const newState: StateDict = {};
         const ids = new Set<string>();
         const keys = new Set<string>();
 
-        const out: n3.Quad[] = [];
+        const out: Quad[] = [];
 
         for (const quad of quads) {
             if (!newState[quad.subject.value]) {
@@ -82,35 +83,35 @@ class Transformer {
             const subject = v[0].subject;
 
             const date = new Date().toISOString();
-            const sub = namedNode(v[0].subject.value + "#" + date);
+            const sub = df.namedNode(v[0].subject.value + "#" + date);
 
             out.push(
-                quad(
+                df.quad(
                     sub,
-          <n3.Quad_Predicate>this.modifiedPath,
-          literal(date, TIMESTAMP),
+          <Quad_Predicate>this.modifiedPath,
+          df.literal(date, TIMESTAMP),
                 ), // VersionOf
-                quad(sub, <n3.Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
+                df.quad(sub, <Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
             );
 
             for (const q of v) {
-                out.push(quad(sub, q.predicate, q.object));
+                out.push(df.quad(sub, q.predicate, q.object));
             }
         }
 
-        const st = new n3.Writer().quadsToString(out);
+        const st = new N3Writer().quadsToString(out);
         return st;
     }
 
     transformCheckState(input: string): string {
-        const quads = new n3.Parser().parse(input);
+        const quads = new Parser().parse(input);
 
         const newState: StateDict = {};
         const newCache: StateCache = {};
         const ids = new Set<string>();
         const keys = new Set<string>();
 
-        const out: n3.Quad[] = [];
+        const out: Quad[] = [];
 
         for (const quad of quads) {
             if (!newState[quad.subject.value]) {
@@ -136,25 +137,25 @@ class Transformer {
             const subject = v[0].subject;
 
             const date = new Date().toISOString();
-            const sub = namedNode(v[0].subject.value + "#" + date);
+            const sub = df.namedNode(v[0].subject.value + "#" + date);
 
             out.push(
-                quad(
+                df.quad(
                     sub,
-          <n3.Quad_Predicate>this.modifiedPath,
-          literal(date, TIMESTAMP),
+          <Quad_Predicate>this.modifiedPath,
+          df.literal(date, TIMESTAMP),
                 ), // VersionOf
-                quad(sub, <n3.Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
+                df.quad(sub, <Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
             );
 
             for (const q of v) {
-                out.push(quad(sub, q.predicate, q.object));
+                out.push(df.quad(sub, q.predicate, q.object));
             }
         }
 
         this.cache = newCache;
 
-        const st = new n3.Writer().quadsToString(out);
+        const st = new N3Writer().quadsToString(out);
         return st;
     }
 }
