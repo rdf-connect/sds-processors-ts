@@ -8,10 +8,14 @@ import { readFileSync } from "fs";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
+import { fileURLToPath } from 'url';
 
 const df = new DataFactory();
 
 export const SDS_GRAPH = SDS.terms.custom("DataDescription");
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 export const SHAPES_FILE_LOCATION = path.join(
     __dirname,
     "../../configs/sds_shapes.ttl",
