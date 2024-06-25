@@ -28,7 +28,9 @@ function maybeParse(data: Quad[] | string): Quad[] {
 // We determine this by assuming that the main node shape
 // is not referenced by any other shape description.
 // If more than one is found an exception is thrown.
-async function extractMainNodeShape(store: RdfStore | null): Promise<Quad_Subject | undefined> {
+async function extractMainNodeShape(
+    store: RdfStore | null,
+): Promise<Quad_Subject | undefined> {
     if (store) {
         const nodeShapes = await getSubjects(
             store,
@@ -48,7 +50,7 @@ async function extractMainNodeShape(store: RdfStore | null): Promise<Quad_Subjec
                     } else {
                         throw new Error(
                             "There are multiple main node shapes in a given shape. " +
-                            "Use sh:xone or sh:or to provide multiple unrelated shapes together."
+                                "Use sh:xone or sh:or to provide multiple unrelated shapes together.",
                         );
                     }
                 }
@@ -56,7 +58,9 @@ async function extractMainNodeShape(store: RdfStore | null): Promise<Quad_Subjec
             if (mainNodeShape) {
                 return <Quad_Subject>mainNodeShape;
             } else {
-                throw new Error("No main SHACL Node Shapes found in given shape filter");
+                throw new Error(
+                    "No main SHACL Node Shapes found in given shape filter",
+                );
             }
         } else {
             throw new Error("No SHACL Node Shapes found in given shape filter");
@@ -69,9 +73,10 @@ function getExtractor(shapeStore: RdfStore | null): CBDShapeExtractor {
         return new CBDShapeExtractor();
     } else {
         return new CBDShapeExtractor(shapeStore, undefined, {
-            fetch: async () => new Response("", {
-                headers: { "content-type": "text/turtle" }
-            }),
+            fetch: async () =>
+                new Response("", {
+                    headers: { "content-type": "text/turtle" },
+                }),
         });
     }
 }
@@ -87,7 +92,9 @@ export function sdsify(
     // Setup member extractor
     const shapeStore = shape ? RdfStore.createDefault() : null;
     if (shape) {
-        maybeParse(shape).forEach((x) => { if (shapeStore) shapeStore.addQuad(x); });
+        maybeParse(shape).forEach((x) => {
+            if (shapeStore) shapeStore.addQuad(x);
+        });
     }
     const extractor = getExtractor(shapeStore);
 
@@ -99,30 +106,48 @@ export function sdsify(
         const members: { [id: string]: SDSMember } = {};
         const t0 = new Date();
         // Get shape Id (if any)
-        const shapeId = shape ? await extractMainNodeShape(shapeStore) : undefined;
+        const shapeId = shape
+            ? await extractMainNodeShape(shapeStore)
+            : undefined;
         const subjects = [];
 
-        if (types) {
+        if (types?.length) {
             for (const t of types) {
                 // Group quads based on given member type
-                subjects.push(...(await getSubjects(dataStore, RDF.terms.type, t)));
+                subjects.push(
+                    ...(await getSubjects(dataStore, RDF.terms.type, t)),
+                );
             }
         } else {
             subjects.push(...(await getSubjects(dataStore)));
         }
 
         // Extract members from received quads
-        await Promise.all(subjects.map(async subject => {
-            if (subject.termType === "NamedNode" && !members[subject.value]) {
-                const membQuads = await extractor.extract(dataStore, subject, shapeId);
-                members[subject.value] = {
-                    quads: membQuads,
-                    timestamp: timestampPath ? dataStore.getQuads(subject, timestampPath)[0].object : undefined
-                };
-            }
-        }));
+        await Promise.all(
+            subjects.map(async (subject) => {
+                if (
+                    subject.termType === "NamedNode" &&
+                    !members[subject.value]
+                ) {
+                    const membQuads = await extractor.extract(
+                        dataStore,
+                        subject,
+                        shapeId,
+                    );
+                    members[subject.value] = {
+                        quads: membQuads,
+                        timestamp: timestampPath
+                            ? dataStore.getQuads(subject, timestampPath)[0]
+                                  .object
+                            : undefined,
+                    };
+                }
+            }),
+        );
 
-        console.log(`[sdsify] Members extracted in ${new Date().getTime() - t0.getTime()} ms`);
+        console.log(
+            `[sdsify] Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
+        );
 
         // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
         const orderedMembersIds = Object.keys(members);
@@ -140,21 +165,33 @@ export function sdsify(
         const TRANSACTION_ID =
             hash
                 .update(new NWriter().quadsToString(dataStore.getQuads()))
-                .digest("hex") + "_" + new Date().toISOString();
+                .digest("hex") +
+            "_" +
+            new Date().toISOString();
 
         for (const sub of orderedMembersIds) {
             const quads = members[sub].quads;
             const blank = df.blankNode();
 
             quads.push(
-                df.quad(blank, SDS.terms.payload, <Quad_Object>df.namedNode(sub), SDS.terms.custom("DataDescription")),
-                df.quad(blank, SDS.terms.stream, <Quad_Object>streamNode, SDS.terms.custom("DataDescription")),
+                df.quad(
+                    blank,
+                    SDS.terms.payload,
+                    <Quad_Object>df.namedNode(sub),
+                    SDS.terms.custom("DataDescription"),
+                ),
+                df.quad(
+                    blank,
+                    SDS.terms.stream,
+                    <Quad_Object>streamNode,
+                    SDS.terms.custom("DataDescription"),
+                ),
                 // This is not standardized (yet)
                 df.quad(
                     blank,
                     LDES.terms.custom("transactionId"),
                     df.literal(TRANSACTION_ID),
-                    SDS.terms.custom("DataDescription")
+                    SDS.terms.custom("DataDescription"),
                 ),
             );
 
@@ -166,7 +203,7 @@ export function sdsify(
                         blank,
                         LDES.terms.custom("isLastOfTransaction"),
                         df.literal("true", XSD.terms.custom("boolean")),
-                        SDS.terms.custom("DataDescription")
+                        SDS.terms.custom("DataDescription"),
                     ),
                 );
             }
@@ -175,7 +212,9 @@ export function sdsify(
             membersCount += 1;
         }
 
-        console.log(`[sdsify] successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`);
+        console.log(
+            `[sdsify] successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`,
+        );
     });
 
     input.on("end", async () => {
