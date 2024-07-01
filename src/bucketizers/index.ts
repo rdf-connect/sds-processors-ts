@@ -5,7 +5,8 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Bucket, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
-import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
+import PagedBucketizer from "./pagedBucketizer";
+import SubjectBucketizer from "./subjectBucketizer";
 import { fileURLToPath } from "url";
 
 const df = new DataFactory();

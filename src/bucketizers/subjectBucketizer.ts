@@ -1,44 +1,10 @@
+import { Bucketizer, SubjectFragmentation } from "./index";
 import { BasicLensM, Cont } from "rdf-lens";
+import { Term } from "@rdfjs/types";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
-import { Bucketizer, PageFragmentation, SubjectFragmentation } from ".";
-import { Term } from "@rdfjs/types";
 
-export class PagedBucketizer implements Bucketizer {
-    private readonly pageSize: number;
-    private count: number = 0;
-
-    constructor(config: PageFragmentation, save?: string) {
-        this.pageSize = config.pageSize;
-
-        if (save) {
-            this.count = JSON.parse(save);
-        }
-    }
-
-    bucketize(
-        _: Record,
-        getBucket: (key: string, root?: boolean) => Bucket,
-    ): Bucket[] {
-        const index = Math.floor(this.count / this.pageSize);
-        this.count += 1;
-        const currentbucket = getBucket("page-" + index, index == 0);
-
-        if (this.count % this.pageSize == 1 && this.count > 1) {
-            const oldBucket = getBucket("page-" + (index - 1), index - 1 == 0);
-            oldBucket.immutable = true;
-            oldBucket.addRelation(currentbucket, TREE.terms.Relation);
-        }
-
-        return [currentbucket];
-    }
-
-    save() {
-        return JSON.stringify(this.count);
-    }
-}
-
-export class SubjectBucketizer implements Bucketizer {
+export default class SubjectBucketizer implements Bucketizer {
     private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
     private readonly pathQuads: RdfThing;
     private readonly namePath?: BasicLensM<Cont, Cont>;
