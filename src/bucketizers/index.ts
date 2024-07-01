@@ -1,6 +1,6 @@
 import { readFileSync } from "fs";
 import * as path from "path";
-import { Term } from "rdf-js";
+import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Bucket, Record } from "../utils";
 import { TREE } from "@treecg/types";
@@ -54,12 +54,15 @@ type Save = { [key: string]: { bucketizer?: Bucketizer; save?: string } };
 
 function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
     switch (config.type.value) {
-    case TREE.custom("SubjectFragmentation"):
-        return new SubjectBucketizer(<SubjectFragmentation>config.config, save);
-    case TREE.custom("PageFragmentation"):
-        return new PagedBucketizer(<PageFragmentation>config.config, save);
-    case TREE.custom("TimebasedFragmentation"):
-        throw "Not yet implemented";
+        case TREE.custom("SubjectFragmentation"):
+            return new SubjectBucketizer(
+                <SubjectFragmentation>config.config,
+                save,
+            );
+        case TREE.custom("PageFragmentation"):
+            return new PagedBucketizer(<PageFragmentation>config.config, save);
+        case TREE.custom("TimebasedFragmentation"):
+            throw "Not yet implemented";
     }
     throw "Unknown bucketizer " + config.type.value;
 }

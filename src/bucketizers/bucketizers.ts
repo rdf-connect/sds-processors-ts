@@ -2,7 +2,7 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { Bucketizer, PageFragmentation, SubjectFragmentation } from ".";
-import { Term } from "rdf-js";
+import { Term } from "@rdfjs/types";
 
 export class PagedBucketizer implements Bucketizer {
     private readonly pageSize: number;
@@ -66,7 +66,9 @@ export class SubjectBucketizer implements Bucketizer {
     ): Bucket[] {
         const values = this.path
             .execute(record.data)
-            .filter((x, i, arr) => arr.findIndex((y) => x.value === y.value) == i);
+            .filter(
+                (x, i, arr) => arr.findIndex((y) => x.value === y.value) == i,
+            );
 
         const out: Bucket[] = [];
 
@@ -85,9 +87,9 @@ export class SubjectBucketizer implements Bucketizer {
         for (const value of values) {
             const name = value.literal
                 ? this.namePath?.execute({
-                    id: value.literal,
-                    quads: record.data.quads,
-                })[0]?.id.value || value.value
+                      id: value.literal,
+                      quads: record.data.quads,
+                  })[0]?.id.value || value.value
                 : value.value;
 
             const bucket = getBucket(name);
