@@ -8,6 +8,7 @@ import { DataFactory } from "rdf-data-factory";
 import PagedBucketizer from "./pagedBucketizer";
 import SubjectBucketizer from "./subjectBucketizer";
 import { fileURLToPath } from "url";
+import TimebasedBucketizer from "./timebasedBucketizer";
 
 const df = new DataFactory();
 
@@ -39,7 +40,10 @@ export type PageFragmentation = {
 
 export type TimebasedFragmentation = {
     path: BasicLensM<Cont, Cont>;
-    maxGranularity: "day" | "hour" | "second";
+    pathQuads: Cont;
+    maxSize: number;
+    k: number;
+    minBucketSpan: number;
 };
 
 export interface Bucketizer {
@@ -63,7 +67,10 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
         case TREE.custom("PageFragmentation"):
             return new PagedBucketizer(<PageFragmentation>config.config, save);
         case TREE.custom("TimebasedFragmentation"):
-            throw "Not yet implemented";
+            return new TimebasedBucketizer(
+                <TimebasedFragmentation>config.config,
+                save,
+            );
     }
     throw "Unknown bucketizer " + config.type.value;
 }
@@ -84,6 +91,7 @@ export class BucketizerOrchestrator {
     bucketize(
         record: Record,
         buckets: { [id: string]: Bucket },
+        requestedBuckets: Set<string>,
         prefix = "",
     ): string[] {
         let queue = [prefix];
@@ -97,14 +105,16 @@ export class BucketizerOrchestrator {
 
                 const getBucket = (value: string, root?: boolean) => {
                     const terms = value.split("/");
-                    const key = terms[terms.length - 1]
-                        .replaceAll("#", "-")
-                        .replaceAll(" ", "-");
+                    const key = encodeURIComponent(
+                        decodeURIComponent(terms[terms.length - 1]),
+                    );
                     // If the requested bucket is the root, it actually is the previous bucket
                     const id = root ? prefix : prefix + "/" + key;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
                     }
+                    // Add the bucket to the requested buckets, so we can send it through to propagate any changes to it.
+                    requestedBuckets.add(id);
                     return buckets[id];
                 };
 

@@ -34,7 +34,7 @@ function addProcess(
     store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
     store.addQuad(df.quad(newId, RDF.terms.type, LDES.terms.Bucketization));
 
-    bucketizeConfig.forEach(q => store.addQuad(q));
+    bucketizeConfig.forEach((q) => store.addQuad(q));
 
     store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
     store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>strategyId));
@@ -102,7 +102,10 @@ function record_to_quads(
     return out;
 }
 
-function bucket_to_quads(bucket: Bucket): Quad[] {
+function bucket_to_quads(
+    bucket: Bucket,
+    includeRelations: boolean = true,
+): Quad[] {
     const out: Quad[] = [
         df.quad(
             <Quad_Subject>bucket.id,
@@ -131,57 +134,59 @@ function bucket_to_quads(bucket: Bucket): Quad[] {
         );
     }
 
-    for (const rel of bucket.links) {
-        const id = df.blankNode();
-        out.push(
-            df.quad(
-                <Quad_Subject>bucket.id,
-                SDS.terms.relation,
-                id,
-                SDS.terms.custom("DataDescription"),
-            ),
-            df.quad(
-                id,
-                SDS.terms.relationType,
-                <Quad_Object>rel.type,
-                SDS.terms.custom("DataDescription"),
-            ),
-            df.quad(
-                id,
-                SDS.terms.relationBucket,
-                <Quad_Object>rel.target,
-                SDS.terms.custom("DataDescription"),
-            ),
-        );
-
-        if (rel.path) {
+    if (includeRelations) {
+        for (const rel of bucket.links) {
+            const id = df.blankNode();
             out.push(
                 df.quad(
+                    <Quad_Subject>bucket.id,
+                    SDS.terms.relation,
                     id,
-                    SDS.terms.relationPath,
-                    <Quad_Object>rel.path.id,
                     SDS.terms.custom("DataDescription"),
                 ),
-                ...rel.path.quads.map((x) =>
+                df.quad(
+                    id,
+                    SDS.terms.relationType,
+                    <Quad_Object>rel.type,
+                    SDS.terms.custom("DataDescription"),
+                ),
+                df.quad(
+                    id,
+                    SDS.terms.relationBucket,
+                    <Quad_Object>rel.target,
+                    SDS.terms.custom("DataDescription"),
+                ),
+            );
+
+            if (rel.path) {
+                out.push(
                     df.quad(
-                        x.subject,
-                        x.predicate,
-                        x.object,
+                        id,
+                        SDS.terms.relationPath,
+                        <Quad_Object>rel.path.id,
                         SDS.terms.custom("DataDescription"),
                     ),
-                ),
-            );
-        }
+                    ...rel.path.quads.map((x) =>
+                        df.quad(
+                            x.subject,
+                            x.predicate,
+                            x.object,
+                            SDS.terms.custom("DataDescription"),
+                        ),
+                    ),
+                );
+            }
 
-        if (rel.value) {
-            out.push(
-                df.quad(
-                    id,
-                    SDS.terms.relationValue,
-                    <Quad_Object>rel.value,
-                    SDS.terms.custom("DataDescription"),
-                ),
-            );
+            if (rel.value) {
+                out.push(
+                    df.quad(
+                        id,
+                        SDS.terms.relationValue,
+                        <Quad_Object>rel.value,
+                        SDS.terms.custom("DataDescription"),
+                    ),
+                );
+            }
         }
     }
 
@@ -201,7 +206,9 @@ function set_metadata(
         (x, y) => addProcess(x, y, config.quads.id, config.quads.quads),
     );
     channels.metadataInput.data(async (quads) =>
-        channels.metadataOutput.push(serializeQuads(await f(parseQuads(quads)))),
+        channels.metadataOutput.push(
+            serializeQuads(await f(parseQuads(quads))),
+        ),
     );
 }
 
@@ -231,10 +238,12 @@ export async function bucketize(
         const quads = new Parser().parse(x);
 
         const store = RdfStore.createDefault();
-        quads.forEach(q => store.addQuad(q));
+        quads.forEach((q) => store.addQuad(q));
 
-        const latest = sourceStream || await getLatestStream(store);
-        const latestShape = latest ? await getLatestShape(latest, store) : undefined;
+        const latest = sourceStream || (await getLatestStream(store));
+        const latestShape = latest
+            ? await getLatestShape(latest, store)
+            : undefined;
 
         if (latestShape) {
             const rdfStore = RdfStore.createDefault();
@@ -258,11 +267,14 @@ export async function bucketize(
 
         const records = await extractor.parse_records(quads);
         const relatedBuckets = new Set<string>();
+        const requestedBuckets = new Set<string>();
+        const includedBuckets = new Set<string>();
 
         for (const record of records) {
             const record_buckets = orchestrator.bucketize(
                 record,
                 buckets,
+                requestedBuckets,
                 sourceStream?.value || "root",
             );
             outputQuads.push(
@@ -272,6 +284,8 @@ export async function bucketize(
                     record_buckets.map((x) => buckets[x]),
                 ),
             );
+            // Register the record buckets as included in the output, so we do not have to write it again as requested bucket without relations
+            record_buckets.forEach((x) => includedBuckets.add(x));
 
             for (const b of record_buckets) {
                 relatedBuckets.add(b);
@@ -285,8 +299,19 @@ export async function bucketize(
 
         for (const relatedBucket of relatedBuckets.values()) {
             outputQuads.push(...bucket_to_quads(buckets[relatedBucket]));
+
+            // Register the related bucket as included in the output, so we do not have to write it again as requested bucket without relations
+            includedBuckets.add(relatedBucket);
         }
 
+        // Only write the requested buckets that are not included in the output yet
+        for (const requestedBucket of requestedBuckets) {
+            if (!includedBuckets.has(requestedBucket)) {
+                outputQuads.push(
+                    ...bucket_to_quads(buckets[requestedBucket], false),
+                );
+            }
+        }
         await channels.dataOutput.push(
             new N3Writer().quadsToString(outputQuads),
         );

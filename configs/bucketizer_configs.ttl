@@ -78,14 +78,33 @@
   sh:targetClass tree:TimebasedFragmentation;
   sh:property [
     sh:name "path";
-    sh:path tree:fragmentationPath;
+    sh:path tree:timestampPath;
     sh:class rdfl:PathLens;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:name "maxGranularity";
-    sh:path tree:maxGranularity;
-    sh:datatype xsd:string;
+    sh:name "pathQuads";
+    sh:path tree:timestampPath;
+    sh:class <RdfThing>;
     sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "maxSize";
+    sh:path tree:maxSize;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "k";
+    sh:path tree:k;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "minBucketSpan";
+    sh:path tree:minBucketSpan;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
   ].
 

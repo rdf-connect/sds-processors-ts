@@ -51,12 +51,14 @@ export default class SubjectBucketizer implements Bucketizer {
         }
 
         for (const value of values) {
-            const name = value.literal
-                ? this.namePath?.execute({
-                      id: value.literal,
-                      quads: record.data.quads,
-                  })[0]?.id.value || value.value
-                : value.value;
+            const name = encodeURIComponent(
+                value.literal
+                    ? this.namePath?.execute({
+                          id: value.literal,
+                          quads: record.data.quads,
+                      })[0]?.id.value || value.value
+                    : value.value,
+            );
 
             const bucket = getBucket(name);
 
