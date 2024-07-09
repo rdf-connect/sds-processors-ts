@@ -214,7 +214,7 @@ function set_metadata(
     const f = transformMetadata(
         resultingStream,
         sourceStream,
-        "sds:Member",
+        "https://w3id.org/sds#Member",
         (x, y) => addProcess(x, y, config.quads.id, config.quads.quads),
     );
     channels.metadataInput.data(async (quads) =>
