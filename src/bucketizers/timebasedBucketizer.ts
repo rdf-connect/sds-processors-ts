@@ -1,5 +1,5 @@
 import { Bucketizer, TimebasedFragmentation } from "./index";
-import { Bucket, RdfThing, Record } from "../utils";
+import { Bucket, Member, RdfThing, Record } from "../utils";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
 import { TREE, XSD } from "@treecg/types";
@@ -15,7 +15,7 @@ export default class TimebasedBucketizer implements Bucketizer {
     private readonly minBucketSpan: number = 300000;
 
     private mutableLeafBucketKeys: Array<string> = [];
-    private memberTimestamps: Array<string> = [];
+    private members: Array<Member> = [];
 
     constructor(config: TimebasedFragmentation, save?: string) {
         this.path = config.path.mapAll((x) => ({
@@ -30,7 +30,7 @@ export default class TimebasedBucketizer implements Bucketizer {
         if (save) {
             const parsed = JSON.parse(save);
             this.mutableLeafBucketKeys = parsed.mutableLeafBucketKeys;
-            this.memberTimestamps = parsed.memberTimestamps;
+            this.members = parsed.members;
         }
     }
 
@@ -79,7 +79,7 @@ export default class TimebasedBucketizer implements Bucketizer {
 
                         // Add the new bucket to the list of leaf buckets.
                         this.mutableLeafBucketKeys.push(yearBucket.id.value);
-                        this.memberTimestamps = [];
+                        this.members = [];
                         bucketKey = yearBucket.id.value;
                     }
 
@@ -108,7 +108,7 @@ export default class TimebasedBucketizer implements Bucketizer {
 
                         // Remove the current bucket from the list of leaf buckets.
                         this.mutableLeafBucketKeys.shift();
-                        this.memberTimestamps = [];
+                        this.members = [];
                         bucketKey = this.mutableLeafBucketKeys[0];
 
                         // If the new current bucket is defined and has a different parent as the former leaf bucket, we make the parent of the former bucket immutable as it has no more mutable children.
@@ -130,7 +130,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                 }
 
                 // Is there still space in the bucket?
-                while (this.memberTimestamps.length >= this.maxSize) {
+                while (this.members.length >= this.maxSize) {
                     // The bucket is full. We need to split it.
                     const bucketNames = candidateBucket.id.value.split("/");
                     const bucketProperties = decodeURIComponent(
@@ -145,7 +145,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         console.log("We need to make a new page");
                         // We need to make a new page.
                         const newBucket = getBucket(
-                            `${bucketProperties[0]}_${bucketProperties[1]}_${bucketProperties[2] + 1}`,
+                            `${bucketProperties[0]}_${bucketProperties[1]}_${parseInt(bucketProperties[2]) + 1}`,
                         );
 
                         // Make the old bucket as immutable and add the relation to the new bucket.
@@ -156,7 +156,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         );
 
                         // Update the members for the new bucket.
-                        this.memberTimestamps = [];
+                        this.members = [];
 
                         // Add the new bucket to the list of leaf buckets at the position of the old bucket, which was at index 0.
                         this.mutableLeafBucketKeys[0] = newBucket.id.value;
@@ -170,7 +170,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                             parseInt(bucketProperties[1]) / this.k;
                         const newMutableLeafBuckets = [];
                         const parentBucket = candidateBucket;
+                        parentBucket.empty = true;
 
+                        const recordTime = new Date(timestamp).getTime();
                         for (let i = 0; i < this.k; i++) {
                             const newTimestamp = new Date(
                                 new Date(bucketProperties[0]).getTime() +
@@ -180,36 +182,43 @@ export default class TimebasedBucketizer implements Bucketizer {
                                 `${newTimestamp.toISOString()}_${newBucketSpan}_0`,
                             );
 
+                            // Add the members that belong to the new bucket.
+                            this.members
+                                .filter(
+                                    (m) =>
+                                        m.timestamp >= newTimestamp.getTime() &&
+                                        m.timestamp <
+                                            newTimestamp.getTime() +
+                                                newBucketSpan,
+                                )
+                                .forEach((m) => newBucket.addMember(m.id));
+
                             // Only add it to the mutable leaf buckets if the record is in this or a later bucket.
-                            const recordTime = new Date(timestamp).getTime();
-                            if (recordTime >= newTimestamp.getTime()) {
+                            if (
+                                recordTime <
+                                newTimestamp.getTime() + newBucketSpan
+                            ) {
                                 newMutableLeafBuckets.push(newBucket.id.value);
 
                                 // If the record is in this bucket, update its members and add the record to it.
-                                if (
-                                    recordTime <
-                                    new Date(
-                                        newTimestamp.getTime() + newBucketSpan,
-                                    ).getTime()
-                                ) {
+                                if (recordTime >= newTimestamp.getTime()) {
                                     // Neglect the records that are now part of an earlier bucket i in the k-split.
-                                    this.memberTimestamps =
-                                        this.memberTimestamps.filter(
-                                            (t) =>
-                                                new Date(t).getTime() >=
-                                                newTimestamp.getTime(),
-                                        );
+                                    this.members = this.members.filter(
+                                        (m) =>
+                                            m.timestamp >=
+                                                newTimestamp.getTime() &&
+                                            m.timestamp <
+                                                newTimestamp.getTime() +
+                                                    newBucketSpan,
+                                    );
 
                                     // The record should have a later timestamp than the last record in the bucket.
-                                    if (this.memberTimestamps.length > 0) {
-                                        const lastTimestamp = new Date(
-                                            this.memberTimestamps[
-                                                this.memberTimestamps.length - 1
-                                            ],
-                                        );
-                                        if (
-                                            recordTime < lastTimestamp.getTime()
-                                        ) {
+                                    if (this.members.length > 0) {
+                                        const lastTimestamp =
+                                            this.members[
+                                                this.members.length - 1
+                                            ].timestamp;
+                                        if (recordTime < lastTimestamp) {
                                             // The record is out of order. This should not happen.
                                             throw new Error(
                                                 "This should not happen! Record timestamp is before the last record timestamp in the new split bucket. Are your records out of order?",
@@ -243,13 +252,10 @@ export default class TimebasedBucketizer implements Bucketizer {
                 }
 
                 // There is still space in the bucket. Check if the record is not out of order.
-                if (this.memberTimestamps.length > 0) {
-                    const lastTimestamp = new Date(
-                        this.memberTimestamps[this.memberTimestamps.length - 1],
-                    );
-                    if (
-                        new Date(timestamp).getTime() < lastTimestamp.getTime()
-                    ) {
+                if (this.members.length > 0) {
+                    const lastTimestamp =
+                        this.members[this.members.length - 1].timestamp;
+                    if (new Date(timestamp).getTime() < lastTimestamp) {
                         // The record is out of order. This should not happen.
                         throw new Error(
                             "This should not happen! Record timestamp is before the last record timestamp. Are your records out of order?",
@@ -257,14 +263,19 @@ export default class TimebasedBucketizer implements Bucketizer {
                     }
                 }
                 // Add the record to the bucket.
-                this.memberTimestamps.push(timestamp);
+                this.members.push({
+                    id: record.data.id.value,
+                    timestamp: new Date(timestamp).getTime(),
+                });
 
                 // The record belongs in this candidateBucket, so return it.
                 out.push(candidateBucket);
             } else {
                 // The record does not have a timestamp value.
                 // TODO: Handle this case: we want to ignore and warn.
-                throw new Error("records without timestamp values");
+                throw new Error(
+                    "The TimebasedBucketizer received records without timestamp values. This is not supported.",
+                );
             }
         }
 
@@ -274,7 +285,7 @@ export default class TimebasedBucketizer implements Bucketizer {
     save(): string {
         return JSON.stringify({
             mutableLeafBucketKeys: this.mutableLeafBucketKeys,
-            memberTimestamps: this.memberTimestamps,
+            members: this.members,
         });
     }
 

@@ -1,4 +1,4 @@
-import { Quad, Term, Quad_Object, Quad_Subject, } from "@rdfjs/types";
+import { Quad, Term, Quad_Object, Quad_Subject } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
@@ -8,7 +8,7 @@ import { readFileSync } from "fs";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import * as path from "path";
-import { fileURLToPath } from 'url';
+import { fileURLToPath } from "url";
 
 const df = new DataFactory();
 
@@ -25,30 +25,35 @@ export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
 });
 
 export type RdfThing = {
-  id: Term;
-  quads: Quad[];
+    id: Term;
+    quads: Quad[];
 };
 
 export type RelationDTO = {
-  type: Term;
-  target: Term;
-  value?: Term | undefined;
-  path?: RdfThing;
+    type: Term;
+    target: Term;
+    value?: Term | undefined;
+    path?: RdfThing;
 };
 
 export type BucketDTO = {
-  links: RelationDTO[];
-  id: Term;
-  root?: boolean;
-  immutable?: boolean;
-  parent?: BucketDTO;
+    links: RelationDTO[];
+    id: Term;
+    root?: boolean;
+    immutable?: boolean;
+    parent?: BucketDTO;
 };
 
 export type BucketRelation = {
-  type: Term;
-  target: Term;
-  value?: Term;
-  path?: RdfThing;
+    type: Term;
+    target: Term;
+    value?: Term;
+    path?: RdfThing;
+};
+
+export type Member = {
+    id: string;
+    timestamp: number;
 };
 
 function writeRelation(rel: BucketRelation, writer: Writer): Term {
@@ -57,14 +62,14 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
         df.quad(
             id,
             SDS.terms.relationType,
-      <Quad_Object>rel.type,
-      SDS.terms.custom("DataDescription"),
+            <Quad_Object>rel.type,
+            SDS.terms.custom("DataDescription"),
         ),
         df.quad(
             id,
             SDS.terms.relationBucket,
-      <Quad_Object>rel.target,
-      SDS.terms.custom("DataDescription"),
+            <Quad_Object>rel.target,
+            SDS.terms.custom("DataDescription"),
         ),
     ]);
 
@@ -73,8 +78,8 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
             df.quad(
                 id,
                 SDS.terms.relationValue,
-        <Quad_Object>rel.value,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>rel.value,
+                SDS.terms.custom("DataDescription"),
             ),
         );
     }
@@ -83,8 +88,8 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
             df.quad(
                 id,
                 SDS.terms.relationPath,
-        <Quad_Object>rel.path.id,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>rel.path.id,
+                SDS.terms.custom("DataDescription"),
             ),
             ...rel.path.quads.map((x) =>
                 df.quad(
@@ -105,6 +110,8 @@ export class Bucket {
     root?: boolean;
     immutable?: boolean;
     links: BucketRelation[];
+    empty: boolean = false;
+    addMember: (memberId: string) => void;
 
     constructor(
         id: Term,
@@ -157,8 +164,8 @@ export class Bucket {
                 df.quad(
                     id,
                     SDS.terms.relation,
-          <Quad_Object>rel,
-          SDS.terms.custom("DataDescription"),
+                    <Quad_Object>rel,
+                    SDS.terms.custom("DataDescription"),
                 ),
             );
 
@@ -178,9 +185,10 @@ export class Bucket {
 }
 
 interface RecordDTO {
-  stream: Term;
-  data: Term;
-  bucket: any;
+    stream: Term;
+    data: Term;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    bucket: any;
 }
 
 export class Record {
@@ -218,14 +226,14 @@ export class Record {
             df.quad(
                 id,
                 SDS.terms.payload,
-        <Quad_Object>this.data.id,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>this.data.id,
+                SDS.terms.custom("DataDescription"),
             ),
             df.quad(
                 id,
                 SDS.terms.stream,
-        <Quad_Object>this.stream,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>this.stream,
+                SDS.terms.custom("DataDescription"),
             ),
         ];
         if (this.bucket) {
@@ -233,8 +241,8 @@ export class Record {
                 df.quad(
                     id,
                     SDS.terms.bucket,
-          <Quad_Object>this.bucket.id,
-          SDS.terms.custom("DataDescription"),
+                    <Quad_Object>this.bucket.id,
+                    SDS.terms.custom("DataDescription"),
                 ),
             );
             this.bucket.write(writer);
@@ -304,4 +312,12 @@ export async function getObjects(
 ): Promise<Term[]> {
     const quads = await store.match(subject, pred, null, graph).toArray();
     return quads.map((x) => x.object);
+}
+
+export function getOrDefaultMap<T1, T2>(
+    map: Map<T1, T2>,
+    key: T1,
+    def: T2,
+): T2 {
+    return map.get(key) || map.set(key, def).get(key)!;
 }

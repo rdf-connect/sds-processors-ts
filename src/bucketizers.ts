@@ -6,7 +6,7 @@ import { getLatestShape, getLatestStream, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
-import { Bucket, Extractor, Record } from "./utils/index";
+import { Bucket, Extractor, getOrDefaultMap, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Cleanup } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
@@ -105,6 +105,7 @@ function record_to_quads(
 function bucket_to_quads(
     bucket: Bucket,
     includeRelations: boolean = true,
+    stream?: Term,
 ): Quad[] {
     const out: Quad[] = [
         df.quad(
@@ -190,6 +191,17 @@ function bucket_to_quads(
         }
     }
 
+    if (stream) {
+        out.push(
+            df.quad(
+                <Quad_Subject>bucket.id,
+                SDS.terms.stream,
+                <Quad_Object>stream,
+                SDS.terms.custom("DataDescription"),
+            ),
+        );
+    }
+
     return out;
 }
 
@@ -266,15 +278,17 @@ export async function bucketize(
         const quads = new Parser().parse(x);
 
         const records = await extractor.parse_records(quads);
-        const relatedBuckets = new Set<string>();
-        const requestedBuckets = new Set<string>();
-        const includedBuckets = new Set<string>();
+        const relatedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Map<string, Set<Term>>();
+        const includedBuckets = new Map<string, Set<Term>>();
+        const newMembers = new Map<string, Set<string>>();
 
         for (const record of records) {
             const record_buckets = orchestrator.bucketize(
                 record,
                 buckets,
                 requestedBuckets,
+                newMembers,
                 sourceStream?.value || "root",
             );
             outputQuads.push(
@@ -285,33 +299,97 @@ export async function bucketize(
                 ),
             );
             // Register the record buckets as included in the output, so we do not have to write it again as requested bucket without relations
-            record_buckets.forEach((x) => includedBuckets.add(x));
+            record_buckets.forEach((x) =>
+                getOrDefaultMap(includedBuckets, x, new Set<Term>()).add(
+                    record.stream,
+                ),
+            );
 
             for (const b of record_buckets) {
-                relatedBuckets.add(b);
+                getOrDefaultMap(relatedBuckets, b, new Set<Term>()).add(
+                    record.stream,
+                );
                 let parent = buckets[b].parent;
                 while (parent) {
-                    relatedBuckets.add(parent.id.value);
+                    getOrDefaultMap(
+                        relatedBuckets,
+                        parent.id.value,
+                        new Set<Term>(),
+                    ).add(record.stream);
                     parent = parent.parent;
                 }
             }
         }
 
-        for (const relatedBucket of relatedBuckets.values()) {
-            outputQuads.push(...bucket_to_quads(buckets[relatedBucket]));
+        for (const [relatedBucket, streams] of relatedBuckets) {
+            for (const stream of streams) {
+                outputQuads.push(
+                    ...bucket_to_quads(buckets[relatedBucket], true, stream),
+                );
 
-            // Register the related bucket as included in the output, so we do not have to write it again as requested bucket without relations
-            includedBuckets.add(relatedBucket);
+                // Register the related bucket as included in the output, so we do not have to write it again as requested bucket without relations
+                getOrDefaultMap(
+                    includedBuckets,
+                    relatedBucket,
+                    new Set<Term>(),
+                ).add(stream);
+            }
+        }
+
+        // Write records for the new members.
+        for (const [bucket, members] of newMembers) {
+            for (const member of members) {
+                outputQuads.push(
+                    ...record_to_quads(
+                        new Record(
+                            { id: df.namedNode(member), quads: [] },
+                            resultingStream,
+                            buckets[bucket],
+                        ),
+                        resultingStream,
+                        [buckets[bucket]],
+                    ),
+                );
+            }
+            // Register the bucket as included in the output, so we do not have to write it again as requested bucket without relations
+            getOrDefaultMap(includedBuckets, bucket, new Set<Term>()).add(
+                resultingStream,
+            );
         }
 
         // Only write the requested buckets that are not included in the output yet
-        for (const requestedBucket of requestedBuckets) {
-            if (!includedBuckets.has(requestedBucket)) {
+        for (const [requestedBucket, streams] of requestedBuckets) {
+            for (const stream of streams) {
+                if (
+                    !getOrDefaultMap(
+                        includedBuckets,
+                        requestedBucket,
+                        new Set<Term>(),
+                    ).has(stream)
+                ) {
+                    outputQuads.push(
+                        ...bucket_to_quads(
+                            buckets[requestedBucket],
+                            false,
+                            stream,
+                        ),
+                    );
+                }
+            }
+
+            // Send empty triples for the bucket if it is set as true.
+            if (buckets[requestedBucket].empty) {
                 outputQuads.push(
-                    ...bucket_to_quads(buckets[requestedBucket], false),
+                    df.quad(
+                        <Quad_Subject>buckets[requestedBucket].id,
+                        SDS.terms.custom("empty"),
+                        df.literal("true"),
+                        SDS.terms.custom("DataDescription"),
+                    ),
                 );
             }
         }
+
         await channels.dataOutput.push(
             new N3Writer().quadsToString(outputQuads),
         );

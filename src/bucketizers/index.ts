@@ -2,7 +2,7 @@ import { readFileSync } from "fs";
 import * as path from "path";
 import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
-import { Bucket, Record } from "../utils";
+import { Bucket, getOrDefaultMap, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
 import PagedBucketizer from "./pagedBucketizer";
@@ -91,7 +91,8 @@ export class BucketizerOrchestrator {
     bucketize(
         record: Record,
         buckets: { [id: string]: Bucket },
-        requestedBuckets: Set<string>,
+        requestedBuckets: Map<string, Set<Term>>,
+        newMembers: Map<string, Set<string>>,
         prefix = "",
     ): string[] {
         let queue = [prefix];
@@ -112,9 +113,19 @@ export class BucketizerOrchestrator {
                     const id = root ? prefix : prefix + "/" + key;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
+
+                        buckets[id].addMember = (memberId: string) => {
+                            getOrDefaultMap(
+                                newMembers,
+                                id,
+                                new Set<string>(),
+                            ).add(memberId);
+                        };
                     }
                     // Add the bucket to the requested buckets, so we can send it through to propagate any changes to it.
-                    requestedBuckets.add(id);
+                    getOrDefaultMap(requestedBuckets, id, new Set<Term>()).add(
+                        record.stream,
+                    );
                     return buckets[id];
                 };
 
