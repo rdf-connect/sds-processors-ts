@@ -56,6 +56,8 @@ This processor takes as input a stream of SDS records and SDS metadata and proce
 
 You can define bucketizers as follows:
 
+#### Example of a subject and page fragmentation
+
 ```turtle
 <bucketize> a js:Bucketize;
   js:channels [
@@ -74,6 +76,38 @@ You can define bucketizers as follows:
   js:savePath <./buckets_save.json>;
   js:outputStreamId <MyEpicStream>.
 ```
+
+#### Example of a time-based fragmentation
+
+```turtle
+<bucketize> a js:Bucketize;
+  js:channels [
+    js:dataInput <...data input>;
+    js:metadataInput <... metadata input>;
+    js:dataOutput <... data output>;
+    js:metadataOutput <... metadata output>;
+  ];
+  js:bucketizeStrategy ( [
+    a tree:TimebasedFragmentation;
+    tree:timestampPath <https://www.w3.org/ns/activitystreams#published>;
+    tree:maxSize 100;
+    tree:k 4;
+    tree:minBucketSpan 3600;        # In seconds
+  ]);
+  js:savePath <./buckets_save.json>;
+  js:outputStreamId <MyEpicStream>.
+```
+
+This will create buckets based on a time-based fragmentation.
+The `tree:timestampPath` specifies the path to the timestamp property in the SDS records.
+The `tree:maxSize` specifies the maximum size of a bucket.
+When the bucket reaches the maximum size, it will be split into `tree:k` new buckets, each with 1/k of the original bucket's timespan.
+The members will be redistributed to the new buckets based on their timestamps.
+The `tree:minBucketSpan` specifies the minimum timespan of a bucket.
+If a bucket is full, but splitting the bucket would result in a bucket with a timespan smaller than `tree:minBucketSpan`, the bucket will not be split, but a relation will be added to a new page bucket with same timespan as the full bucket, similar to the page fragmentation.
+
+The members need to be arrived in order of their timestamps.
+When a member arrives, all buckets that hold members with a timestamp older than the new member's timestamp will be made immutable and no new members can be added to them.
 
 
 ### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)
