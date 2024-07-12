@@ -62,8 +62,15 @@ export default class TimebasedBucketizer implements Bucketizer {
                         newBucketTimestamp.setUTCMonth(0);
                         newBucketTimestamp.setUTCDate(1);
                         newBucketTimestamp.setUTCHours(0, 0, 0, 0);
-                        // TODO: Add support for leap years.
-                        const yearTimespan = 31536000000;
+                        // Support leap years.
+                        const yearTimespan =
+                            new Date(
+                                newBucketTimestamp.getUTCFullYear(),
+                                1,
+                                29,
+                            ).getDate() === 29
+                                ? 31622400000
+                                : 31536000000;
                         const yearBucket = getBucket(
                             `${newBucketTimestamp.toISOString()}_${yearTimespan}_0`,
                             false,

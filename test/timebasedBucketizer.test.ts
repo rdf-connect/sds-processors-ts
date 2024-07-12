@@ -390,4 +390,26 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         expect(recordBuckets[0]).toBe(secondBucketExpected);
         expect(buckets[secondBucketExpected].parent.links.length).toBe(1);
     });
+
+    test("bucketize with (k = 4, m = 100, s = 3600) should add to a first bucket with adjusted timespan for leap year", () => {
+        const orchestrator = getOrchestrator(4, 100, 3600);
+
+        const firstBucketExpected =
+            "/" + encodeURIComponent("2024-01-01T00:00:00.000Z_31622400000_0");
+
+        const member = members[0];
+        member.timestamp = new Date(member.timestamp);
+        member.timestamp.setUTCFullYear(2024);
+
+        const recordBuckets = orchestrator.bucketize(
+            memberToRecord(member),
+            buckets,
+            new Map<string, Set<Term>>(),
+            new Map<string, Set<string>>(),
+        );
+        expect(recordBuckets.length).toBe(1);
+        expect(recordBuckets[0]).toBe(firstBucketExpected);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets[""].links.length).toBe(2);
+    });
 });
