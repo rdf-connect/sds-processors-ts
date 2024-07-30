@@ -271,7 +271,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                 }
                 // Add the record to the bucket.
                 this.members.push({
-                    id: record.data.id.value,
+                    id: JSON.parse(JSON.stringify(record.data.id.value)),
                     timestamp: new Date(timestamp).getTime(),
                 });
 
