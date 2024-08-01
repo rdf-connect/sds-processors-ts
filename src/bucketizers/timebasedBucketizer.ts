@@ -2,19 +2,20 @@ import { AddRelation, Bucketizer, TimebasedFragmentation } from "./index";
 import { Bucket, Member, RdfThing, Record } from "../utils";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
-import { getLogger, TREE, XSD } from "@treecg/types";
+import { TREE, XSD } from "@treecg/types";
 import { DataFactory } from "n3";
 import literal = DataFactory.literal;
 import namedNode = DataFactory.namedNode;
+import { getLoggerFor } from "../utils/logUtil";
 
 export default class TimebasedBucketizer implements Bucketizer {
+    protected readonly logger = getLoggerFor(this);
+
     private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
     private readonly pathQuads: RdfThing;
     private readonly maxSize: number = 100;
     private readonly k: number = 4;
     private readonly minBucketSpan: number = 300000;
-
-    private readonly logger = getLogger("TimebasedBucketizer");
 
     private mutableLeafBucketKeys: Array<string> = [];
     private members: Array<Member> = [];
@@ -74,6 +75,11 @@ export default class TimebasedBucketizer implements Bucketizer {
                             ).getDate() === 29
                                 ? 31622400000
                                 : 31536000000;
+
+                        this.logger.info(
+                            `Creating new year bucket with timestamp ${newBucketTimestamp.toISOString()} and timespan ${yearTimespan}.`,
+                        );
+
                         const yearBucket = getBucket(
                             `${newBucketTimestamp.toISOString()}_${yearTimespan}_0`,
                             false,
@@ -106,9 +112,10 @@ export default class TimebasedBucketizer implements Bucketizer {
                     const recordTimestamp = new Date(timestamp);
                     if (recordTimestamp.getTime() < bucketTimestamp.getTime()) {
                         // This should not happen! The record timestamp is before the bucket timestamp of the smallest leaf bucket.
-                        throw new Error(
-                            "This should not happen! Record timestamp is before the smallest mutable bucket timestamp. Are your records out of order?",
+                        this.logger.error(
+                            `Record timestamp is before the smallest mutable bucket timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
                         );
+                        return [];
                     } else if (
                         recordTimestamp.getTime() >=
                         bucketTimestamp.getTime() + bucketSpan
@@ -116,6 +123,10 @@ export default class TimebasedBucketizer implements Bucketizer {
                         // The record timestamp is after the current bucket span. We need to check the next leaf bucket.
                         // Make this bucket immutable as a record with a later timestamp arrived.
                         bucket.immutable = true;
+
+                        this.logger.debug(
+                            `Record timestamp is after the current bucket span. Making bucket '${bucket.id.value}' immutable.`,
+                        );
 
                         // Remove the current bucket from the list of leaf buckets.
                         this.mutableLeafBucketKeys.shift();
@@ -146,6 +157,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         parseInt(bucketProperties[1]) / this.k <
                         this.minBucketSpan
                     ) {
+                        this.logger.debug("We need to make a new page");
                         // We need to make a new page.
                         const newBucket = getBucket(
                             `${bucketProperties[0]}_${bucketProperties[1]}_${
@@ -170,6 +182,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         // The record belongs in this newBucket, so make newBucket the candidateBucket.
                         candidateBucket = newBucket;
                     } else {
+                        this.logger.debug("We need to split the bucket");
                         // We need to split the bucket.
                         const newBucketSpan = Math.round(
                             parseInt(bucketProperties[1]) / this.k,
@@ -226,9 +239,10 @@ export default class TimebasedBucketizer implements Bucketizer {
                                             ].timestamp;
                                         if (recordTime < lastTimestamp) {
                                             // The record is out of order. This should not happen.
-                                            throw new Error(
-                                                "This should not happen! Record timestamp is before the last record timestamp in the new split bucket. Are your records out of order?",
+                                            this.logger.error(
+                                                `Record timestamp is before the last record timestamp in the new split bucket. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
                                             );
+                                            return [];
                                         }
                                     }
 
@@ -264,9 +278,10 @@ export default class TimebasedBucketizer implements Bucketizer {
                         this.members[this.members.length - 1].timestamp;
                     if (new Date(timestamp).getTime() < lastTimestamp) {
                         // The record is out of order. This should not happen.
-                        throw new Error(
-                            "This should not happen! Record timestamp is before the last record timestamp. Are your records out of order?",
+                        this.logger.error(
+                            `Record timestamp is before the last record timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
                         );
+                        return [];
                     }
                 }
 
@@ -280,9 +295,8 @@ export default class TimebasedBucketizer implements Bucketizer {
                 out.push(candidateBucket);
             } else {
                 // The record does not have a timestamp value.
-                // TODO: Handle this case: we want to ignore and warn.
-                throw new Error(
-                    "The TimebasedBucketizer received records without timestamp values. This is not supported.",
+                this.logger.warn(
+                    `Received records without timestamp values. Ignoring record '${record.data.id.value}'.`,
                 );
             }
         }

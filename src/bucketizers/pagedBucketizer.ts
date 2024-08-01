@@ -1,8 +1,11 @@
 import { AddRelation, Bucketizer, PageFragmentation } from "./index";
 import { Bucket, Record } from "../utils";
 import { TREE } from "@treecg/types";
+import { getLoggerFor } from "../utils/logUtil";
 
 export default class PagedBucketizer implements Bucketizer {
+    protected readonly logger = getLoggerFor(this);
+
     private readonly pageSize: number;
     private count: number = 0;
 
@@ -27,6 +30,7 @@ export default class PagedBucketizer implements Bucketizer {
             const oldBucket = getBucket("page-" + (index - 1), index - 1 == 0);
             oldBucket.immutable = true;
             addRelation(oldBucket, currentbucket, TREE.terms.Relation);
+            this.logger.info(`Created new page bucket ${index}`);
         }
 
         return [currentbucket];
