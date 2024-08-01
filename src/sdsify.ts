@@ -7,6 +7,9 @@ import { Parser, Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import { createHash } from "crypto";
+import { getLoggerFor } from "./utils/logUtil";
+
+const logger = getLoggerFor("sdsify");
 
 const df = new DataFactory();
 
@@ -101,7 +104,7 @@ export function sdsify(
     input.data(async (input) => {
         const dataStore = RdfStore.createDefault();
         maybeParse(input).forEach((x) => dataStore.addQuad(x));
-        console.log("[sdsify] Got input with", dataStore.size, "quads");
+        logger.debug(`Got input with ${dataStore.size} quads`);
 
         const members: { [id: string]: SDSMember } = {};
         const t0 = new Date();
@@ -145,8 +148,8 @@ export function sdsify(
             }),
         );
 
-        console.log(
-            `[sdsify] Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
+        logger.debug(
+            `Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
         );
 
         // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
@@ -212,13 +215,13 @@ export function sdsify(
             membersCount += 1;
         }
 
-        console.log(
-            `[sdsify] successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`,
+        logger.debug(
+            `Successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`,
         );
     });
 
     input.on("end", async () => {
-        console.log("[sdsify] input channel was closed down");
+        logger.info("Input channel was closed down");
         await output.end();
     });
 }

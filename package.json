@@ -20,7 +20,8 @@
   },
   "author": "Arthur Vercruysse",
   "contributors": [
-    "Julián Rojas"
+    "Julián Rojas",
+    "Ieben Smessaert"
   ],
   "license": "MIT",
   "dependencies": {
@@ -31,7 +32,8 @@
     "n3": "^1.17.3",
     "rdf-data-factory": "^1.1.2",
     "rdf-lens": "^1.2.8",
-    "rdf-stores": "^1.0.0"
+    "rdf-stores": "^1.0.0",
+    "winston": "^3.13.1"
   },
   "devDependencies": {
     "@rdfc/js-runner": "^0.2.1",

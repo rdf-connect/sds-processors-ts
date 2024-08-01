@@ -1,4 +1,8 @@
+import { getLoggerFor } from "./utils/logUtil";
+
 function noOp() {}
+
+const logger = getLoggerFor("ExitHandler");
 
 export function Cleanup(callback: () => void | Promise<void>) {
     // attach user callback to the process event emitter
@@ -10,12 +14,12 @@ export function Cleanup(callback: () => void | Promise<void>) {
     const fn = async function (event: string, code?: number) {
         if (!callbackCalled) {
             callbackCalled = true;
-            console.log(
+            logger.debug(
                 `[Cleanup] Callback called on '${event}' with code '${code}'.`,
             );
             await callback();
         } else {
-            console.log(
+            logger.debug(
                 `[Cleanup] Callback has already been called. Ignoring '${event}' with code '${code}'.`,
             );
         }

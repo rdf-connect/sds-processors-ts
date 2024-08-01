@@ -3,8 +3,11 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
+import { getLoggerFor } from "../utils/logUtil";
 
 export default class SubjectBucketizer implements Bucketizer {
+    protected readonly logger = getLoggerFor(this);
+
     private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
     private readonly pathQuads: RdfThing;
     private readonly namePath?: BasicLensM<Cont, Cont>;
@@ -45,7 +48,7 @@ export default class SubjectBucketizer implements Bucketizer {
         }
 
         if (values.length === 0) {
-            console.error(
+            this.logger.error(
                 "Didn't find bucket, and default name is not set, sadness :(",
             );
         }
