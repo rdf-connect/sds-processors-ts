@@ -157,7 +157,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                         parseInt(bucketProperties[1]) / this.k <
                         this.minBucketSpan
                     ) {
-                        this.logger.debug("We need to make a new page");
+                        this.logger.debug(
+                            `We need to make a new page. Bucket '${candidateBucket.id.value}' is full.`,
+                        );
                         // We need to make a new page.
                         const newBucket = getBucket(
                             `${bucketProperties[0]}_${bucketProperties[1]}_${
@@ -182,7 +184,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                         // The record belongs in this newBucket, so make newBucket the candidateBucket.
                         candidateBucket = newBucket;
                     } else {
-                        this.logger.debug("We need to split the bucket");
+                        this.logger.debug(
+                            `We need to split the bucket '${candidateBucket.id.value}'.`,
+                        );
                         // We need to split the bucket.
                         const newBucketSpan = Math.round(
                             parseInt(bucketProperties[1]) / this.k,
@@ -199,6 +203,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                             );
                             const newBucket = getBucket(
                                 `${newTimestamp.toISOString()}_${newBucketSpan}_0`,
+                            );
+                            this.logger.debug(
+                                `Creating new bucket '${newBucket.id.value}' with timespan ${newBucketSpan}.`,
                             );
 
                             // Add the members that belong to the new bucket.
@@ -252,6 +259,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                             } else {
                                 // Otherwise, make the bucket immutable.
                                 newBucket.immutable = true;
+                                this.logger.debug(
+                                    `Making bucket '${newBucket.id.value}' immutable.`,
+                                );
                             }
 
                             // Add the relations for the new bucket.
@@ -293,6 +303,9 @@ export default class TimebasedBucketizer implements Bucketizer {
 
                 // The record belongs in this candidateBucket, so return it.
                 out.push(candidateBucket);
+                this.logger.debug(
+                    `Added record '${record.data.id.value}' to bucket '${candidateBucket.id.value}'.`,
+                );
             } else {
                 // The record does not have a timestamp value.
                 this.logger.warn(
