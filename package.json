@@ -38,7 +38,7 @@
     "@rdfjs/types": "^1.1.0",
     "@types/jsonld": "^1.5.14",
     "@types/n3": "^1.16.4",
-    "@types/node": "^20.14.2",
+    "@types/node": "^22.2.0",
     "@types/rdf-js": "^4.0.2",
     "@typescript-eslint/eslint-plugin": "^7.13.0",
     "@typescript-eslint/parser": "^7.13.0",
