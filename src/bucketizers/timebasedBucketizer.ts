@@ -167,8 +167,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                     } else {
                         console.log("We need to split the bucket");
                         // We need to split the bucket.
-                        const newBucketSpan =
-                            parseInt(bucketProperties[1]) / this.k;
+                        const newBucketSpan = Math.round(
+                            parseInt(bucketProperties[1]) / this.k,
+                        );
                         const newMutableLeafBuckets = [];
                         const parentBucket = candidateBucket;
                         parentBucket.empty = true;
