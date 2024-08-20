@@ -4,9 +4,9 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
 import { TREE, XSD } from "@treecg/types";
 import { DataFactory } from "n3";
+import { getLoggerFor } from "../utils/logUtil";
 import literal = DataFactory.literal;
 import namedNode = DataFactory.namedNode;
-import { getLoggerFor } from "../utils/logUtil";
 
 export default class TimebasedBucketizer implements Bucketizer {
     protected readonly logger = getLoggerFor(this);
@@ -131,18 +131,11 @@ export default class TimebasedBucketizer implements Bucketizer {
                         this.members = [];
                         bucketKey = this.mutableLeafBucketKeys[0];
 
-                        // If the new current bucket is defined and has a different parent as the former leaf bucket, we make the parent of the former bucket immutable as it has no more mutable children.
-                        if (
-                            bucket.parent &&
-                            (this.mutableLeafBucketKeys.length === 0 ||
-                                bucket.parent.id.value !==
-                                    getBucket(bucketKey)?.parent?.id.value)
-                        ) {
-                            // But we don't do this with the root bucket!
-                            if (!bucket.parent.root) {
-                                bucket.parent.immutable = true;
-                            }
-                        }
+                        // Check if we should also make the parent immutable.
+                        this.makeParentImmutableIfNoMutableChildren(
+                            bucket,
+                            getBucket,
+                        );
                     } else {
                         // The record belongs to the current bucket.
                         candidateBucket = bucket;
@@ -344,5 +337,25 @@ export default class TimebasedBucketizer implements Bucketizer {
             ),
             this.pathQuads,
         );
+    }
+
+    private makeParentImmutableIfNoMutableChildren(
+        bucket: Bucket,
+        getBucket: (key: string, root?: boolean) => Bucket,
+    ) {
+        const parent = bucket.parent;
+        if (parent && !parent.root) {
+            // Check if all its children are immutable.
+            const children = parent.links.map((link) =>
+                getBucket(link.target.value),
+            );
+            if (children.find((child) => !child.immutable) === undefined) {
+                parent.immutable = true;
+                this.logger.debug(
+                    `Making parent bucket '${parent.id.value}' immutable.`,
+                );
+                this.makeParentImmutableIfNoMutableChildren(parent, getBucket);
+            }
+        }
     }
 }
