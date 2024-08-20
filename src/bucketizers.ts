@@ -387,6 +387,9 @@ export async function bucketize(
                         SDS.terms.custom("DataDescription"),
                     ),
                 );
+
+                // Undo marking as to be emptied.
+                buckets[requestedBucket].empty = false;
             }
         }
 
