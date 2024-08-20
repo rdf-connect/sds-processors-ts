@@ -338,6 +338,10 @@ export async function bucketize(
 
         // Write records for the new members.
         for (const [bucket, members] of newMembers) {
+            // Check if bucket is not in emptyBuckets, otherwise we optimize by skipping this entry.
+            if (buckets[bucket].empty) {
+                continue;
+            }
             for (const member of members) {
                 outputQuads.push(
                     ...record_to_quads(
