@@ -1,4 +1,4 @@
-import { Bucketizer, SubjectFragmentation } from "./index";
+import { AddRelation, Bucketizer, SubjectFragmentation } from "./index";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
 import { Bucket, RdfThing, Record } from "../utils";
@@ -29,6 +29,7 @@ export default class SubjectBucketizer implements Bucketizer {
     bucketize(
         record: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
+        addRelation: AddRelation,
     ): Bucket[] {
         const values = this.path
             .execute(record.data)
@@ -65,7 +66,8 @@ export default class SubjectBucketizer implements Bucketizer {
             if (!this.seen.has(bucket.id.value)) {
                 this.seen.add(bucket.id.value);
 
-                root.addRelation(
+                addRelation(
+                    root,
                     bucket,
                     TREE.terms.EqualToRelation,
                     value.literal,

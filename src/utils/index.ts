@@ -1,4 +1,4 @@
-import { Quad, Term, Quad_Object, Quad_Subject } from "@rdfjs/types";
+import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
@@ -149,11 +149,6 @@ export class Bucket {
         );
         bucket_cache[bucket.id.value] = out;
         return out;
-    }
-
-    addRelation(target: Bucket, type: Term, value?: Term, path?: RdfThing) {
-        this.links.push({ type, value, path, target: target.id });
-        target.parent = this;
     }
 
     write(writer: Writer) {

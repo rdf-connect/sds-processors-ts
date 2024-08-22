@@ -11,6 +11,7 @@ import {
 } from "../src/bucketizers/index";
 import { Bucket, Record } from "../src/";
 import { Term } from "@rdfjs/types";
+import { BucketRelation } from "../src/utils";
 
 const { namedNode, literal, quad } = DataFactory;
 
@@ -170,8 +171,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
-        const requestedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Set<string>();
         const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
@@ -184,6 +189,7 @@ describe("Bucketizer behavior", () => {
                     buckets,
                     requestedBuckets,
                     newMembers,
+                    newRelations,
                 ),
             );
         }
@@ -213,8 +219,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
-        const requestedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Set<string>();
         const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
@@ -227,6 +237,7 @@ describe("Bucketizer behavior", () => {
                     buckets,
                     requestedBuckets,
                     newMembers,
+                    newRelations,
                 ),
             );
         }
@@ -256,8 +267,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
-        const requestedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Set<string>();
         const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         const pred = namedNode("http://example.org/test");
         for (const member of [
@@ -289,6 +304,7 @@ describe("Bucketizer behavior", () => {
                     buckets,
                     requestedBuckets,
                     newMembers,
+                    newRelations,
                 ),
             );
         }
@@ -324,8 +340,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
-        const requestedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Set<string>();
         const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
 
         for (const member of [
@@ -340,6 +360,7 @@ describe("Bucketizer behavior", () => {
                     buckets,
                     requestedBuckets,
                     newMembers,
+                    newRelations,
                 ),
             );
         }

@@ -1,10 +1,9 @@
-import { Bucketizer, TimebasedFragmentation } from "./index";
+import { AddRelation, Bucketizer, TimebasedFragmentation } from "./index";
 import { Bucket, Member, RdfThing, Record } from "../utils";
 import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
-import { TREE, XSD } from "@treecg/types";
+import { getLogger, TREE, XSD } from "@treecg/types";
 import { DataFactory } from "n3";
-import { getLoggerFor } from "../utils/logUtil";
 import literal = DataFactory.literal;
 import namedNode = DataFactory.namedNode;
 
@@ -15,10 +14,15 @@ export default class TimebasedBucketizer implements Bucketizer {
     private readonly k: number = 4;
     private readonly minBucketSpan: number = 300000;
 
+    private readonly logger = getLogger("TimebasedBucketizer");
+
     private mutableLeafBucketKeys: Array<string> = [];
     private members: Array<Member> = [];
 
     constructor(config: TimebasedFragmentation, save?: string) {
+        console.log("=============================");
+        console.log("CREATING TIMEBASED BUCKETIZER");
+        console.log("============================");
         this.path = config.path.mapAll((x) => ({
             value: x.id.value,
             literal: x.id,
@@ -38,6 +42,7 @@ export default class TimebasedBucketizer implements Bucketizer {
     bucketize(
         record: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
+        addRelation: AddRelation,
     ): Bucket[] {
         const values = this.path
             .execute(record.data)
@@ -46,6 +51,11 @@ export default class TimebasedBucketizer implements Bucketizer {
             );
 
         const out: Bucket[] = [];
+        console.log(
+            `Bucketizer: Adding record  ${record.data.id.value} to buckets ${values.map(
+                (x) => x.value,
+            )}`,
+        );
 
         for (const value of values) {
             if (value.literal) {
@@ -83,6 +93,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                             yearBucket,
                             newBucketTimestamp,
                             yearTimespan,
+                            addRelation,
                         );
 
                         // Add the new bucket to the list of leaf buckets.
@@ -146,12 +157,15 @@ export default class TimebasedBucketizer implements Bucketizer {
                         console.log("We need to make a new page");
                         // We need to make a new page.
                         const newBucket = getBucket(
-                            `${bucketProperties[0]}_${bucketProperties[1]}_${parseInt(bucketProperties[2]) + 1}`,
+                            `${bucketProperties[0]}_${bucketProperties[1]}_${
+                                parseInt(bucketProperties[2]) + 1
+                            }`,
                         );
 
                         // Make the old bucket as immutable and add the relation to the new bucket.
                         candidateBucket.immutable = true;
-                        candidateBucket.addRelation(
+                        addRelation(
+                            candidateBucket,
                             newBucket,
                             TREE.terms.Relation,
                         );
@@ -242,6 +256,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                                 newBucket,
                                 newTimestamp,
                                 newBucketSpan,
+                                addRelation,
                             );
                         }
 
@@ -296,14 +311,18 @@ export default class TimebasedBucketizer implements Bucketizer {
         childBucket: Bucket,
         startTimestamp: Date,
         timespan: number,
+        addRelation: AddRelation,
     ) {
-        rootBucket.addRelation(
+        addRelation(
+            rootBucket,
             childBucket,
             TREE.terms.GreaterThanOrEqualToRelation,
             literal(startTimestamp.toISOString(), namedNode(XSD.dateTime)),
             this.pathQuads,
         );
-        rootBucket.addRelation(
+
+        addRelation(
+            rootBucket,
             childBucket,
             TREE.terms.LessThanRelation,
             literal(

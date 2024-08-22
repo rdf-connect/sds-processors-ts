@@ -2,7 +2,13 @@ import { readFileSync } from "fs";
 import * as path from "path";
 import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
-import { Bucket, getOrDefaultMap, Record } from "../utils";
+import {
+    Bucket,
+    BucketRelation,
+    getOrDefaultMap,
+    RdfThing,
+    Record,
+} from "../utils";
 import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
 import PagedBucketizer from "./pagedBucketizer";
@@ -46,10 +52,19 @@ export type TimebasedFragmentation = {
     minBucketSpan: number;
 };
 
+export type AddRelation = (
+    origin: Bucket,
+    target: Bucket,
+    type: Term,
+    value?: Term,
+    path?: RdfThing,
+) => void;
+
 export interface Bucketizer {
     bucketize(
         sdsMember: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
+        addRelation: AddRelation,
     ): Bucket[];
 
     save(): string;
@@ -91,11 +106,38 @@ export class BucketizerOrchestrator {
     bucketize(
         record: Record,
         buckets: { [id: string]: Bucket },
-        requestedBuckets: Map<string, Set<Term>>,
+        requestedBuckets: Set<string>,
         newMembers: Map<string, Set<string>>,
+        newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[],
         prefix = "",
     ): string[] {
         let queue = [prefix];
+
+        const addRelation = (
+            origin: Bucket,
+            target: Bucket,
+            type: Term,
+            value?: Term,
+            path?: RdfThing,
+        ) => {
+            const relation = {
+                type,
+                value,
+                path,
+                target: target.id,
+            };
+            const newRel = {
+                origin,
+                relation,
+            };
+            newRelations.push(newRel);
+
+            origin.links.push(relation);
+            target.parent = origin;
+        };
 
         for (let i = 0; i < this.configs.length; i++) {
             const todo = queue.slice();
@@ -122,14 +164,18 @@ export class BucketizerOrchestrator {
                             ).add(memberId);
                         };
                     }
-                    // Add the bucket to the requested buckets, so we can send it through to propagate any changes to it.
-                    getOrDefaultMap(requestedBuckets, id, new Set<Term>()).add(
-                        record.stream,
-                    );
+
+                    // This bucket is requested, please remember
+                    requestedBuckets.add(id);
+
                     return buckets[id];
                 };
 
-                const foundBucket = bucketizer.bucketize(record, getBucket);
+                const foundBucket = bucketizer.bucketize(
+                    record,
+                    getBucket,
+                    addRelation,
+                );
 
                 for (const bucket of foundBucket) {
                     queue.push(bucket.id.value);
