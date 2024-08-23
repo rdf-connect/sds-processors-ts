@@ -140,11 +140,7 @@ function record_to_quads(
     return out;
 }
 
-function bucket_to_quads(
-    bucket: Bucket,
-    includeRelations: boolean = true,
-    stream?: Term,
-): Quad[] {
+function bucket_to_quads(bucket: Bucket, stream?: Term): Quad[] {
     const out: Quad[] = [
         df.quad(
             <Quad_Subject>bucket.id,
@@ -207,6 +203,12 @@ function relationToQuads(bucket: Bucket, rel: BucketRelation): Quad[] {
             <Quad_Subject>bucket.id,
             SDS.terms.relation,
             id,
+            SDS.terms.custom("DataDescription"),
+        ),
+        df.quad(
+            id,
+            RDF.terms.type,
+            <Quad_Object>SDS.terms.custom("Relation"),
             SDS.terms.custom("DataDescription"),
         ),
         df.quad(
@@ -386,17 +388,14 @@ export async function bucketize(
         // Only write the requested buckets that are not included in the output yet
         for (const requestedBucket of requestedBuckets) {
             outputQuads.push(
-                ...bucket_to_quads(
-                    buckets[requestedBucket],
-                    false,
-                    resultingStream,
-                ),
+                ...bucket_to_quads(buckets[requestedBucket], resultingStream),
             );
         }
-
         for (const { origin, relation } of newRelations) {
             outputQuads.push(...relationToQuads(origin, relation));
         }
+
+        // await prettyPrintQuads(outputQuads);
 
         await channels.dataOutput.push(
             new N3Writer().quadsToString(outputQuads),
