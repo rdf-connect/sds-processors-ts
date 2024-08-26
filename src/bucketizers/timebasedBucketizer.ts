@@ -49,6 +49,7 @@ export default class TimebasedBucketizer implements Bucketizer {
             .filter(
                 (x, i, arr) => arr.findIndex((y) => x.value === y.value) == i,
             );
+        console.log("Values", values, this.mutableLeafBucketKeys);
 
         const out: Bucket[] = [];
         console.log(
@@ -67,6 +68,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                 let bucketKey = this.mutableLeafBucketKeys[0];
                 while (!candidateBucket) {
                     if (!bucketKey) {
+                        console.log("No candidate bucket and no bucket key");
                         // No more leaf buckets to check. We need to generate a new year bucket.
                         const root = getBucket("root", true);
                         const newBucketTimestamp = new Date(timestamp);
@@ -121,6 +123,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         recordTimestamp.getTime() >=
                         bucketTimestamp.getTime() + bucketSpan
                     ) {
+                        console.log("Make this bucket immutable");
                         // The record timestamp is after the current bucket span. We need to check the next leaf bucket.
                         // Make this bucket immutable as a record with a later timestamp arrived.
                         bucket.immutable = true;
@@ -143,6 +146,7 @@ export default class TimebasedBucketizer implements Bucketizer {
 
                 // Is there still space in the bucket?
                 while (this.members.length >= this.maxSize) {
+                    console.log("No space, need to split");
                     // The bucket is full. We need to split it.
                     const bucketNames = candidateBucket.id.value.split("/");
                     const bucketProperties = decodeURIComponent(
@@ -279,6 +283,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         );
                     }
                 }
+
                 // Add the record to the bucket.
                 this.members.push({
                     id: JSON.parse(JSON.stringify(record.data.id.value)),
@@ -338,13 +343,17 @@ export default class TimebasedBucketizer implements Bucketizer {
         getBucket: (key: string, root?: boolean) => Bucket,
     ) {
         const parent = bucket.parent;
+        console.log("makeParentImmutableIfNoMutableChildren", !!parent);
         if (parent && !parent.root) {
             // Check if all its children are immutable.
-            const children = parent.links.map((link) =>
-                getBucket(link.target.value),
-            );
-            if (children.find((child) => !child.immutable) === undefined) {
+            const children = parent.links.map((link) => {
+                console.log("link", link.type.value);
+                return getBucket(link.target.value);
+            });
+            const mutableChild = children.find((child) => !child.immutable);
+            if (mutableChild === undefined) {
                 parent.immutable = true;
+                console.log("Making parent immutable", parent.id.value);
                 this.logger.debug(
                     `Making parent bucket '${parent.id.value}' immutable.`,
                 );

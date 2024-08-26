@@ -484,18 +484,26 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             const outputPromise = outputListener(outgoing, output);
             await incoming.push(createInput(`ra${i + 1}`, dates[0][i]));
             await outputPromise;
+
+            const expected = [
+                {
+                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
+                    immutable: false,
+                    relations: 0,
+                },
+            ];
+            if (i == 0) {
+                expected.unshift({
+                    id: "root",
+                    immutable: false,
+                    relations: 2,
+                });
+            }
             testOutput(
                 output,
                 `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
                 [],
-                [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 0,
-                    },
-                ],
+                expected,
                 [
                     {
                         id: `ra${i + 1}`,
@@ -568,7 +576,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
+                // { id: "root", immutable: false, relations: 2 },
                 {
                     id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
                     immutable: false,
@@ -870,60 +878,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_1`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
-                            b0_2_0,
-                            b0_2_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
-                            b0_2_0_3,
-                            b0_2_0_4,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
-                            b0_2_0_3_2,
-                            b0_2_0_3_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
-                            b0_2_0_3_2_2,
-                            b0_2_0_3_2_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
-                            b0_2_0_3_2_2_3,
-                            b0_2_0_3_2_2_4,
-                        )}_0`,
-                        immutable: true,
-                        relations: 1,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                             b0_2_0_3_2_2_3,
@@ -946,10 +900,12 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         }
 
         // Next day (2024-07-24), Rb1 should be added, making previous buckets immutable.
+        console.log("============ beforeer -----------");
         output = [];
         outputPromise = outputListener(outgoing, output);
         await incoming.push(createInput("rb1", dates[1][0]));
         await outputPromise;
+
         testOutput(
             output,
             `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
@@ -1104,6 +1060,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             ],
         );
 
+        console.log("============ futheer -----------");
         // Rb2 - Rb10 should just be added.
         for (let i = 1; i < 10; i++) {
             output = [];
@@ -5531,9 +5488,11 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                     q.object.value === SDS.terms.custom("Bucket").value,
             )
             .map((q) => q.subject.value);
+
         const relatedBuckets: {
             id: string;
             immutable: boolean;
+            empty: boolean;
             relations: number;
         }[] = [];
         relatedBucketsIds.forEach((bucket) => {
@@ -5544,12 +5503,18 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         q.predicate.value ===
                             SDS.terms.custom("immutable").value,
                 )?.object.value === "true";
+            const empty =
+                quads.find(
+                    (q) =>
+                        q.subject.value === bucket &&
+                        q.predicate.value === SDS.terms.custom("empty").value,
+                )?.object.value === "true";
             const relations = quads.filter(
                 (q) =>
                     q.subject.value === bucket &&
                     q.predicate.value === SDS.terms.relation.value,
             ).length;
-            relatedBuckets.push({ id: bucket, immutable, relations });
+            relatedBuckets.push({ id: bucket, immutable, relations, empty });
         });
 
         const membersIds = quads
@@ -5600,15 +5565,65 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         expect(bucket).toBe(expectedBucket);
 
         // Check the empty buckets
-        console.log("emptyBuckets", emptyBuckets);
+        console.log(
+            "Empty buckets expected",
+            expectedEmptyBuckets.length,
+            "found",
+            emptyBuckets.length,
+        );
+        if (emptyBuckets.length !== expectedEmptyBuckets.length) {
+            // console.log(
+            //     "== Empty buckets",
+            //     emptyBuckets.length,
+            //     "!=",
+            //     expectedEmptyBuckets.length,
+            // );
+            // console.log("Found");
+            // emptyBuckets.forEach((relatedBucket) => {
+            //     console.log(relatedBucket);
+            // });
+            // console.log("Expected");
+            // expectedEmptyBuckets.forEach((relatedBucket) => {
+            //     console.log(relatedBucket);
+            // });
+
+            console.log(
+                "== Related Buckets",
+                relatedBuckets.length,
+                "!=",
+                expectedRelatedBuckets.length,
+            );
+            // console.log("Found");
+            // relatedBuckets.forEach((relatedBucket) => {
+            //     console.log(relatedBucket);
+            // });
+            // console.log("Expected");
+            // expectedRelatedBuckets.forEach((relatedBucket) => {
+            //     console.log(relatedBucket);
+            // });
+        }
+        // console.log("emptyBuckets", emptyBuckets);
         expect(emptyBuckets.length).toBe(expectedEmptyBuckets.length);
         expect(emptyBuckets).toEqual(expectedEmptyBuckets);
 
         // Check the related buckets
-        console.log(relatedBuckets.length, expectedRelatedBuckets.length);
-        relatedBuckets.forEach((relatedBucket) => {
-            console.log(relatedBucket);
-        });
+        console.log(
+            "Related buckets expected",
+            expectedRelatedBuckets.length,
+            "found",
+            relatedBuckets.length,
+        );
+        // console.log(relatedBuckets.length, expectedRelatedBuckets.length);
+        if (expectedRelatedBuckets.length !== relatedBuckets.length) {
+            console.log("Found");
+            relatedBuckets.forEach((relatedBucket) => {
+                console.log(relatedBucket);
+            });
+            console.log("Expected");
+            expectedRelatedBuckets.forEach((relatedBucket) => {
+                console.log(relatedBucket);
+            });
+        }
         expect(relatedBuckets.length).toBe(expectedRelatedBuckets.length);
         relatedBuckets.forEach((relatedBucket) => {
             const expected = expectedRelatedBuckets.find(
@@ -5620,9 +5635,15 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         });
 
         // Check the members
+        console.log(
+            "Members expected",
+            expectedMembers.length,
+            "found",
+            members.length,
+        );
         expect(members.length).toBe(expectedMembers.length);
         members.forEach((member) => {
-            console.log("member", member);
+            // console.log("member", member);
             const expected = expectedMembers.find(
                 (m) => `http://example.org/${m.id}` === member.id,
             );

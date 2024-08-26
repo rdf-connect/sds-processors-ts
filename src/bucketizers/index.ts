@@ -123,6 +123,7 @@ export class BucketizerOrchestrator {
             value?: Term,
             path?: RdfThing,
         ) => {
+            console.log("Adding relation", origin.id, target.id, type.value);
             const relation = {
                 type,
                 value,
@@ -147,6 +148,7 @@ export class BucketizerOrchestrator {
                 const bucketizer = this.getBucketizer(i, prefix);
 
                 const getBucket = (value: string, root?: boolean) => {
+                    console.log("Getting bucket", decodeURIComponent(value));
                     const terms = value.split("/");
                     const key = encodeURIComponent(
                         decodeURIComponent(terms[terms.length - 1]),
