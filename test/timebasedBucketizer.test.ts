@@ -914,36 +914,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
-                        b0_2_0,
-                        b0_2_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
-                        b0_2_0_3,
-                        b0_2_0_4,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
                         b0_2_0_3_0,
@@ -1075,36 +1045,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
-                            b0_2_0,
-                            b0_2_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
-                            b0_2_0_3,
-                            b0_2_0_4,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                             b0_2_0_3_3,
@@ -1166,36 +1106,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
-                        b0_2_0,
-                        b0_2_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
-                        b0_2_0_3,
-                        b0_2_0_4,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
@@ -1372,60 +1282,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_1`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
-                            b0_2_0,
-                            b0_2_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
-                            b0_2_0_3,
-                            b0_2_0_4,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
-                            b0_2_0_3_3,
-                            b0_2_0_3_4,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
-                            b0_2_0_3_3_1,
-                            b0_2_0_3_3_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
-                            b0_2_0_3_3_1_2,
-                            b0_2_0_3_3_1_3,
-                        )}_0`,
-                        immutable: true,
-                        relations: 1,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                             b0_2_0_3_3_1_2,
@@ -1460,20 +1316,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                         b0_2_0,
@@ -1668,20 +1510,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                             b0_2_1,
@@ -1755,20 +1583,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
@@ -2009,60 +1823,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_1`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                            b0_2_1_0,
-                            b0_2_1_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
-                            b0_2_1_0_0,
-                            b0_2_1_0_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
-                            b0_2_1_0_0_0,
-                            b0_2_1_0_0_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
-                            b0_2_1_0_0_0_1,
-                            b0_2_1_0_0_0_2,
-                        )}_0`,
-                        immutable: true,
-                        relations: 1,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                             b0_2_1_0_0_0_1,
@@ -2097,44 +1857,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                        b0_2_1_0,
-                        b0_2_1_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
-                        b0_2_1_0_0,
-                        b0_2_1_0_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0,
@@ -2233,44 +1955,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                            b0_2_1_0,
-                            b0_2_1_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
-                            b0_2_1_0_0,
-                            b0_2_1_0_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                             b0_2_1_0_0_3,
@@ -2307,36 +1991,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                        b0_2_1_0,
-                        b0_2_1_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
@@ -2427,36 +2081,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                            b0_2_1_0,
-                            b0_2_1_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                             b0_2_1_0_1,
@@ -2493,36 +2117,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                        b0_2_1_0,
-                        b0_2_1_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
@@ -2581,36 +2175,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                            b0_2_1_0,
-                            b0_2_1_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                             b0_2_1_0_2,
@@ -2662,36 +2226,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                        b0_2_1_0,
-                        b0_2_1_1,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
@@ -2828,44 +2362,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
-                            b0_2_1_0,
-                            b0_2_1_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
-                            b0_2_1_0_2,
-                            b0_2_1_0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                             b0_2_1_0_2_3,
@@ -2904,28 +2400,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
@@ -3048,28 +2522,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                             b0_2_1_1,
@@ -3104,28 +2556,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
@@ -3159,28 +2589,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
@@ -3214,28 +2622,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
@@ -3269,28 +2655,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
@@ -3324,28 +2688,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
@@ -3379,28 +2721,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
@@ -3459,28 +2779,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                             b0_2_1_2,
@@ -3547,28 +2845,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
@@ -3777,60 +3053,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_1`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                            b0_2_1_2,
-                            b0_2_1_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
-                            b0_2_1_2_0,
-                            b0_2_1_2_1,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
-                            b0_2_1_2_0_2,
-                            b0_2_1_2_0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
-                            b0_2_1_2_0_2_0,
-                            b0_2_1_2_0_2_1,
-                        )}_0`,
-                        immutable: true,
-                        relations: 1,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                             b0_2_1_2_0_2_0,
@@ -3865,36 +3087,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                        b0_2_1_2,
-                        b0_2_1_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
@@ -4025,36 +3217,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                            b0_2_1_2,
-                            b0_2_1_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                             b0_2_1_2_1,
@@ -4106,36 +3268,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                        b0_2_1_2,
-                        b0_2_1_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
@@ -4272,44 +3404,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                            b0_2_1_2,
-                            b0_2_1_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
-                            b0_2_1_2_1,
-                            b0_2_1_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                             b0_2_1_2_1_3,
@@ -4346,36 +3440,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                        b0_2_1_2,
-                        b0_2_1_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
@@ -4466,36 +3530,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                            b0_2_1_2,
-                            b0_2_1_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                             b0_2_1_2_2,
@@ -4532,36 +3566,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                        b0_2_1_2,
-                        b0_2_1_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
@@ -4620,36 +3624,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
-                            b0_2_1_2,
-                            b0_2_1_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                             b0_2_1_2_3,
@@ -4686,28 +3660,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
@@ -4799,28 +3751,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
@@ -4856,28 +3786,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
@@ -4913,28 +3821,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
@@ -4970,28 +3856,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
@@ -5028,28 +3892,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                             b0_2_1_3,
@@ -5094,28 +3936,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
             ],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                        b0_2_1,
-                        b0_2_2,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
@@ -5252,36 +4072,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 )}_0`,
                 [],
                 [
-                    { id: "root", immutable: false, relations: 2 },
-                    {
-                        id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                            b0_2,
-                            b0_3,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
-                            b0_2_1,
-                            b0_2_2,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
-                    {
-                        id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
-                            b0_2_1_3,
-                            b0_2_1_4,
-                        )}_0`,
-                        immutable: false,
-                        relations: 8,
-                    },
                     {
                         id: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                             b0_2_1_3_3,
@@ -5318,20 +4108,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             )}_0`,
             [],
             [
-                { id: "root", immutable: false, relations: 2 },
-                {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
-                {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
-                        b0_2,
-                        b0_3,
-                    )}_0`,
-                    immutable: false,
-                    relations: 8,
-                },
                 {
                     id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                         b0_2_0,
@@ -5564,66 +4340,11 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Check the bucket
         expect(bucket).toBe(expectedBucket);
 
-        // Check the empty buckets
-        console.log(
-            "Empty buckets expected",
-            expectedEmptyBuckets.length,
-            "found",
-            emptyBuckets.length,
-        );
-        if (emptyBuckets.length !== expectedEmptyBuckets.length) {
-            // console.log(
-            //     "== Empty buckets",
-            //     emptyBuckets.length,
-            //     "!=",
-            //     expectedEmptyBuckets.length,
-            // );
-            // console.log("Found");
-            // emptyBuckets.forEach((relatedBucket) => {
-            //     console.log(relatedBucket);
-            // });
-            // console.log("Expected");
-            // expectedEmptyBuckets.forEach((relatedBucket) => {
-            //     console.log(relatedBucket);
-            // });
-
-            console.log(
-                "== Related Buckets",
-                relatedBuckets.length,
-                "!=",
-                expectedRelatedBuckets.length,
-            );
-            // console.log("Found");
-            // relatedBuckets.forEach((relatedBucket) => {
-            //     console.log(relatedBucket);
-            // });
-            // console.log("Expected");
-            // expectedRelatedBuckets.forEach((relatedBucket) => {
-            //     console.log(relatedBucket);
-            // });
-        }
         // console.log("emptyBuckets", emptyBuckets);
         expect(emptyBuckets.length).toBe(expectedEmptyBuckets.length);
         expect(emptyBuckets).toEqual(expectedEmptyBuckets);
 
         // Check the related buckets
-        console.log(
-            "Related buckets expected",
-            expectedRelatedBuckets.length,
-            "found",
-            relatedBuckets.length,
-        );
-        // console.log(relatedBuckets.length, expectedRelatedBuckets.length);
-        if (expectedRelatedBuckets.length !== relatedBuckets.length) {
-            console.log("Found");
-            relatedBuckets.forEach((relatedBucket) => {
-                console.log(relatedBucket);
-            });
-            console.log("Expected");
-            expectedRelatedBuckets.forEach((relatedBucket) => {
-                console.log(relatedBucket);
-            });
-        }
         expect(relatedBuckets.length).toBe(expectedRelatedBuckets.length);
         relatedBuckets.forEach((relatedBucket) => {
             const expected = expectedRelatedBuckets.find(
@@ -5635,12 +4356,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         });
 
         // Check the members
-        console.log(
-            "Members expected",
-            expectedMembers.length,
-            "found",
-            members.length,
-        );
         expect(members.length).toBe(expectedMembers.length);
         members.forEach((member) => {
             // console.log("member", member);
@@ -5656,7 +4371,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
     }
 
     function splitTimespan(start: Date, end: Date, split: number): Date[] {
-        const timespans = [];
+        const timespans: Date[] = [];
         const step = Math.round((end.getTime() - start.getTime()) / split);
         for (let i = 0; i < split + 1; i++) {
             const next = new Date(start.getTime() + i * step);

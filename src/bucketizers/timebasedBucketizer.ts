@@ -20,9 +20,6 @@ export default class TimebasedBucketizer implements Bucketizer {
     private members: Array<Member> = [];
 
     constructor(config: TimebasedFragmentation, save?: string) {
-        console.log("=============================");
-        console.log("CREATING TIMEBASED BUCKETIZER");
-        console.log("============================");
         this.path = config.path.mapAll((x) => ({
             value: x.id.value,
             literal: x.id,
@@ -49,14 +46,8 @@ export default class TimebasedBucketizer implements Bucketizer {
             .filter(
                 (x, i, arr) => arr.findIndex((y) => x.value === y.value) == i,
             );
-        console.log("Values", values, this.mutableLeafBucketKeys);
 
         const out: Bucket[] = [];
-        console.log(
-            `Bucketizer: Adding record  ${record.data.id.value} to buckets ${values.map(
-                (x) => x.value,
-            )}`,
-        );
 
         for (const value of values) {
             if (value.literal) {
@@ -68,7 +59,6 @@ export default class TimebasedBucketizer implements Bucketizer {
                 let bucketKey = this.mutableLeafBucketKeys[0];
                 while (!candidateBucket) {
                     if (!bucketKey) {
-                        console.log("No candidate bucket and no bucket key");
                         // No more leaf buckets to check. We need to generate a new year bucket.
                         const root = getBucket("root", true);
                         const newBucketTimestamp = new Date(timestamp);
@@ -123,7 +113,6 @@ export default class TimebasedBucketizer implements Bucketizer {
                         recordTimestamp.getTime() >=
                         bucketTimestamp.getTime() + bucketSpan
                     ) {
-                        console.log("Make this bucket immutable");
                         // The record timestamp is after the current bucket span. We need to check the next leaf bucket.
                         // Make this bucket immutable as a record with a later timestamp arrived.
                         bucket.immutable = true;
@@ -146,7 +135,6 @@ export default class TimebasedBucketizer implements Bucketizer {
 
                 // Is there still space in the bucket?
                 while (this.members.length >= this.maxSize) {
-                    console.log("No space, need to split");
                     // The bucket is full. We need to split it.
                     const bucketNames = candidateBucket.id.value.split("/");
                     const bucketProperties = decodeURIComponent(
@@ -158,7 +146,6 @@ export default class TimebasedBucketizer implements Bucketizer {
                         parseInt(bucketProperties[1]) / this.k <
                         this.minBucketSpan
                     ) {
-                        console.log("We need to make a new page");
                         // We need to make a new page.
                         const newBucket = getBucket(
                             `${bucketProperties[0]}_${bucketProperties[1]}_${
@@ -183,7 +170,6 @@ export default class TimebasedBucketizer implements Bucketizer {
                         // The record belongs in this newBucket, so make newBucket the candidateBucket.
                         candidateBucket = newBucket;
                     } else {
-                        console.log("We need to split the bucket");
                         // We need to split the bucket.
                         const newBucketSpan = Math.round(
                             parseInt(bucketProperties[1]) / this.k,
@@ -343,17 +329,14 @@ export default class TimebasedBucketizer implements Bucketizer {
         getBucket: (key: string, root?: boolean) => Bucket,
     ) {
         const parent = bucket.parent;
-        console.log("makeParentImmutableIfNoMutableChildren", !!parent);
         if (parent && !parent.root) {
             // Check if all its children are immutable.
             const children = parent.links.map((link) => {
-                console.log("link", link.type.value);
                 return getBucket(link.target.value);
             });
             const mutableChild = children.find((child) => !child.immutable);
             if (mutableChild === undefined) {
                 parent.immutable = true;
-                console.log("Making parent immutable", parent.id.value);
                 this.logger.debug(
                     `Making parent bucket '${parent.id.value}' immutable.`,
                 );

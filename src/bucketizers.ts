@@ -179,6 +179,7 @@ function bucket_to_quads(bucket: Bucket, stream?: Term): Quad[] {
                 SDS.terms.custom("DataDescription"),
             ),
         );
+        bucket.empty = false;
     }
 
     if (stream) {
