@@ -8,8 +8,9 @@ import {
     SHAPES_TEXT,
     SubjectFragmentation,
     TimebasedFragmentation,
-} from "../src/bucketizers/index";
-import { Bucket, Record } from "../src/utils";
+} from "../lib/bucketizers/index";
+import { Bucket, Record } from "../lib/";
+import { BucketRelation } from "../lib/utils";
 
 const { namedNode, literal, quad } = DataFactory;
 
@@ -87,14 +88,15 @@ describe("Bucketizer configs", () => {
 @prefix tree: <https://w3id.org/tree#>.
 @prefix ex: <http://example.org/>.
 @prefix sds: <https://w3id.org/sds#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 
-<test> <b> [
-  <c> 42;
-].
+<test> <tsp> "2024-01-01T00:00:00Z"^^xsd:dateTime.
 
 <a> a tree:TimebasedFragmentation;
-  tree:maxGranularity "hour";
-  tree:fragmentationPath (<b> <c>).
+  tree:timestampPath <tsp>;
+  tree:maxSize 3;
+  tree:k 2;
+  tree:minBucketSpan 3600.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
         const output: BucketizerConfig = lens.execute({
@@ -108,10 +110,14 @@ describe("Bucketizer configs", () => {
         const config = <TimebasedFragmentation>output.config;
         expect(config.path).toBeDefined();
 
-        expect(config.maxGranularity).toEqual("hour");
+        expect(config.maxSize).toEqual(3);
+        expect(config.k).toEqual(2);
+        expect(config.minBucketSpan).toEqual(3600);
 
         const applied = config.path.execute({ id: namedNode("test"), quads });
-        expect(applied.map((x) => x.id.value)).toEqual(["42"]);
+        expect(applied.map((x) => x.id.value)).toEqual([
+            "2024-01-01T00:00:00Z",
+        ]);
     });
 
     test("Paged", () => {
@@ -164,13 +170,27 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
+        const requestedBuckets = new Set<string>();
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
             new Record({ id: namedNode("a2"), quads: [] }, stream),
             new Record({ id: namedNode("a3"), quads: [] }, stream),
         ]) {
-            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+            recordBuckets.push(
+                ...orchestrator.bucketize(
+                    member,
+                    buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
         }
 
         expect(recordBuckets).toEqual(["", "", "/page-1"]);
@@ -198,13 +218,27 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
+        const requestedBuckets = new Set<string>();
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
             new Record({ id: namedNode("a2"), quads: [] }, stream),
             new Record({ id: namedNode("a2"), quads: [] }, stream),
         ]) {
-            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+            recordBuckets.push(
+                ...orchestrator.bucketize(
+                    member,
+                    buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
         }
 
         expect(recordBuckets).toEqual(["/a1", "/a2", "/a2"]);
@@ -232,6 +266,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
+        const requestedBuckets = new Set<string>();
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         const pred = namedNode("http://example.org/test");
         for (const member of [
@@ -257,7 +297,15 @@ describe("Bucketizer behavior", () => {
                 stream,
             ),
         ]) {
-            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+            recordBuckets.push(
+                ...orchestrator.bucketize(
+                    member,
+                    buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
         }
 
         expect(recordBuckets).toEqual(["/test-a1", "/test-a1", "/test-a2"]);
@@ -291,6 +339,12 @@ describe("Bucketizer behavior", () => {
         const stream = namedNode("MyStream");
 
         const buckets: { [id: string]: Bucket } = {};
+        const requestedBuckets = new Set<string>();
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
 
         for (const member of [
@@ -299,7 +353,15 @@ describe("Bucketizer behavior", () => {
             new Record({ id: namedNode("a2"), quads: [] }, stream),
             new Record({ id: namedNode("a2"), quads: [] }, stream),
         ]) {
-            recordBuckets.push(...orchestrator.bucketize(member, buckets));
+            recordBuckets.push(
+                ...orchestrator.bucketize(
+                    member,
+                    buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
         }
 
         expect(Object.keys(buckets).length).toBe(4);

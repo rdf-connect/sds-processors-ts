@@ -1,24 +1,24 @@
 import { readFileSync } from "fs";
 import * as path from "path";
-import { Term } from "rdf-js";
+import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
-import { Bucket, Record } from "../utils";
+import {
+    Bucket,
+    BucketRelation,
+    getOrDefaultMap,
+    RdfThing,
+    Record,
+} from "../utils";
 import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
-import { PagedBucketizer, SubjectBucketizer } from "./bucketizers";
-import { fileURLToPath } from "url";
+import PagedBucketizer from "./pagedBucketizer";
+import SubjectBucketizer from "./subjectBucketizer";
+import TimebasedBucketizer from "./timebasedBucketizer";
+
+import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 
 const df = new DataFactory();
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const SHAPES_FILE_LOCATION = path.join(
-    __dirname,
-    "../../configs/bucketizer_configs.ttl",
-);
-export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
-    encoding: "utf8",
-});
+export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
 
 export type BucketizerConfig = {
     type: Term;
@@ -38,13 +38,25 @@ export type PageFragmentation = {
 
 export type TimebasedFragmentation = {
     path: BasicLensM<Cont, Cont>;
-    maxGranularity: "day" | "hour" | "second";
+    pathQuads: Cont;
+    maxSize: number;
+    k: number;
+    minBucketSpan: number;
 };
+
+export type AddRelation = (
+    origin: Bucket,
+    target: Bucket,
+    type: Term,
+    value?: Term,
+    path?: RdfThing,
+) => void;
 
 export interface Bucketizer {
     bucketize(
         sdsMember: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
+        addRelation: AddRelation,
     ): Bucket[];
 
     save(): string;
@@ -54,12 +66,18 @@ type Save = { [key: string]: { bucketizer?: Bucketizer; save?: string } };
 
 function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
     switch (config.type.value) {
-    case TREE.custom("SubjectFragmentation"):
-        return new SubjectBucketizer(<SubjectFragmentation>config.config, save);
-    case TREE.custom("PageFragmentation"):
-        return new PagedBucketizer(<PageFragmentation>config.config, save);
-    case TREE.custom("TimebasedFragmentation"):
-        throw "Not yet implemented";
+        case TREE.custom("SubjectFragmentation"):
+            return new SubjectBucketizer(
+                <SubjectFragmentation>config.config,
+                save,
+            );
+        case TREE.custom("PageFragmentation"):
+            return new PagedBucketizer(<PageFragmentation>config.config, save);
+        case TREE.custom("TimebasedFragmentation"):
+            return new TimebasedBucketizer(
+                <TimebasedFragmentation>config.config,
+                save,
+            );
     }
     throw "Unknown bucketizer " + config.type.value;
 }
@@ -80,9 +98,38 @@ export class BucketizerOrchestrator {
     bucketize(
         record: Record,
         buckets: { [id: string]: Bucket },
+        requestedBuckets: Set<string>,
+        newMembers: Map<string, Set<string>>,
+        newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[],
         prefix = "",
     ): string[] {
         let queue = [prefix];
+
+        const addRelation = (
+            origin: Bucket,
+            target: Bucket,
+            type: Term,
+            value?: Term,
+            path?: RdfThing,
+        ) => {
+            const relation = {
+                type,
+                value,
+                path,
+                target: target.id,
+            };
+            const newRel = {
+                origin,
+                relation,
+            };
+            newRelations.push(newRel);
+
+            origin.links.push(relation);
+            target.parent = origin;
+        };
 
         for (let i = 0; i < this.configs.length; i++) {
             const todo = queue.slice();
@@ -93,18 +140,34 @@ export class BucketizerOrchestrator {
 
                 const getBucket = (value: string, root?: boolean) => {
                     const terms = value.split("/");
-                    const key = terms[terms.length - 1]
-                        .replaceAll("#", "-")
-                        .replaceAll(" ", "-");
+                    const key = encodeURIComponent(
+                        decodeURIComponent(terms[terms.length - 1]),
+                    );
                     // If the requested bucket is the root, it actually is the previous bucket
                     const id = root ? prefix : prefix + "/" + key;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
+
+                        buckets[id].addMember = (memberId: string) => {
+                            getOrDefaultMap(
+                                newMembers,
+                                id,
+                                new Set<string>(),
+                            ).add(memberId);
+                        };
                     }
+
+                    // This bucket is requested, please remember
+                    requestedBuckets.add(id);
+
                     return buckets[id];
                 };
 
-                const foundBucket = bucketizer.bucketize(record, getBucket);
+                const foundBucket = bucketizer.bucketize(
+                    record,
+                    getBucket,
+                    addRelation,
+                );
 
                 for (const bucket of foundBucket) {
                     queue.push(bucket.id.value);

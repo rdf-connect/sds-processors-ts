@@ -3,6 +3,9 @@ import { randomInt } from "crypto";
 import { DataFactory } from "rdf-data-factory";
 import { Writer as N3Writer } from "n3";
 import { Term, Quad_Predicate } from "@rdfjs/types";
+import { getLoggerFor } from "./utils/logUtil";
+
+const logger = getLoggerFor("Generator");
 
 const df = new DataFactory();
 const NS = "http://time.is/ns#";
@@ -19,7 +22,8 @@ const types = [
 
 function generateMember(i: number, timestampPath?: Term) {
     const id = df.namedNode(NS + i);
-    const q = (p: string, o: string) => df.quad(id, df.namedNode(p), df.literal(o));
+    const q = (p: string, o: string) =>
+        df.quad(id, df.namedNode(p), df.literal(o));
 
     const { x, y } = types[i % types.length];
 
@@ -31,7 +35,11 @@ function generateMember(i: number, timestampPath?: Term) {
 
     if (timestampPath) {
         quads.push(
-            df.quad(id, <Quad_Predicate>timestampPath, df.literal(Date.now() + "")),
+            df.quad(
+                id,
+                <Quad_Predicate>timestampPath,
+                df.literal(Date.now() + ""),
+            ),
         );
     }
 
@@ -48,10 +56,10 @@ export async function generate(
     const wait = mWait ?? 50.0;
 
     return async function () {
-        console.log("generate starting");
+        logger.debug("generate starting");
 
         for (let i = 0; i < count; i++) {
-            console.log(`${i}/${count}`);
+            logger.debug(`${i}/${count}`);
             await writer.push(generateMember(i, timestampPath));
             await new Promise((res) => setTimeout(res, wait));
         }

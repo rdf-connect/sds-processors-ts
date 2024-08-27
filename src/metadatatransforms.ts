@@ -1,12 +1,6 @@
 import { RdfStore } from "rdf-stores";
 import { DataFactory } from "rdf-data-factory";
-import {
-    createProperty,
-    NBNode,
-    SR,
-    SW,
-    transformMetadata,
-} from "./core.js";
+import { createProperty, NBNode, SR, SW, transformMetadata } from "./core.js";
 import { EX, PPLAN, PROV, RDF, SHACL, XSD } from "@treecg/types";
 import { BlankNode, NamedNode, Quad, Quad_Object, Term } from "@rdfjs/types";
 
@@ -19,7 +13,7 @@ function shapeTransform(
     const newId = df.blankNode();
     if (id) {
         const quads = store.getQuads(id);
-        quads.forEach(q => store.addQuad(q));
+        quads.forEach((q) => store.addQuad(q));
         return newId;
     }
 
@@ -27,23 +21,25 @@ function shapeTransform(
 
     const p1 = createProperty(
         store,
-    <NBNode>EX.terms.custom("x"),
-    <NBNode>intTerm,
-    undefined,
-    1,
-    1,
+        <NBNode>EX.terms.custom("x"),
+        <NBNode>intTerm,
+        undefined,
+        1,
+        1,
     );
     const p2 = createProperty(
         store,
-    <NBNode>EX.terms.custom("y"),
-    <NBNode>intTerm,
-    undefined,
-    1,
-    1,
+        <NBNode>EX.terms.custom("y"),
+        <NBNode>intTerm,
+        undefined,
+        1,
+        1,
     );
 
     store.addQuad(df.quad(newId, RDF.terms.type, SHACL.terms.NodeShape));
-    store.addQuad(df.quad(newId, SHACL.terms.targetClass, EX.terms.custom("Point")));
+    store.addQuad(
+        df.quad(newId, SHACL.terms.targetClass, EX.terms.custom("Point")),
+    );
 
     store.addQuad(df.quad(newId, SHACL.terms.property, p1));
     store.addQuad(df.quad(newId, SHACL.terms.property, p2));
@@ -71,16 +67,17 @@ export function updateMetadata(
     sourceStream: string | undefined,
     newStream: string,
 ) {
-    const sourceStreamName = sourceStream ? df.namedNode(sourceStream) : undefined;
+    const sourceStreamName = sourceStream
+        ? df.namedNode(sourceStream)
+        : undefined;
     const newStreamName = df.namedNode(newStream);
     const f = transformMetadata(
         newStreamName,
         sourceStreamName,
-        "sds:Member",
+        "https://w3id.org/sds#Member",
         addProcess,
         shapeTransform,
     );
 
     sr.metadata.data(async (quads) => sw.metadata.push(await f(quads)));
 }
-

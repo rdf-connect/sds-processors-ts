@@ -3,7 +3,7 @@ import { extractShapes } from "rdf-lens";
 import { DataFactory, Parser } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
-import { Bucket, Extractor, SHAPES_TEXT } from "../src/utils/index";
+import { Bucket, Extractor, SHAPES_TEXT } from "../lib/utils/index";
 
 const { namedNode } = DataFactory;
 

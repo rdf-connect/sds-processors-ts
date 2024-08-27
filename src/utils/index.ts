@@ -1,54 +1,50 @@
-import { Quad, Term, Quad_Object, Quad_Subject, } from "@rdfjs/types";
+import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
 import { SDS, XSD } from "@treecg/types";
 import { BasicLensM, extractShapes, match, Shapes, subject } from "rdf-lens";
-import { readFileSync } from "fs";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
-import * as path from "path";
-import { fileURLToPath } from 'url';
+
+import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 
 const df = new DataFactory();
 
 export const SDS_GRAPH = SDS.terms.custom("DataDescription");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const SHAPES_FILE_LOCATION = path.join(
-    __dirname,
-    "../../configs/sds_shapes.ttl",
-);
-export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
-    encoding: "utf8",
-});
+export const SHAPES_TEXT = $INLINE_FILE("../../configs/sds_shapes.ttl");
 
 export type RdfThing = {
-  id: Term;
-  quads: Quad[];
+    id: Term;
+    quads: Quad[];
 };
 
 export type RelationDTO = {
-  type: Term;
-  target: Term;
-  value?: Term | undefined;
-  path?: RdfThing;
+    type: Term;
+    target: Term;
+    value?: Term | undefined;
+    path?: RdfThing;
 };
 
 export type BucketDTO = {
-  links: RelationDTO[];
-  id: Term;
-  root?: boolean;
-  immutable?: boolean;
-  parent?: BucketDTO;
+    links: RelationDTO[];
+    id: Term;
+    root?: boolean;
+    immutable?: boolean;
+    parent?: BucketDTO;
 };
 
 export type BucketRelation = {
-  type: Term;
-  target: Term;
-  value?: Term;
-  path?: RdfThing;
+    type: Term;
+    target: Term;
+    value?: Term;
+    path?: RdfThing;
+};
+
+export type Member = {
+    id: string;
+    timestamp: number;
 };
 
 function writeRelation(rel: BucketRelation, writer: Writer): Term {
@@ -57,14 +53,14 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
         df.quad(
             id,
             SDS.terms.relationType,
-      <Quad_Object>rel.type,
-      SDS.terms.custom("DataDescription"),
+            <Quad_Object>rel.type,
+            SDS.terms.custom("DataDescription"),
         ),
         df.quad(
             id,
             SDS.terms.relationBucket,
-      <Quad_Object>rel.target,
-      SDS.terms.custom("DataDescription"),
+            <Quad_Object>rel.target,
+            SDS.terms.custom("DataDescription"),
         ),
     ]);
 
@@ -73,8 +69,8 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
             df.quad(
                 id,
                 SDS.terms.relationValue,
-        <Quad_Object>rel.value,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>rel.value,
+                SDS.terms.custom("DataDescription"),
             ),
         );
     }
@@ -83,8 +79,8 @@ function writeRelation(rel: BucketRelation, writer: Writer): Term {
             df.quad(
                 id,
                 SDS.terms.relationPath,
-        <Quad_Object>rel.path.id,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>rel.path.id,
+                SDS.terms.custom("DataDescription"),
             ),
             ...rel.path.quads.map((x) =>
                 df.quad(
@@ -105,6 +101,8 @@ export class Bucket {
     root?: boolean;
     immutable?: boolean;
     links: BucketRelation[];
+    empty: boolean = false;
+    addMember: (memberId: string) => void;
 
     constructor(
         id: Term,
@@ -144,11 +142,6 @@ export class Bucket {
         return out;
     }
 
-    addRelation(target: Bucket, type: Term, value?: Term, path?: RdfThing) {
-        this.links.push({ type, value, path, target: target.id });
-        target.parent = this;
-    }
-
     write(writer: Writer) {
         const id = <Quad_Subject>this.id;
         const relations = this.links
@@ -157,8 +150,8 @@ export class Bucket {
                 df.quad(
                     id,
                     SDS.terms.relation,
-          <Quad_Object>rel,
-          SDS.terms.custom("DataDescription"),
+                    <Quad_Object>rel,
+                    SDS.terms.custom("DataDescription"),
                 ),
             );
 
@@ -178,9 +171,10 @@ export class Bucket {
 }
 
 interface RecordDTO {
-  stream: Term;
-  data: Term;
-  bucket: any;
+    stream: Term;
+    data: Term;
+    /* eslint-disable @typescript-eslint/no-explicit-any */
+    bucket: any;
 }
 
 export class Record {
@@ -218,14 +212,14 @@ export class Record {
             df.quad(
                 id,
                 SDS.terms.payload,
-        <Quad_Object>this.data.id,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>this.data.id,
+                SDS.terms.custom("DataDescription"),
             ),
             df.quad(
                 id,
                 SDS.terms.stream,
-        <Quad_Object>this.stream,
-        SDS.terms.custom("DataDescription"),
+                <Quad_Object>this.stream,
+                SDS.terms.custom("DataDescription"),
             ),
         ];
         if (this.bucket) {
@@ -233,8 +227,8 @@ export class Record {
                 df.quad(
                     id,
                     SDS.terms.bucket,
-          <Quad_Object>this.bucket.id,
-          SDS.terms.custom("DataDescription"),
+                    <Quad_Object>this.bucket.id,
+                    SDS.terms.custom("DataDescription"),
                 ),
             );
             this.bucket.write(writer);
@@ -257,7 +251,7 @@ export class Extractor {
         const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
         this.shapes = extractShapes(quads, {
             "#Bucket": (item) => {
-                return Bucket.parse(item, this.bucket_cache);
+                return Bucket.parse(<BucketDTO>item, this.bucket_cache);
             },
         });
 
@@ -304,4 +298,12 @@ export async function getObjects(
 ): Promise<Term[]> {
     const quads = await store.match(subject, pred, null, graph).toArray();
     return quads.map((x) => x.object);
+}
+
+export function getOrDefaultMap<T1, T2>(
+    map: Map<T1, T2>,
+    key: T1,
+    def: T2,
+): T2 {
+    return map.get(key) || map.set(key, def).get(key)!;
 }
