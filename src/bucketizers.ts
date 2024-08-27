@@ -6,7 +6,7 @@ import { getLatestShape, getLatestStream, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
 import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
-import { Bucket, Extractor, getOrDefaultMap, Record } from "./utils/index";
+import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Cleanup } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
@@ -102,11 +102,7 @@ function record_to_quads(
     return out;
 }
 
-function bucket_to_quads(
-    bucket: Bucket,
-    includeRelations: boolean = true,
-    stream?: Term,
-): Quad[] {
+function bucket_to_quads(bucket: Bucket, stream?: Term): Quad[] {
     const out: Quad[] = [
         df.quad(
             <Quad_Subject>bucket.id,
@@ -135,60 +131,17 @@ function bucket_to_quads(
         );
     }
 
-    if (includeRelations) {
-        for (const rel of bucket.links) {
-            const id = df.blankNode();
-            out.push(
-                df.quad(
-                    <Quad_Subject>bucket.id,
-                    SDS.terms.relation,
-                    id,
-                    SDS.terms.custom("DataDescription"),
-                ),
-                df.quad(
-                    id,
-                    SDS.terms.relationType,
-                    <Quad_Object>rel.type,
-                    SDS.terms.custom("DataDescription"),
-                ),
-                df.quad(
-                    id,
-                    SDS.terms.relationBucket,
-                    <Quad_Object>rel.target,
-                    SDS.terms.custom("DataDescription"),
-                ),
-            );
-
-            if (rel.path) {
-                out.push(
-                    df.quad(
-                        id,
-                        SDS.terms.relationPath,
-                        <Quad_Object>rel.path.id,
-                        SDS.terms.custom("DataDescription"),
-                    ),
-                    ...rel.path.quads.map((x) =>
-                        df.quad(
-                            x.subject,
-                            x.predicate,
-                            x.object,
-                            SDS.terms.custom("DataDescription"),
-                        ),
-                    ),
-                );
-            }
-
-            if (rel.value) {
-                out.push(
-                    df.quad(
-                        id,
-                        SDS.terms.relationValue,
-                        <Quad_Object>rel.value,
-                        SDS.terms.custom("DataDescription"),
-                    ),
-                );
-            }
-        }
+    // Send empty triples for the bucket if it is set as true.
+    if (bucket.empty) {
+        out.push(
+            df.quad(
+                <Quad_Subject>bucket.id,
+                SDS.terms.custom("empty"),
+                df.literal("true"),
+                SDS.terms.custom("DataDescription"),
+            ),
+        );
+        bucket.empty = false;
     }
 
     if (stream) {
@@ -197,6 +150,69 @@ function bucket_to_quads(
                 <Quad_Subject>bucket.id,
                 SDS.terms.stream,
                 <Quad_Object>stream,
+                SDS.terms.custom("DataDescription"),
+            ),
+        );
+    }
+
+    return out;
+}
+
+function relationToQuads(bucket: Bucket, rel: BucketRelation): Quad[] {
+    const out: Quad[] = [];
+    const id = df.blankNode();
+    out.push(
+        df.quad(
+            <Quad_Subject>bucket.id,
+            SDS.terms.relation,
+            id,
+            SDS.terms.custom("DataDescription"),
+        ),
+        df.quad(
+            id,
+            RDF.terms.type,
+            <Quad_Object>SDS.terms.custom("Relation"),
+            SDS.terms.custom("DataDescription"),
+        ),
+        df.quad(
+            id,
+            SDS.terms.relationType,
+            <Quad_Object>rel.type,
+            SDS.terms.custom("DataDescription"),
+        ),
+        df.quad(
+            id,
+            SDS.terms.relationBucket,
+            <Quad_Object>rel.target,
+            SDS.terms.custom("DataDescription"),
+        ),
+    );
+
+    if (rel.path) {
+        out.push(
+            df.quad(
+                id,
+                SDS.terms.relationPath,
+                <Quad_Object>rel.path.id,
+                SDS.terms.custom("DataDescription"),
+            ),
+            ...rel.path.quads.map((x) =>
+                df.quad(
+                    x.subject,
+                    x.predicate,
+                    x.object,
+                    SDS.terms.custom("DataDescription"),
+                ),
+            ),
+        );
+    }
+
+    if (rel.value) {
+        out.push(
+            df.quad(
+                id,
+                SDS.terms.relationValue,
+                <Quad_Object>rel.value,
                 SDS.terms.custom("DataDescription"),
             ),
         );
@@ -278,10 +294,13 @@ export async function bucketize(
         const quads = new Parser().parse(x);
 
         const records = await extractor.parse_records(quads);
-        const relatedBuckets = new Map<string, Set<Term>>();
-        const requestedBuckets = new Map<string, Set<Term>>();
-        const includedBuckets = new Map<string, Set<Term>>();
+        const requestedBuckets = new Set<string>();
         const newMembers = new Map<string, Set<string>>();
+
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
 
         for (const record of records) {
             const record_buckets = orchestrator.bucketize(
@@ -289,8 +308,13 @@ export async function bucketize(
                 buckets,
                 requestedBuckets,
                 newMembers,
+                newRelations,
                 sourceStream?.value || "root",
             );
+
+            record_buckets.forEach((x) => requestedBuckets.add(x));
+
+            // Write SDS Record for resulting stream
             outputQuads.push(
                 ...record_to_quads(
                     record,
@@ -298,42 +322,6 @@ export async function bucketize(
                     record_buckets.map((x) => buckets[x]),
                 ),
             );
-            // Register the record buckets as included in the output, so we do not have to write it again as requested bucket without relations
-            record_buckets.forEach((x) =>
-                getOrDefaultMap(includedBuckets, x, new Set<Term>()).add(
-                    record.stream,
-                ),
-            );
-
-            for (const b of record_buckets) {
-                getOrDefaultMap(relatedBuckets, b, new Set<Term>()).add(
-                    record.stream,
-                );
-                let parent = buckets[b].parent;
-                while (parent) {
-                    getOrDefaultMap(
-                        relatedBuckets,
-                        parent.id.value,
-                        new Set<Term>(),
-                    ).add(record.stream);
-                    parent = parent.parent;
-                }
-            }
-        }
-
-        for (const [relatedBucket, streams] of relatedBuckets) {
-            for (const stream of streams) {
-                outputQuads.push(
-                    ...bucket_to_quads(buckets[relatedBucket], true, stream),
-                );
-
-                // Register the related bucket as included in the output, so we do not have to write it again as requested bucket without relations
-                getOrDefaultMap(
-                    includedBuckets,
-                    relatedBucket,
-                    new Set<Term>(),
-                ).add(stream);
-            }
         }
 
         // Write records for the new members.
@@ -355,47 +343,22 @@ export async function bucketize(
                     ),
                 );
             }
+
             // Register the bucket as included in the output, so we do not have to write it again as requested bucket without relations
-            getOrDefaultMap(includedBuckets, bucket, new Set<Term>()).add(
-                resultingStream,
-            );
+            requestedBuckets.add(bucket);
         }
 
         // Only write the requested buckets that are not included in the output yet
-        for (const [requestedBucket, streams] of requestedBuckets) {
-            for (const stream of streams) {
-                if (
-                    !getOrDefaultMap(
-                        includedBuckets,
-                        requestedBucket,
-                        new Set<Term>(),
-                    ).has(stream)
-                ) {
-                    outputQuads.push(
-                        ...bucket_to_quads(
-                            buckets[requestedBucket],
-                            false,
-                            stream,
-                        ),
-                    );
-                }
-            }
-
-            // Send empty triples for the bucket if it is set as true.
-            if (buckets[requestedBucket].empty) {
-                outputQuads.push(
-                    df.quad(
-                        <Quad_Subject>buckets[requestedBucket].id,
-                        SDS.terms.custom("empty"),
-                        df.literal("true"),
-                        SDS.terms.custom("DataDescription"),
-                    ),
-                );
-
-                // Undo marking as to be emptied.
-                buckets[requestedBucket].empty = false;
-            }
+        for (const requestedBucket of requestedBuckets) {
+            outputQuads.push(
+                ...bucket_to_quads(buckets[requestedBucket], resultingStream),
+            );
         }
+        for (const { origin, relation } of newRelations) {
+            outputQuads.push(...relationToQuads(origin, relation));
+        }
+
+        // await prettyPrintQuads(outputQuads);
 
         await channels.dataOutput.push(
             new N3Writer().quadsToString(outputQuads),
