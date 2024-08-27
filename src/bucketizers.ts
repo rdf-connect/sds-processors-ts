@@ -22,44 +22,6 @@ async function writeState(
     }
 }
 
-/* tslint:disable:no-unused-variable */
-async function prettyPrintQuads(quads: Quad[]): Promise<void> {
-    quads.sort((a, b) =>
-        a.subject.value == b.subject.value
-            ? 0
-            : a.subject.value > b.subject.value
-              ? 1
-              : -1,
-    );
-    quads.sort((a, b) =>
-        a.graph.value == b.graph.value
-            ? 0
-            : a.graph.value > b.graph.value
-              ? 1
-              : -1,
-    );
-
-    const writer = new N3Writer({
-        prefixes: {
-            uk: "http://mumo.be/data/unknown/",
-            sds: "https://w3id.org/sds#",
-            data: "http://mumo.be/data/",
-            ob: "http://def.isotc211.org/iso19156/2011/Observation#",
-            xsd: "http://www.w3.org/2001/XMLSchema#",
-            sosa: "http://www.w3.org/ns/sosa/",
-        },
-        format: "application/trig",
-    });
-    writer.addQuads(quads);
-
-    return new Promise((res) => {
-        writer.end((_error, result) => {
-            console.log(result);
-            res();
-        });
-    });
-}
-
 function addProcess(
     id: Term | undefined,
     store: RdfStore,
