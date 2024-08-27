@@ -13,20 +13,12 @@ import { TREE } from "@treecg/types";
 import { DataFactory } from "rdf-data-factory";
 import PagedBucketizer from "./pagedBucketizer";
 import SubjectBucketizer from "./subjectBucketizer";
-import { fileURLToPath } from "url";
 import TimebasedBucketizer from "./timebasedBucketizer";
 
-const df = new DataFactory();
+import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const SHAPES_FILE_LOCATION = path.join(
-    __dirname,
-    "../../configs/bucketizer_configs.ttl",
-);
-export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
-    encoding: "utf8",
-});
+const df = new DataFactory();
+export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
 
 export type BucketizerConfig = {
     type: Term;

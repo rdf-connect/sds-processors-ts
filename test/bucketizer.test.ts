@@ -8,10 +8,9 @@ import {
     SHAPES_TEXT,
     SubjectFragmentation,
     TimebasedFragmentation,
-} from "../src/bucketizers/index";
-import { Bucket, Record } from "../src/";
-import { Term } from "@rdfjs/types";
-import { BucketRelation } from "../src/utils";
+} from "../lib/bucketizers/index";
+import { Bucket, Record } from "../lib/";
+import { BucketRelation } from "../lib/utils";
 
 const { namedNode, literal, quad } = DataFactory;
 

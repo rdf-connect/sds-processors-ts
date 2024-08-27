@@ -4,25 +4,16 @@ import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
 import { SDS, XSD } from "@treecg/types";
 import { BasicLensM, extractShapes, match, Shapes, subject } from "rdf-lens";
-import { readFileSync } from "fs";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
-import * as path from "path";
-import { fileURLToPath } from "url";
+
+import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 
 const df = new DataFactory();
 
 export const SDS_GRAPH = SDS.terms.custom("DataDescription");
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
-export const SHAPES_FILE_LOCATION = path.join(
-    __dirname,
-    "../../configs/sds_shapes.ttl",
-);
-export const SHAPES_TEXT = readFileSync(SHAPES_FILE_LOCATION, {
-    encoding: "utf8",
-});
+export const SHAPES_TEXT = $INLINE_FILE("../../configs/sds_shapes.ttl");
 
 export type RdfThing = {
     id: Term;
@@ -260,7 +251,7 @@ export class Extractor {
         const quads = new Parser({ baseIRI: "" }).parse(SHAPES_TEXT);
         this.shapes = extractShapes(quads, {
             "#Bucket": (item) => {
-                return Bucket.parse(item, this.bucket_cache);
+                return Bucket.parse(<BucketDTO>item, this.bucket_cache);
             },
         });
 

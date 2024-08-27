@@ -4,10 +4,9 @@ import {
     BucketizerConfig,
     BucketizerOrchestrator,
     SHAPES_TEXT,
-} from "../src/bucketizers/index";
-import { Bucket, Record } from "../src/";
+} from "../lib/bucketizers/index";
+import { Bucket, Record } from "../lib/";
 import { extractShapes, pred } from "rdf-lens";
-import { Term } from "@rdfjs/types";
 import { SimpleStream } from "@rdfc/js-runner";
 import { bucketize } from "../lib/main";
 import { RDF, SDS } from "@treecg/types";
