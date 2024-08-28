@@ -1,8 +1,15 @@
 import type { Stream, Writer } from "@rdfc/js-runner";
-import { Term, Quad, Quad_Predicate } from "@rdfjs/types";
+import { Quad, Quad_Predicate, Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import { DataFactory } from "rdf-data-factory";
-import { Parser, Writer as N3Writer } from "n3";
+import { NamedNode, Parser, Quad_Object, Writer as N3Writer } from "n3";
+import { Extractor } from "./utils";
+import { CBDShapeExtractor } from "extract-cbd-shape";
+
+// @ts-expect-error no declaration file found
+import { canonize } from "rdf-canonize";
+import { SDS, XSD } from "@treecg/types";
+import { Cleanup } from "./exitHandler";
 
 const df = new DataFactory();
 
@@ -88,8 +95,8 @@ class Transformer {
             out.push(
                 df.quad(
                     sub,
-          <Quad_Predicate>this.modifiedPath,
-          df.literal(date, TIMESTAMP),
+                    <Quad_Predicate>this.modifiedPath,
+                    df.literal(date, TIMESTAMP),
                 ), // VersionOf
                 df.quad(sub, <Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
             );
@@ -142,8 +149,8 @@ class Transformer {
             out.push(
                 df.quad(
                     sub,
-          <Quad_Predicate>this.modifiedPath,
-          df.literal(date, TIMESTAMP),
+                    <Quad_Predicate>this.modifiedPath,
+                    df.literal(date, TIMESTAMP),
                 ), // VersionOf
                 df.quad(sub, <Quad_Predicate>this.isVersionOfPath, subject), // Timestamp
             );
@@ -187,5 +194,92 @@ export function ldesify(
             ? transformer.transformCheckState(x)
             : transformer.simpleTransform(x);
         return writer.push(st);
+    });
+}
+
+export function ldesify_sds(
+    reader: Stream<string>,
+    writer: Writer<string>,
+    statePath: string | undefined,
+    sourceStream: Term | undefined,
+    targetStream: Term,
+    modifiedPathM?: Term, // This are the things that are added to the new entities, not necessarily related to the real objects
+    isVersionOfPathM?: Term,
+) {
+    const modifiedPath: Term = modifiedPathM || MODIFIED;
+    const versionPath: Term = isVersionOfPathM || IS_VERSION_OF;
+
+    let cache: { [key: string]: string } = {};
+    if (statePath) cache = getPrevState(statePath);
+
+    Cleanup(() => {
+        if (statePath) {
+            writeFileSync(statePath, JSON.stringify(cache), {
+                encoding: "utf8",
+            });
+        }
+    });
+    reader.on("end", () => {
+        if (statePath) {
+            writeFileSync(statePath, JSON.stringify(cache), {
+                encoding: "utf8",
+            });
+        }
+    });
+
+    const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
+    reader.on("data", async (x) => {
+        const quads = new Parser().parse(x);
+
+        const records = await extractor.parse_records(quads);
+
+        for (const rec of records) {
+            if (rec.data.quads.length === 0) continue;
+
+            const hash = await canonize(rec.data.quads, {
+                algorithm: "RDFC-1.0",
+            });
+            if (cache[rec.data.id.value] === hash) continue;
+
+            cache[rec.data.id.value] = hash;
+
+            const date = new Date();
+            const id = new NamedNode(rec.data.id.value + date.getTime());
+
+            const quads = [
+                df.quad(
+                    id,
+                    <Quad_Predicate>modifiedPath,
+                    df.literal(date.toISOString(), XSD.terms.dateTime),
+                ),
+
+                df.quad(
+                    id,
+                    <Quad_Predicate>versionPath,
+                    <Quad_Object>rec.data.id,
+                ),
+
+                ...rec.data.quads.map((q) =>
+                    df.quad(q.subject, q.predicate, q.object, id),
+                ),
+            ];
+
+            quads.push(
+                df.quad(
+                    id,
+                    SDS.terms.payload,
+                    id,
+                    SDS.terms.custom("DataDescription"),
+                ),
+                df.quad(
+                    id,
+                    SDS.terms.stream,
+                    <Quad_Object>targetStream,
+                    SDS.terms.custom("DataDescription"),
+                ),
+            );
+
+            await writer.push(new N3Writer().quadsToString(quads));
+        }
     });
 }
