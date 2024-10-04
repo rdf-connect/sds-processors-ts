@@ -78,3 +78,85 @@ js:Ldesify a js:JsProcess;
     sh:maxCount 1;
   ].
 
+
+js:LdesifySDS a js:JsProcess;
+  dc:title "Ldesify processor (for sds streams)";
+  dc:description "";
+  js:file <../lib/ldesify.js>;
+  js:function "ldesify_sds";
+  js:location <../>;
+  js:mapping [
+    a fno:Mapping;
+    fno:parameterMapping [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data input channel";
+      fnom:implementationParameterPosition "0"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data output channel";
+      fnom:implementationParameterPosition "1"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "State file path";
+      fnom:implementationParameterPosition "2"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Source Stream";
+      fnom:implementationParameterPosition "3"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Target Stream";
+      fnom:implementationParameterPosition "4"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Timestamp Path";
+      fnom:implementationParameterPosition "5"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Version Of Path";
+      fnom:implementationParameterPosition "6"^^xsd:int;
+    ];
+  ].
+ 
+
+[ ] a sh:NodeShape;
+  sh:targetClass js:LdesifySDS;
+  sh:property [
+    sh:class :ReaderChannel;
+    sh:path js:input;
+    sh:name "Data input channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:class :WriterChannel;
+    sh:path js:output;
+    sh:name "Data output channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:statePath;
+    sh:name "State file path";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:sourceStream;
+    sh:name "Source Stream";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:targetStream;
+    sh:name "Target Stream";
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:timestampPath;
+    sh:name "Timestamp Path";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path js:versionOfPath;
+    sh:name "Version Of Path";
+    sh:maxCount 1;
+  ].

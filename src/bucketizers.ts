@@ -68,7 +68,7 @@ type Config = {
     strategy: BucketizerConfig[];
 };
 
-function record_to_quads(
+export function record_to_quads(
     record: Record,
     resultingStream: Term,
     buckets: Bucket[],

@@ -1,6 +1,6 @@
 import type { Stream, Writer } from "@rdfc/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
-import type { Quad, Term, Quad_Object, Quad_Subject } from "@rdfjs/types";
+import type { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { getSubjects } from "./utils/index";
 import { Parser, Writer as NWriter } from "n3";
@@ -84,7 +84,7 @@ function getExtractor(shapeStore: RdfStore | null): CBDShapeExtractor {
     }
 }
 
-export function sdsify(
+export async function sdsify(
     input: Stream<string | Quad[]>,
     output: Writer<string>,
     streamNode: Term,
@@ -100,6 +100,7 @@ export function sdsify(
         });
     }
     const extractor = getExtractor(shapeStore);
+    const shapeId = shape ? await extractMainNodeShape(shapeStore) : undefined;
 
     input.data(async (input) => {
         const dataStore = RdfStore.createDefault();
@@ -109,9 +110,7 @@ export function sdsify(
         const members: { [id: string]: SDSMember } = {};
         const t0 = new Date();
         // Get shape Id (if any)
-        const shapeId = shape
-            ? await extractMainNodeShape(shapeStore)
-            : undefined;
+
         const subjects = [];
 
         if (types?.length) {
@@ -216,7 +215,9 @@ export function sdsify(
         }
 
         logger.debug(
-            `Successfully pushed ${membersCount} members in ${new Date().getTime() - t0.getTime()} ms`,
+            `Successfully pushed ${membersCount} members in ${
+                new Date().getTime() - t0.getTime()
+            } ms`,
         );
     });
 
