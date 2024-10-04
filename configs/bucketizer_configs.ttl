@@ -134,5 +134,10 @@
     sh:datatype xsd:string;
     sh:minCount 1;
     sh:in ( "year" "month" "day-of-month" "hour" "minute" "second" "millisecond" );
+  ], [
+    sh:name "timeBufferMs";
+    sh:path tree:buffer;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
   ].
 
