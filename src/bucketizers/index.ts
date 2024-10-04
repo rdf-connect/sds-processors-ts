@@ -1,5 +1,3 @@
-import { readFileSync } from "fs";
-import * as path from "path";
 import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
 import {
@@ -16,6 +14,9 @@ import SubjectBucketizer from "./subjectBucketizer";
 import TimebasedBucketizer from "./timebasedBucketizer";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
+import TimeBucketTreeBucketizer, {
+    TimeBucketTreeConfig,
+} from "./timeBucketTree";
 
 const df = new DataFactory();
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
@@ -78,6 +79,11 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
                 <TimebasedFragmentation>config.config,
                 save,
             );
+        case TREE.custom("TimeBucketFragmentation"):
+            return new TimeBucketTreeBucketizer(
+                <TimeBucketTreeConfig>config.config,
+                save,
+            );
     }
     throw "Unknown bucketizer " + config.type.value;
 }
@@ -104,7 +110,7 @@ export class BucketizerOrchestrator {
             origin: Bucket;
             relation: BucketRelation;
         }[],
-        prefix = "",
+        prefix: string = "",
     ): string[] {
         let queue = [prefix];
 
@@ -139,12 +145,25 @@ export class BucketizerOrchestrator {
                 const bucketizer = this.getBucketizer(i, prefix);
 
                 const getBucket = (value: string, root?: boolean) => {
-                    const terms = value.split("/");
-                    const key = encodeURIComponent(
-                        decodeURIComponent(terms[terms.length - 1]),
-                    );
+                    console.log("get bucket", { prefix, value });
+                    const encodedValue = value
+                        .split("/")
+                        .map((x) => encodeURIComponent(decodeURIComponent(x)))
+                        .join("/");
+                    const key = value.endsWith("/")
+                        ? encodedValue
+                        : encodedValue + "/";
+                    // const key = value;
                     // If the requested bucket is the root, it actually is the previous bucket
-                    const id = root ? prefix : prefix + "/" + key;
+
+                    // avoid double slashes and leading slashes
+                    const next =
+                        prefix.endsWith("/") ||
+                        prefix == "" ||
+                        key.startsWith("/")
+                            ? prefix + key
+                            : prefix + "/" + key;
+                    const id = root ? prefix : next;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
 

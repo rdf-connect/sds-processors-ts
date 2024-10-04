@@ -113,14 +113,14 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 10, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
 
         const secondSplitBucketExpected =
-            "/" + encodeURIComponent("2023-04-02T06:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-04-02T06:00:00.000Z_7884000000_0") + "/";
         const thirdSplitBucketExpected =
-            "/" + encodeURIComponent("2023-07-02T12:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-07-02T12:00:00.000Z_7884000000_0") + "/";
         const fourthSplitBucketExpected =
-            "/" + encodeURIComponent("2023-10-01T18:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-10-01T18:00:00.000Z_7884000000_0") + "/";
 
         // Add first 10 members, should all be added to the first single bucket.
         for (let i = 0; i < 10; i++) {
@@ -165,7 +165,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 100, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
 
         // All the members should fit in the first bucket.
         for (let i = 0; i < 24; i++) {
@@ -187,11 +187,11 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 10, 30000000000);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
         const secondBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_1");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_1") + "/";
         const thirdBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_2");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_2") + "/";
 
         // Add first 10 members, should all be added to the first single bucket.
         for (let i = 0; i < 10; i++) {
@@ -243,14 +243,14 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 10, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
 
         const secondSplitBucketExpected =
-            "/" + encodeURIComponent("2023-04-02T06:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-04-02T06:00:00.000Z_7884000000_0") + "/";
         const thirdSplitBucketExpected =
-            "/" + encodeURIComponent("2023-07-02T12:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-07-02T12:00:00.000Z_7884000000_0") + "/";
         const fourthSplitBucketExpected =
-            "/" + encodeURIComponent("2023-10-01T18:00:00.000Z_7884000000_0");
+            encodeURIComponent("2023-10-01T18:00:00.000Z_7884000000_0") + "/";
 
         // Add first 10 members, should all be added to the first single bucket.
         for (let i = 0; i < 10; i++) {
@@ -303,7 +303,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 10, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
 
         // Add first 10 members, should all be added to the first single bucket.
         for (let i = 0; i < 10; i++) {
@@ -348,9 +348,9 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(2, 3, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
         const secondBucketExpected =
-            "/" + encodeURIComponent("2023-02-15T15:00:00.000Z_3942000000_0");
+            encodeURIComponent("2023-02-15T15:00:00.000Z_3942000000_0") + "/";
 
         // First 3 members should fit in the first bucket.
         for (let i = 0; i < 3; i++) {
@@ -383,9 +383,9 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(2, 3, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") + "/";
         const secondBucketExpected =
-            "/" + encodeURIComponent("2023-01-01T00:00:00.000Z_3849610_1");
+            encodeURIComponent("2023-01-01T00:00:00.000Z_3849610_1") + "/";
 
         // First 3 members should fit in the first bucket.
         for (let i = 0; i < 3; i++) {
@@ -425,7 +425,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         const orchestrator = getOrchestrator(4, 100, 3600);
 
         const firstBucketExpected =
-            "/" + encodeURIComponent("2024-01-01T00:00:00.000Z_31622400000_0");
+            encodeURIComponent("2024-01-01T00:00:00.000Z_31622400000_0") + "/";
 
         const member = members[0];
         member.timestamp = new Date(member.timestamp);
@@ -486,30 +486,30 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
             const expected = [
                 {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
+                    id: `${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0/`,
                     immutable: false,
                     relations: 0,
                 },
             ];
             if (i == 0) {
                 expected.unshift({
-                    id: "root",
+                    id: "",
                     immutable: false,
                     relations: 2,
                 });
             }
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
+                `${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0/`,
                 [],
                 expected,
                 [
                     {
                         id: `ra${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0.toISOString())}_${ts(
                             b0,
                             b1,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -550,234 +550,234 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         //                                                                                                                              Expected new page
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                 b0_2_0_3_2_2_3,
                 b0_2_0_3_2_2_4,
-            )}_1`,
+            )}_1/`,
             [
-                `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                `root/${encodeURIComponent(b0_2.toISOString())}_${ts(b0_2, b0_3)}_0`,
-                `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
+                `${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0/`,
+                `${encodeURIComponent(b0_2.toISOString())}_${ts(b0_2, b0_3)}_0/`,
+                `${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                     b0_2_0,
                     b0_2_1,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
                     b0_2_0_3,
                     b0_2_0_4,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
                     b0_2_0_3_2,
                     b0_2_0_3_3,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
                     b0_2_0_3_2_2,
                     b0_2_0_3_2_3,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 // { id: "root", immutable: false, relations: 2 },
                 {
-                    id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
+                    id: `${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_0.toISOString())}_${ts(
                         b0_0,
                         b0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_1.toISOString())}_${ts(
                         b0_1,
                         b0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2.toISOString())}_${ts(
                         b0_2,
                         b0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_3.toISOString())}_${ts(
                         b0_3,
                         b0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                         b0_2_0,
                         b0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
                         b0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_2.toISOString())}_${ts(
                         b0_2_2,
                         b0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_3.toISOString())}_${ts(
                         b0_2_3,
                         b0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_0.toISOString())}_${ts(
                         b0_2_0_0,
                         b0_2_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_1.toISOString())}_${ts(
                         b0_2_0_1,
                         b0_2_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_2.toISOString())}_${ts(
                         b0_2_0_2,
                         b0_2_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
                         b0_2_0_3,
                         b0_2_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
                         b0_2_0_3_0,
                         b0_2_0_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
                         b0_2_0_3_1,
                         b0_2_0_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
                         b0_2_0_3_2,
                         b0_2_0_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
                         b0_2_0_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_0.toISOString())}_${ts(
                         b0_2_0_3_2_0,
                         b0_2_0_3_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_1.toISOString())}_${ts(
                         b0_2_0_3_2_1,
                         b0_2_0_3_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
                         b0_2_0_3_2_2,
                         b0_2_0_3_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_3,
                         b0_2_0_3_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_0.toISOString())}_${ts(
                         b0_2_0_3_2_2_0,
                         b0_2_0_3_2_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_1.toISOString())}_${ts(
                         b0_2_0_3_2_2_1,
                         b0_2_0_3_2_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_2.toISOString())}_${ts(
                         b0_2_0_3_2_2_2,
                         b0_2_0_3_2_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 1,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_1`,
+                    )}_1/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -785,80 +785,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ra1",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra2",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra3",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra4",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra5",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra6",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra7",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra8",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra9",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra10",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ra11",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_1`,
+                    )}_1/`,
                 },
             ],
         );
@@ -871,17 +871,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                     b0_2_0_3_2_2_3,
                     b0_2_0_3_2_2_4,
-                )}_1`,
+                )}_1/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                             b0_2_0_3_2_2_3,
                             b0_2_0_3_2_2_4,
-                        )}_1`,
+                        )}_1/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -889,17 +889,16 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `ra${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                             b0_2_0_3_2_2_3,
                             b0_2_0_3_2_2_4,
-                        )}_1`,
+                        )}_1/`,
                     },
                 ],
             );
         }
 
         // Next day (2024-07-24), Rb1 should be added, making previous buckets immutable.
-        console.log("============ beforeer -----------");
         output = [];
         outputPromise = outputListener(outgoing, output);
         await incoming.push(createInput("rb1", dates[1][0]));
@@ -907,113 +906,113 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                 b0_2_0_3_3,
                 b0_2_0_3_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
                         b0_2_0_3_0,
                         b0_2_0_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
                         b0_2_0_3_1,
                         b0_2_0_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
                         b0_2_0_3_2,
                         b0_2_0_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
                         b0_2_0_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_0.toISOString())}_${ts(
                         b0_2_0_3_2_0,
                         b0_2_0_3_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_1.toISOString())}_${ts(
                         b0_2_0_3_2_1,
                         b0_2_0_3_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2.toISOString())}_${ts(
                         b0_2_0_3_2_2,
                         b0_2_0_3_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_3,
                         b0_2_0_3_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_0.toISOString())}_${ts(
                         b0_2_0_3_2_2_0,
                         b0_2_0_3_2_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_1.toISOString())}_${ts(
                         b0_2_0_3_2_2_1,
                         b0_2_0_3_2_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_2.toISOString())}_${ts(
                         b0_2_0_3_2_2_2,
                         b0_2_0_3_2_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2_2_3.toISOString())}_${ts(
                         b0_2_0_3_2_2_3,
                         b0_2_0_3_2_2_4,
-                    )}_1`,
+                    )}_1/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -1021,15 +1020,14 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rb1",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
                         b0_2_0_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
 
-        console.log("============ futheer -----------");
         // Rb2 - Rb10 should just be added.
         for (let i = 1; i < 10; i++) {
             output = [];
@@ -1038,17 +1036,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                     b0_2_0_3_3,
                     b0_2_0_3_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                             b0_2_0_3_3,
                             b0_2_0_3_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -1056,10 +1054,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rb${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                             b0_2_0_3_3,
                             b0_2_0_3_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -1090,98 +1088,98 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         //                                                                                                                              Expected new page
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                 b0_2_0_3_3_1_2,
                 b0_2_0_3_3_1_3,
-            )}_1`,
+            )}_1/`,
             [
-                `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                     b0_2_0_3_3,
                     b0_2_0_3_4,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
                     b0_2_0_3_3_1,
                     b0_2_0_3_3_2,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
                         b0_2_0_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_0.toISOString())}_${ts(
                         b0_2_0_3_3_0,
                         b0_2_0_3_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
                         b0_2_0_3_3_1,
                         b0_2_0_3_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_2.toISOString())}_${ts(
                         b0_2_0_3_3_2,
                         b0_2_0_3_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_3.toISOString())}_${ts(
                         b0_2_0_3_3_3,
                         b0_2_0_3_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_0.toISOString())}_${ts(
                         b0_2_0_3_3_1_0,
                         b0_2_0_3_3_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_1.toISOString())}_${ts(
                         b0_2_0_3_3_1_1,
                         b0_2_0_3_3_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 1,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_1`,
+                    )}_1/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_3.toISOString())}_${ts(
                         b0_2_0_3_3_1_3,
                         b0_2_0_3_3_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -1189,80 +1187,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rb1",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb2",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb3",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb4",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb5",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb6",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb7",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb8",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb9",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb10",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rb11",
-                    bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_1`,
+                    )}_1/`,
                 },
             ],
         );
@@ -1275,17 +1273,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                     b0_2_0_3_3_1_2,
                     b0_2_0_3_3_1_3,
-                )}_1`,
+                )}_1/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                             b0_2_0_3_3_1_2,
                             b0_2_0_3_3_1_3,
-                        )}_1`,
+                        )}_1/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -1293,10 +1291,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rb${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                             b0_2_0_3_3_1_2,
                             b0_2_0_3_3_1_3,
-                        )}_1`,
+                        )}_1/`,
                     },
                 ],
             );
@@ -1309,177 +1307,177 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                 b0_2_1,
                 b0_2_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                         b0_2_0,
                         b0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
                         b0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_2.toISOString())}_${ts(
                         b0_2_2,
                         b0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_3.toISOString())}_${ts(
                         b0_2_3,
                         b0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_0.toISOString())}_${ts(
                         b0_2_0_0,
                         b0_2_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_1.toISOString())}_${ts(
                         b0_2_0_1,
                         b0_2_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_2.toISOString())}_${ts(
                         b0_2_0_2,
                         b0_2_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3.toISOString())}_${ts(
                         b0_2_0_3,
                         b0_2_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_0.toISOString())}_${ts(
                         b0_2_0_3_0,
                         b0_2_0_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_1.toISOString())}_${ts(
                         b0_2_0_3_1,
                         b0_2_0_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_2.toISOString())}_${ts(
                         b0_2_0_3_2,
                         b0_2_0_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3.toISOString())}_${ts(
                         b0_2_0_3_3,
                         b0_2_0_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_0.toISOString())}_${ts(
                         b0_2_0_3_3_0,
                         b0_2_0_3_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1.toISOString())}_${ts(
                         b0_2_0_3_3_1,
                         b0_2_0_3_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_2.toISOString())}_${ts(
                         b0_2_0_3_3_2,
                         b0_2_0_3_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_3.toISOString())}_${ts(
                         b0_2_0_3_3_3,
                         b0_2_0_3_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_0.toISOString())}_${ts(
                         b0_2_0_3_3_1_0,
                         b0_2_0_3_3_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_1.toISOString())}_${ts(
                         b0_2_0_3_3_1_1,
                         b0_2_0_3_3_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_2.toISOString())}_${ts(
                         b0_2_0_3_3_1_2,
                         b0_2_0_3_3_1_3,
-                    )}_1`,
+                    )}_1/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_0_3_3_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0_3_3_1_3.toISOString())}_${ts(
                         b0_2_0_3_3_1_3,
                         b0_2_0_3_3_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -1487,10 +1485,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rc1",
-                    bucket: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
                         b0_2_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -1503,17 +1501,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                     b0_2_1,
                     b0_2_2,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                             b0_2_1,
                             b0_2_2,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -1521,10 +1519,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rc${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                             b0_2_1,
                             b0_2_2,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -1559,170 +1557,170 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         //                                                                                                                              Expected new page
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                 b0_2_1_0_0_0_1,
                 b0_2_1_0_0_0_2,
-            )}_1`,
+            )}_1/`,
             [
-                `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                     b0_2_1,
                     b0_2_2,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                     b0_2_1_0,
                     b0_2_1_1,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                     b0_2_1_0_0,
                     b0_2_1_0_1,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
                     b0_2_1_0_0_0,
                     b0_2_1_0_0_1,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
                         b0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
                         b0_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
                         b0_2_1_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                         b0_2_1_0_1,
                         b0_2_1_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
                         b0_2_1_0_3,
                         b0_2_1_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0,
                         b0_2_1_0_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_1,
                         b0_2_1_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
                         b0_2_1_0_0_2,
                         b0_2_1_0_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_3,
                         b0_2_1_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0_0,
                         b0_2_1_0_0_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 1,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_1`,
+                    )}_1/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_2.toISOString())}_${ts(
                         b0_2_1_0_0_0_2,
                         b0_2_1_0_0_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_0_3,
                         b0_2_1_0_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -1730,80 +1728,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rc1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc2",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc3",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc4",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc5",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc6",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc7",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc8",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc9",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc10",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rc11",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_1`,
+                    )}_1/`,
                 },
             ],
         );
@@ -1816,17 +1814,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                     b0_2_1_0_0_0_1,
                     b0_2_1_0_0_0_2,
-                )}_1`,
+                )}_1/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                             b0_2_1_0_0_0_1,
                             b0_2_1_0_0_0_2,
-                        )}_1`,
+                        )}_1/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -1834,10 +1832,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rc${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                             b0_2_1_0_0_0_1,
                             b0_2_1_0_0_0_2,
-                        )}_1`,
+                        )}_1/`,
                     },
                 ],
             );
@@ -1850,81 +1848,81 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                 b0_2_1_0_0_3,
                 b0_2_1_0_0_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0,
                         b0_2_1_0_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_1,
                         b0_2_1_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
                         b0_2_1_0_0_2,
                         b0_2_1_0_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_3,
                         b0_2_1_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0_0,
                         b0_2_1_0_0_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_0_1,
                         b0_2_1_0_0_0_2,
-                    )}_1`,
+                    )}_1/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_2.toISOString())}_${ts(
                         b0_2_1_0_0_0_2,
                         b0_2_1_0_0_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_0_3,
                         b0_2_1_0_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -1932,10 +1930,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rd1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_3,
                         b0_2_1_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -1948,17 +1946,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                     b0_2_1_0_0_3,
                     b0_2_1_0_0_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                             b0_2_1_0_0_3,
                             b0_2_1_0_0_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -1966,10 +1964,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rd${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                             b0_2_1_0_0_3,
                             b0_2_1_0_0_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -1984,73 +1982,73 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                 b0_2_1_0_1,
                 b0_2_1_0_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
                         b0_2_1_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                         b0_2_1_0_1,
                         b0_2_1_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
                         b0_2_1_0_3,
                         b0_2_1_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_0.toISOString())}_${ts(
                         b0_2_1_0_0_0,
                         b0_2_1_0_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_1.toISOString())}_${ts(
                         b0_2_1_0_0_1,
                         b0_2_1_0_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_2.toISOString())}_${ts(
                         b0_2_1_0_0_2,
                         b0_2_1_0_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0_3.toISOString())}_${ts(
                         b0_2_1_0_0_3,
                         b0_2_1_0_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -2058,10 +2056,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "re1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                         b0_2_1_0_1,
                         b0_2_1_0_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2074,17 +2072,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                     b0_2_1_0_1,
                     b0_2_1_0_2,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                             b0_2_1_0_1,
                             b0_2_1_0_2,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -2092,10 +2090,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `re${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                             b0_2_1_0_1,
                             b0_2_1_0_2,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -2110,41 +2108,41 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                 b0_2_1_0_2,
                 b0_2_1_0_3,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
                         b0_2_1_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                         b0_2_1_0_1,
                         b0_2_1_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
                         b0_2_1_0_3,
                         b0_2_1_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2152,10 +2150,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rf1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2168,17 +2166,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                     b0_2_1_0_2,
                     b0_2_1_0_3,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                             b0_2_1_0_2,
                             b0_2_1_0_3,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -2186,10 +2184,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rf${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                             b0_2_1_0_2,
                             b0_2_1_0_3,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -2214,54 +2212,54 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                 b0_2_1_0_2_3,
                 b0_2_1_0_2_4,
-            )}_0`,
+            )}_0/`,
             [
-                `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                     b0_2_1_0_2,
                     b0_2_1_0_3,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_1.toISOString())}_${ts(
                         b0_2_1_0_2_1,
                         b0_2_1_0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_2.toISOString())}_${ts(
                         b0_2_1_0_2_2,
                         b0_2_1_0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                         b0_2_1_0_2_3,
                         b0_2_1_0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2269,80 +2267,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rf1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf2",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf3",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf4",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf5",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf6",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf7",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf8",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf9",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rf10",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rg1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                         b0_2_1_0_2_3,
                         b0_2_1_0_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2355,17 +2353,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                     b0_2_1_0_2_3,
                     b0_2_1_0_2_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                             b0_2_1_0_2_3,
                             b0_2_1_0_2_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -2373,10 +2371,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rg${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                             b0_2_1_0_2_3,
                             b0_2_1_0_2_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -2393,105 +2391,105 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
                         b0_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_0.toISOString())}_${ts(
                         b0_2_1_0_0,
                         b0_2_1_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_1.toISOString())}_${ts(
                         b0_2_1_0_1,
                         b0_2_1_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2.toISOString())}_${ts(
                         b0_2_1_0_2,
                         b0_2_1_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_3.toISOString())}_${ts(
                         b0_2_1_0_3,
                         b0_2_1_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_0.toISOString())}_${ts(
                         b0_2_1_0_2_0,
                         b0_2_1_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_1.toISOString())}_${ts(
                         b0_2_1_0_2_1,
                         b0_2_1_0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_2.toISOString())}_${ts(
                         b0_2_1_0_2_2,
                         b0_2_1_0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0_2_3.toISOString())}_${ts(
                         b0_2_1_0_2_3,
                         b0_2_1_0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -2499,10 +2497,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rh1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2515,17 +2513,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                     b0_2_1_1,
                     b0_2_1_2,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                             b0_2_1_1,
                             b0_2_1_2,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -2533,10 +2531,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rh${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                             b0_2_1_1,
                             b0_2_1_2,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -2549,17 +2547,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2567,10 +2565,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ri1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2582,17 +2580,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2600,10 +2598,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rj1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2615,17 +2613,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2633,10 +2631,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rk1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2648,17 +2646,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2666,10 +2664,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rl1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2681,17 +2679,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                 b0_2_1_1,
                 b0_2_1_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2699,10 +2697,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rm1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2714,41 +2712,41 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                 b0_2_1_2,
                 b0_2_1_3,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
                         b0_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2756,10 +2754,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rn1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -2772,17 +2770,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                     b0_2_1_2,
                     b0_2_1_3,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                             b0_2_1_2,
                             b0_2_1_3,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -2790,10 +2788,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rn${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                             b0_2_1_2,
                             b0_2_1_3,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -2825,134 +2823,134 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                 b0_2_1_2_0_2_0,
                 b0_2_1_2_0_2_1,
-            )}_1`,
+            )}_1/`,
             [
-                `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                     b0_2_1_2,
                     b0_2_1_3,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                     b0_2_1_2_0,
                     b0_2_1_2_1,
-                )}_0`,
-                `root/${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
+                )}_0/`,
+                `${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
                     b0_2_1_2_0_2,
                     b0_2_1_2_0_3,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
                         b0_2_1_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_0.toISOString())}_${ts(
                         b0_2_1_2_0_0,
                         b0_2_1_2_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_1.toISOString())}_${ts(
                         b0_2_1_2_0_1,
                         b0_2_1_2_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
                         b0_2_1_2_0_2,
                         b0_2_1_2_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_3.toISOString())}_${ts(
                         b0_2_1_2_0_3,
                         b0_2_1_2_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 1,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_1`,
+                    )}_1/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_1.toISOString())}_${ts(
                         b0_2_1_2_0_2_1,
                         b0_2_1_2_0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_2.toISOString())}_${ts(
                         b0_2_1_2_0_2_2,
                         b0_2_1_2_0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_3.toISOString())}_${ts(
                         b0_2_1_2_0_2_3,
                         b0_2_1_2_0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -2960,80 +2958,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rn1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn2",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn3",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn4",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn5",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn6",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn7",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn8",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn9",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn10",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rn11",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_1`,
+                    )}_1/`,
                 },
             ],
         );
@@ -3046,17 +3044,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                     b0_2_1_2_0_2_0,
                     b0_2_1_2_0_2_1,
-                )}_1`,
+                )}_1/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                             b0_2_1_2_0_2_0,
                             b0_2_1_2_0_2_1,
-                        )}_1`,
+                        )}_1/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3064,10 +3062,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rn${i + 11}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                             b0_2_1_2_0_2_0,
                             b0_2_1_2_0_2_1,
-                        )}_1`,
+                        )}_1/`,
                     },
                 ],
             );
@@ -3080,113 +3078,113 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                 b0_2_1_2_1,
                 b0_2_1_2_2,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
                         b0_2_1_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_0.toISOString())}_${ts(
                         b0_2_1_2_0_0,
                         b0_2_1_2_0_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_1.toISOString())}_${ts(
                         b0_2_1_2_0_1,
                         b0_2_1_2_0_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2.toISOString())}_${ts(
                         b0_2_1_2_0_2,
                         b0_2_1_2_0_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_3.toISOString())}_${ts(
                         b0_2_1_2_0_3,
                         b0_2_1_2_0_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_0.toISOString())}_${ts(
                         b0_2_1_2_0_2_0,
                         b0_2_1_2_0_2_1,
-                    )}_1`,
+                    )}_1/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_1.toISOString())}_${ts(
                         b0_2_1_2_0_2_1,
                         b0_2_1_2_0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_2.toISOString())}_${ts(
                         b0_2_1_2_0_2_2,
                         b0_2_1_2_0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0_2_3.toISOString())}_${ts(
                         b0_2_1_2_0_2_3,
                         b0_2_1_2_0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -3194,10 +3192,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ro1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3210,17 +3208,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                     b0_2_1_2_1,
                     b0_2_1_2_2,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                             b0_2_1_2_1,
                             b0_2_1_2_2,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3228,10 +3226,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `ro${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                             b0_2_1_2_1,
                             b0_2_1_2_2,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -3256,54 +3254,54 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                 b0_2_1_2_1_3,
                 b0_2_1_2_1_4,
-            )}_0`,
+            )}_0/`,
             [
-                `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                     b0_2_1_2_1,
                     b0_2_1_2_2,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_1.toISOString())}_${ts(
                         b0_2_1_2_1_1,
                         b0_2_1_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_2.toISOString())}_${ts(
                         b0_2_1_2_1_2,
                         b0_2_1_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                         b0_2_1_2_1_3,
                         b0_2_1_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3311,80 +3309,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ro1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro2",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro3",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro4",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro5",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro6",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro7",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro8",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro9",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ro10",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rp1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                         b0_2_1_2_1_3,
                         b0_2_1_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3397,17 +3395,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                     b0_2_1_2_1_3,
                     b0_2_1_2_1_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                             b0_2_1_2_1_3,
                             b0_2_1_2_1_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3415,10 +3413,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rp${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                             b0_2_1_2_1_3,
                             b0_2_1_2_1_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -3433,73 +3431,73 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                 b0_2_1_2_2,
                 b0_2_1_2_3,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
                         b0_2_1_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_0.toISOString())}_${ts(
                         b0_2_1_2_1_0,
                         b0_2_1_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_1.toISOString())}_${ts(
                         b0_2_1_2_1_1,
                         b0_2_1_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_2.toISOString())}_${ts(
                         b0_2_1_2_1_2,
                         b0_2_1_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1_3.toISOString())}_${ts(
                         b0_2_1_2_1_3,
                         b0_2_1_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -3507,10 +3505,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rq1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3523,17 +3521,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                     b0_2_1_2_2,
                     b0_2_1_2_3,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                             b0_2_1_2_2,
                             b0_2_1_2_3,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3541,10 +3539,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rq${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                             b0_2_1_2_2,
                             b0_2_1_2_3,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -3559,41 +3557,41 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                 b0_2_1_2_3,
                 b0_2_1_2_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
                         b0_2_1_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3601,10 +3599,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rr1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3617,17 +3615,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                     b0_2_1_2_3,
                     b0_2_1_2_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                             b0_2_1_2_3,
                             b0_2_1_2_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3635,10 +3633,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rr${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                             b0_2_1_2_3,
                             b0_2_1_2_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -3653,73 +3651,73 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                 b0_2_1_3,
                 b0_2_1_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
                         b0_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_0.toISOString())}_${ts(
                         b0_2_1_2_0,
                         b0_2_1_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_1.toISOString())}_${ts(
                         b0_2_1_2_1,
                         b0_2_1_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_2.toISOString())}_${ts(
                         b0_2_1_2_2,
                         b0_2_1_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2_3.toISOString())}_${ts(
                         b0_2_1_2_3,
                         b0_2_1_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -3727,10 +3725,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rs1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3744,17 +3742,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                 b0_2_1_3,
                 b0_2_1_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3762,10 +3760,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rt1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3779,17 +3777,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                 b0_2_1_3,
                 b0_2_1_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3797,10 +3795,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ru1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3814,17 +3812,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                 b0_2_1_3,
                 b0_2_1_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3832,10 +3830,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rv1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3849,17 +3847,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                 b0_2_1_3,
                 b0_2_1_4,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3867,10 +3865,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rw1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -3885,17 +3883,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                     b0_2_1_3,
                     b0_2_1_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                             b0_2_1_3,
                             b0_2_1_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -3903,10 +3901,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rx${i}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                             b0_2_1_3,
                             b0_2_1_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -3924,54 +3922,54 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                 b0_2_1_3_3,
                 b0_2_1_3_4,
-            )}_0`,
+            )}_0/`,
             [
-                `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                     b0_2_1_3,
                     b0_2_1_4,
-                )}_0`,
+                )}_0/`,
             ],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 8,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
                         b0_2_1_3_0,
                         b0_2_1_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
                         b0_2_1_3_1,
                         b0_2_1_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
                         b0_2_1_3_2,
                         b0_2_1_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
@@ -3979,80 +3977,80 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "rs1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
                         b0_2_1_3_0,
                         b0_2_1_3_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rt1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
                         b0_2_1_3_0,
                         b0_2_1_3_1,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "ru1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
                         b0_2_1_3_1,
                         b0_2_1_3_2,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rv1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
                         b0_2_1_3_2,
                         b0_2_1_3_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rw1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
                         b0_2_1_3_2,
                         b0_2_1_3_3,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx1",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx2",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx3",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx4",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx5",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
                 {
                     id: "rx6",
-                    bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -4065,17 +4063,17 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             await outputPromise;
             testOutput(
                 output,
-                `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                     b0_2_1_3_3,
                     b0_2_1_3_4,
-                )}_0`,
+                )}_0/`,
                 [],
                 [
                     {
-                        id: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                        id: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                             b0_2_1_3_3,
                             b0_2_1_3_4,
-                        )}_0`,
+                        )}_0/`,
                         immutable: false,
                         relations: 0,
                     },
@@ -4083,10 +4081,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 [
                     {
                         id: `rx${i + 1}`,
-                        bucket: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                        bucket: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                             b0_2_1_3_3,
                             b0_2_1_3_4,
-                        )}_0`,
+                        )}_0/`,
                     },
                 ],
             );
@@ -4101,105 +4099,105 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         await outputPromise;
         testOutput(
             output,
-            `root/${encodeURIComponent(b0_2_2.toISOString())}_${ts(
+            `${encodeURIComponent(b0_2_2.toISOString())}_${ts(
                 b0_2_2,
                 b0_2_3,
-            )}_0`,
+            )}_0/`,
             [],
             [
                 {
-                    id: `root/${encodeURIComponent(b0_2_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_0.toISOString())}_${ts(
                         b0_2_0,
                         b0_2_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1.toISOString())}_${ts(
                         b0_2_1,
                         b0_2_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_2.toISOString())}_${ts(
                         b0_2_2,
                         b0_2_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_3.toISOString())}_${ts(
                         b0_2_3,
                         b0_2_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: false,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_0.toISOString())}_${ts(
                         b0_2_1_0,
                         b0_2_1_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_1.toISOString())}_${ts(
                         b0_2_1_1,
                         b0_2_1_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_2.toISOString())}_${ts(
                         b0_2_1_2,
                         b0_2_1_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3.toISOString())}_${ts(
                         b0_2_1_3,
                         b0_2_1_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_0.toISOString())}_${ts(
                         b0_2_1_3_0,
                         b0_2_1_3_1,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_1.toISOString())}_${ts(
                         b0_2_1_3_1,
                         b0_2_1_3_2,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_2.toISOString())}_${ts(
                         b0_2_1_3_2,
                         b0_2_1_3_3,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
                 {
-                    id: `root/${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
+                    id: `${encodeURIComponent(b0_2_1_3_3.toISOString())}_${ts(
                         b0_2_1_3_3,
                         b0_2_1_3_4,
-                    )}_0`,
+                    )}_0/`,
                     immutable: true,
                     relations: 0,
                 },
@@ -4207,10 +4205,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             [
                 {
                     id: "ry1",
-                    bucket: `root/${encodeURIComponent(b0_2_2.toISOString())}_${ts(
+                    bucket: `${encodeURIComponent(b0_2_2.toISOString())}_${ts(
                         b0_2_2,
                         b0_2_3,
-                    )}_0`,
+                    )}_0/`,
                 },
             ],
         );
@@ -4339,7 +4337,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Check the bucket
         expect(bucket).toBe(expectedBucket);
 
-        // console.log("emptyBuckets", emptyBuckets);
         expect(emptyBuckets.length).toBe(expectedEmptyBuckets.length);
         expect(emptyBuckets).toEqual(expectedEmptyBuckets);
 
@@ -4357,7 +4354,6 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Check the members
         expect(members.length).toBe(expectedMembers.length);
         members.forEach((member) => {
-            // console.log("member", member);
             const expected = expectedMembers.find(
                 (m) => `http://example.org/${m.id}` === member.id,
             );
