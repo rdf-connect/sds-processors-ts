@@ -4,8 +4,8 @@ import { BasicLensM, Cont } from "rdf-lens";
 import { Term } from "@rdfjs/types";
 import { TREE, XSD } from "@treecg/types";
 import { DataFactory } from "n3";
-import literal = DataFactory.literal;
-import namedNode = DataFactory.namedNode;
+
+const { literal, namedNode } = DataFactory;
 import { getLoggerFor } from "../utils/logUtil";
 
 export default class TimebasedBucketizer implements Bucketizer {
