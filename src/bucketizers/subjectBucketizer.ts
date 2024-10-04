@@ -4,6 +4,7 @@ import { Term } from "@rdfjs/types";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { getLoggerFor } from "../utils/logUtil";
+import { Writer } from "n3";
 
 export default class SubjectBucketizer implements Bucketizer {
     protected readonly logger = getLoggerFor(this);
@@ -42,7 +43,7 @@ export default class SubjectBucketizer implements Bucketizer {
 
         const out: Bucket[] = [];
 
-        const root = getBucket("root", true);
+        const root = getBucket("", true);
 
         if (values.length === 0 && this.defaultName) {
             values.push({ value: this.defaultName });

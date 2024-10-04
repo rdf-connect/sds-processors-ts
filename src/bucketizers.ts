@@ -68,7 +68,7 @@ type Config = {
     strategy: BucketizerConfig[];
 };
 
-function record_to_quads(
+export function record_to_quads(
     record: Record,
     resultingStream: Term,
     buckets: Bucket[],
@@ -256,6 +256,7 @@ export async function bucketize(
     savePath: string | undefined,
     sourceStream: Term | undefined,
     resultingStream: Term,
+    prefix = "",
 ) {
     set_metadata(channels, resultingStream, sourceStream, config);
     const save = read_save(savePath);
@@ -309,7 +310,8 @@ export async function bucketize(
                 requestedBuckets,
                 newMembers,
                 newRelations,
-                sourceStream?.value || "root",
+                prefix,
+                // sourceStream?.value || "/",
             );
 
             record_buckets.forEach((x) => requestedBuckets.add(x));
