@@ -8,6 +8,7 @@ import {
     SHAPES_TEXT,
     SubjectFragmentation,
     TimebasedFragmentation,
+    TimeBucketTreeConfig,
 } from "../lib/bucketizers/index";
 import { Bucket, Record } from "../lib/";
 import { BucketRelation } from "../lib/utils";
@@ -34,7 +35,7 @@ describe("Bucketizer configs", () => {
   tree:fragmentationPath (<b> <c>).
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -67,7 +68,7 @@ describe("Bucketizer configs", () => {
   tree:fragmentationPath <b>.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -99,7 +100,7 @@ describe("Bucketizer configs", () => {
   tree:minBucketSpan 3600.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -131,7 +132,7 @@ describe("Bucketizer configs", () => {
   tree:pageSize 42.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -161,7 +162,7 @@ describe("Bucketizer behavior", () => {
   tree:pageSize 2.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -209,7 +210,7 @@ describe("Bucketizer behavior", () => {
   tree:fragmentationPath ( ).
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -370,5 +371,133 @@ describe("Bucketizer behavior", () => {
         expect(buckets["a2/"].parent!.id.value).toBe("");
         expect(buckets["a2/page-1/"].parent!.id.value).toBe("a2/");
         expect(buckets["a1/"].parent!.id.value).toBe("");
+    });
+
+    describe.only("timebucket", () => {
+        const dayMs = 1000 * 60 * 60 * 24;
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+<a> a tree:TimeBucketFragmentation;
+  tree:timestampPath <time>;
+  tree:maxSize 2;
+  tree:level ( "year" "month" );
+  tree:buffer ${dayMs}. # one day
+`;
+        let idCount = 0;
+        const stream = namedNode("MyStream");
+        const record = (date: Date) => {
+            const id = namedNode("a" + idCount);
+            idCount += 1;
+
+            return new Record(
+                {
+                    id,
+                    quads: [
+                        quad(
+                            id,
+                            namedNode("time"),
+                            literal(date.toISOString()),
+                        ),
+                    ],
+                },
+                stream,
+            );
+        };
+
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const config = <BucketizerConfig>lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+        const inner = <TimeBucketTreeConfig>config.config;
+
+        test("correct config", () => {
+            expect(inner.maxSize).toBe(2);
+            expect(inner.levels).toEqual(["year", "month"]);
+            expect(inner.timeBufferMs).toBe(dayMs);
+        });
+
+        const orchestrator = new BucketizerOrchestrator([config]);
+
+        const buckets: { [id: string]: Bucket } = {};
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
+        const recordBuckets: string[][] = [];
+
+        const firstBuckets = new Set<string>();
+        for (const member of [
+            record(new Date(2024, 1, 1)),
+            record(new Date(2024, 1, 2)),
+        ]) {
+            recordBuckets.push(
+                orchestrator.bucketize(
+                    member,
+                    buckets,
+                    firstBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
+        }
+
+        test("First bucket is the year", () => {
+            expect(firstBuckets).toEqual(new Set(["", "2024/"]));
+            expect(recordBuckets[0]).toEqual(["2024/"]);
+            expect(recordBuckets[1]).toEqual(["2024/"]);
+        });
+
+        const secondBuckets = new Set<string>();
+        for (const member of [
+            record(new Date(2024, 1, 2)),
+            record(new Date(2024, 2, 3)),
+        ]) {
+            recordBuckets.push(
+                orchestrator.bucketize(
+                    member,
+                    buckets,
+                    secondBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
+        }
+
+        test("Second bucket is the month", () => {
+            expect(secondBuckets).toEqual(
+                new Set(["", "2024/", "2024/march/", "2024/february/"]),
+            );
+            expect(recordBuckets[2]).toEqual(["2024/february/"]);
+            expect(recordBuckets[3]).toEqual(["2024/march/"]);
+
+            expect(buckets["2024/february/"].immutable).toBeTruthy();
+            expect(buckets["2024/march/"].immutable).toBeFalsy();
+            expect(buckets["2024/"].immutable).toBeFalsy();
+            expect(buckets[""].immutable).toBeFalsy();
+        });
+
+        const restBuckets = new Set<string>();
+        for (const member of [record(new Date(2024, 3, 2))]) {
+            recordBuckets.push(
+                orchestrator.bucketize(
+                    member,
+                    buckets,
+                    restBuckets,
+                    newMembers,
+                    newRelations,
+                ),
+            );
+        }
+
+        test("second bucket is april, yet february is not yet closed", () => {
+            expect(recordBuckets[4]).toEqual(["2024/april/"]);
+            expect(buckets["2024/march/"].immutable).toBeFalsy();
+            expect(buckets["2024/april/"].immutable).toBeFalsy();
+        });
     });
 });

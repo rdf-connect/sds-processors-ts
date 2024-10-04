@@ -100,23 +100,17 @@ export default class TimebasedBucketizer implements Bucketizer {
                         bucketKey = yearBucket.id.value;
                     }
 
-                    console.log({ bucketKey });
                     const bucket = getBucket(bucketKey);
 
                     // Check if the record belongs to the current bucket.
                     const bucketNames = bucket.id.value.split("/");
-                    console.log("bucketNames", bucketNames);
                     const bucketProperties = decodeURIComponent(
                         bucketNames[bucketNames.length - 2],
                     ).split("_");
                     const bucketTimestamp = new Date(bucketProperties[0]);
                     const bucketSpan = parseInt(bucketProperties[1]);
                     const recordTimestamp = new Date(timestamp);
-                    console.log({
-                        bucketTimestamp,
-                        bucketSpan,
-                        recordTimestamp,
-                    });
+
                     if (recordTimestamp.getTime() < bucketTimestamp.getTime()) {
                         // This should not happen! The record timestamp is before the bucket timestamp of the smallest leaf bucket.
                         this.logger.error(

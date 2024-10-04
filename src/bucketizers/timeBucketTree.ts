@@ -199,14 +199,24 @@ export type TimeBucketTreeConfig = {
     pathQuads: Cont;
     maxSize: number;
     levels: Level[];
+    timeBufferMs: number;
 };
 
 type State = {
     [value: string]: {
         deep: State;
         count: number;
+        end: Date;
+        immutable: boolean;
     };
 };
+
+function hydrate(state: State) {
+    for (const key of Object.keys(state)) {
+        state[key].end = new Date(state[key].end);
+        hydrate(state[key].deep);
+    }
+}
 
 export default class TimeBucketTreeBucketizer implements Bucketizer {
     private readonly config: TimeBucketTreeConfig;
@@ -220,6 +230,10 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
                 JSON.stringify(config.levels)
             );
         }
+
+        if (config["timeBufferMs"] === undefined) {
+            config["timeBufferMs"] = 0;
+        }
         this.config = config;
 
         this.path = config.path.mapAll((x) => ({
@@ -229,6 +243,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
 
         if (save) {
             this.state = JSON.parse(save);
+            hydrate(this.state);
         }
     }
 
@@ -246,19 +261,23 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
         const out: Bucket[] = [];
         for (const value of values) {
             const date = new Date(value.value);
+            const endDate = new Date(date.getTime() - this.config.timeBufferMs);
             let key = "";
             let state = this.state;
             let bucket = getBucket(key, true);
             for (const level of this.config.levels) {
-                const levelValue = levelToValue[level](date);
-                const found = goInState(state, levelValue);
-                state = found.value.deep;
+                checkImmutable(state, key, endDate, getBucket);
 
-                if (key.length === 0) {
-                    key = levelValue;
-                } else {
-                    key = `${key}/${levelValue}`;
-                }
+                const levelValue = levelToValue[level](date);
+                const found = goInState(
+                    state,
+                    levelValue,
+                    date,
+                    levelMax[level],
+                );
+
+                state = found.value.deep;
+                key = concat_key(key, levelValue);
 
                 const nextBucket = getBucket(key);
                 if (!found.found) {
@@ -299,13 +318,46 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
     }
 }
 
+function concat_key(path: string, key: string): string {
+    if (path.length === 0) {
+        return key;
+    } else {
+        return `${path}/${key}`;
+    }
+}
+
+function checkImmutable(
+    state: State,
+    path: string,
+    end: Date,
+    getBucket: (key: string, root?: boolean) => Bucket,
+) {
+    for (const key of Object.keys(state)) {
+        const inner = state[key];
+        if (!inner.immutable && inner.end < end) {
+            const innerPath = concat_key(path, key);
+            const bucket = getBucket(innerPath);
+            inner.immutable = true;
+            bucket.immutable = true;
+            checkImmutable(inner.deep, innerPath, end, getBucket);
+        }
+    }
+}
+
 function goInState(
     state: State,
     value: string,
+    date_value: Date,
+    end_f: (value: Date) => Date,
 ): { found: boolean; value: { deep: State; count: number } } {
     const out = state[value];
     if (out) return { found: true, value: out };
 
-    state[value] = { deep: {}, count: 0 };
+    state[value] = {
+        deep: {},
+        count: 0,
+        end: end_f(date_value),
+        immutable: false,
+    };
     return { found: false, value: state[value] };
 }

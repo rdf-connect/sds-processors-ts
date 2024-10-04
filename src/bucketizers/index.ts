@@ -18,12 +18,18 @@ import TimeBucketTreeBucketizer, {
     TimeBucketTreeConfig,
 } from "./timeBucketTree";
 
+export { TimeBucketTreeConfig } from "./timeBucketTree";
+
 const df = new DataFactory();
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
 
 export type BucketizerConfig = {
     type: Term;
-    config: SubjectFragmentation | PageFragmentation | TimebasedFragmentation;
+    config:
+        | SubjectFragmentation
+        | PageFragmentation
+        | TimebasedFragmentation
+        | TimeBucketTreeConfig;
 };
 
 export type SubjectFragmentation = {
@@ -145,7 +151,6 @@ export class BucketizerOrchestrator {
                 const bucketizer = this.getBucketizer(i, prefix);
 
                 const getBucket = (value: string, root?: boolean) => {
-                    console.log("get bucket", { prefix, value });
                     const encodedValue = value
                         .split("/")
                         .map((x) => encodeURIComponent(decodeURIComponent(x)))
