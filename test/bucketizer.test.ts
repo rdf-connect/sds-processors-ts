@@ -193,10 +193,10 @@ describe("Bucketizer behavior", () => {
             );
         }
 
-        expect(recordBuckets).toEqual(["", "", "/page-1"]);
+        expect(recordBuckets).toEqual(["", "", "page-1/"]);
         expect(buckets[""].root).toBeTruthy();
         expect(buckets[""].links.length).toBe(1);
-        expect(buckets["/page-1"].links.length).toBe(0);
+        expect(buckets["page-1/"].links.length).toBe(0);
     });
 
     test("Subject", () => {
@@ -241,7 +241,7 @@ describe("Bucketizer behavior", () => {
             );
         }
 
-        expect(recordBuckets).toEqual(["/a1", "/a2", "/a2"]);
+        expect(recordBuckets).toEqual(["a1/", "a2/", "a2/"]);
         expect(buckets[""].root).toBeTruthy();
         expect(buckets[""].links.length).toBe(2);
     });
@@ -257,7 +257,7 @@ describe("Bucketizer behavior", () => {
   tree:fragmentationPathName ex:test.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -308,7 +308,7 @@ describe("Bucketizer behavior", () => {
             );
         }
 
-        expect(recordBuckets).toEqual(["/test-a1", "/test-a1", "/test-a2"]);
+        expect(recordBuckets).toEqual(["test-a1/", "test-a1/", "test-a2/"]);
         expect(buckets[""].root).toBeTruthy();
         expect(buckets[""].links.length).toBe(2);
     });
@@ -326,11 +326,11 @@ describe("Bucketizer behavior", () => {
   tree:pageSize 2.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const config1: BucketizerConfig = lens.execute({
+        const config1 = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
-        const config2: BucketizerConfig = lens.execute({
+        const config2 = <BucketizerConfig>lens.execute({
             id: namedNode("b"),
             quads,
         });
@@ -365,10 +365,10 @@ describe("Bucketizer behavior", () => {
         }
 
         expect(Object.keys(buckets).length).toBe(4);
-        expect(recordBuckets).toEqual(["/a1", "/a2", "/a2", "/a2/page-1"]);
+        expect(recordBuckets).toEqual(["a1/", "a2/", "a2/", "a2/page-1/"]);
         expect(buckets[""].root).toBeTruthy();
-        expect(buckets["/a2"].parent!.id.value).toBe("");
-        expect(buckets["/a2/page-1"].parent!.id.value).toBe("/a2");
-        expect(buckets["/a1"].parent!.id.value).toBe("");
+        expect(buckets["a2/"].parent!.id.value).toBe("");
+        expect(buckets["a2/page-1/"].parent!.id.value).toBe("a2/");
+        expect(buckets["a1/"].parent!.id.value).toBe("");
     });
 });

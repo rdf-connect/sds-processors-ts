@@ -61,7 +61,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                 while (!candidateBucket) {
                     if (!bucketKey) {
                         // No more leaf buckets to check. We need to generate a new year bucket.
-                        const root = getBucket("root", true);
+                        const root = getBucket("", true);
                         const newBucketTimestamp = new Date(timestamp);
                         newBucketTimestamp.setUTCMonth(0);
                         newBucketTimestamp.setUTCDate(1);
@@ -100,16 +100,23 @@ export default class TimebasedBucketizer implements Bucketizer {
                         bucketKey = yearBucket.id.value;
                     }
 
+                    console.log({ bucketKey });
                     const bucket = getBucket(bucketKey);
 
                     // Check if the record belongs to the current bucket.
                     const bucketNames = bucket.id.value.split("/");
+                    console.log("bucketNames", bucketNames);
                     const bucketProperties = decodeURIComponent(
-                        bucketNames[bucketNames.length - 1],
+                        bucketNames[bucketNames.length - 2],
                     ).split("_");
                     const bucketTimestamp = new Date(bucketProperties[0]);
                     const bucketSpan = parseInt(bucketProperties[1]);
                     const recordTimestamp = new Date(timestamp);
+                    console.log({
+                        bucketTimestamp,
+                        bucketSpan,
+                        recordTimestamp,
+                    });
                     if (recordTimestamp.getTime() < bucketTimestamp.getTime()) {
                         // This should not happen! The record timestamp is before the bucket timestamp of the smallest leaf bucket.
                         this.logger.error(
@@ -149,7 +156,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                     // The bucket is full. We need to split it.
                     const bucketNames = candidateBucket.id.value.split("/");
                     const bucketProperties = decodeURIComponent(
-                        bucketNames[bucketNames.length - 1],
+                        bucketNames[bucketNames.length - 2],
                     ).split("_");
 
                     // Check if we should split or make a new page.
