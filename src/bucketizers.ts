@@ -3,7 +3,7 @@ import { Parser, Writer as N3Writer } from "n3";
 import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { getLatestShape, getLatestStream, transformMetadata } from "./core";
-import { LDES, PPLAN, PROV, RDF, SDS } from "@treecg/types";
+import { LDES, PPLAN, PROV, RDF, SDS, XSD } from "@treecg/types";
 import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
@@ -97,7 +97,16 @@ function record_to_quads(
                     SDS.terms.custom("DataDescription"),
                 ),
             ),
-        ...record.data.quads,
+        ...(record.data.quads.length
+            ? record.data.quads
+            : [
+                  df.quad(
+                      id,
+                      SDS.terms.custom("dataless"),
+                      df.literal("true", XSD.terms.custom("boolean")),
+                      SDS.terms.custom("DataDescription"),
+                  ),
+              ]),
     ];
     return out;
 }
