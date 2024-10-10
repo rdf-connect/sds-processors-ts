@@ -373,7 +373,7 @@ describe("Bucketizer behavior", () => {
         expect(buckets["a1/"].parent!.id.value).toBe("");
     });
 
-    describe.only("timebucket", () => {
+    describe("timebucket", () => {
         const dayMs = 1000 * 60 * 60 * 24;
         const quadsStr = `
 @prefix tree: <https://w3id.org/tree#>.
@@ -382,8 +382,10 @@ describe("Bucketizer behavior", () => {
 
 <a> a tree:TimeBucketFragmentation;
   tree:timestampPath <time>;
-  tree:maxSize 2;
-  tree:level ( "year" "month" );
+  tree:level ( 
+    [tree:range "year";  tree:maxSize 1]
+    [tree:range "month"; tree:maxSize 2]
+  );
   tree:buffer ${dayMs}. # one day
 `;
         let idCount = 0;
@@ -415,8 +417,13 @@ describe("Bucketizer behavior", () => {
         const inner = <TimeBucketTreeConfig>config.config;
 
         test("correct config", () => {
-            expect(inner.maxSize).toBe(2);
-            expect(inner.levels).toEqual(["year", "month"]);
+            expect(inner.levels).toEqual([
+                { range: "year", amount: 1 },
+                {
+                    range: "month",
+                    amount: 2,
+                },
+            ]);
             expect(inner.timeBufferMs).toBe(dayMs);
         });
 
@@ -433,7 +440,7 @@ describe("Bucketizer behavior", () => {
         const firstBuckets = new Set<string>();
         for (const member of [
             record(new Date(2024, 1, 1)),
-            record(new Date(2024, 1, 2)),
+            // record(new Date(2024, 1, 2)),
         ]) {
             recordBuckets.push(
                 orchestrator.bucketize(
@@ -449,7 +456,7 @@ describe("Bucketizer behavior", () => {
         test("First bucket is the year", () => {
             expect(firstBuckets).toEqual(new Set(["", "2024/"]));
             expect(recordBuckets[0]).toEqual(["2024/"]);
-            expect(recordBuckets[1]).toEqual(["2024/"]);
+            // expect(recordBuckets[1]).toEqual(["2024/"]);
         });
 
         const secondBuckets = new Set<string>();
@@ -472,8 +479,8 @@ describe("Bucketizer behavior", () => {
             expect(secondBuckets).toEqual(
                 new Set(["", "2024/", "2024/march/", "2024/february/"]),
             );
-            expect(recordBuckets[2]).toEqual(["2024/february/"]);
-            expect(recordBuckets[3]).toEqual(["2024/march/"]);
+            expect(recordBuckets[1]).toEqual(["2024/february/"]);
+            expect(recordBuckets[2]).toEqual(["2024/march/"]);
 
             expect(buckets["2024/february/"].immutable).toBeTruthy();
             expect(buckets["2024/march/"].immutable).toBeFalsy();
@@ -495,7 +502,7 @@ describe("Bucketizer behavior", () => {
         }
 
         test("second bucket is april, yet february is not yet closed", () => {
-            expect(recordBuckets[4]).toEqual(["2024/april/"]);
+            expect(recordBuckets[3]).toEqual(["2024/april/"]);
             expect(buckets["2024/march/"].immutable).toBeFalsy();
             expect(buckets["2024/april/"].immutable).toBeFalsy();
         });

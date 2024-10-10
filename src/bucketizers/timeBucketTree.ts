@@ -16,6 +16,11 @@ export type Level =
     | "second"
     | "millisecond";
 
+export type TimeBucket = {
+    range: Level;
+    amount: number;
+};
+
 const months = [
     "january",
     "february",
@@ -197,8 +202,7 @@ function levelsAreValid(levels: Level[]): boolean {
 export type TimeBucketTreeConfig = {
     path: BasicLensM<Cont, Cont>;
     pathQuads: Cont;
-    maxSize: number;
-    levels: Level[];
+    levels: TimeBucket[];
     timeBufferMs: number;
 };
 
@@ -224,7 +228,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
     private readonly state: State = {};
 
     constructor(config: TimeBucketTreeConfig, save?: string) {
-        if (!levelsAreValid(config.levels)) {
+        if (!levelsAreValid(config.levels.map((x) => x.range))) {
             throw (
                 "Levels are not valid, duplicate keys are a thing! " +
                 JSON.stringify(config.levels)
@@ -268,12 +272,12 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
             for (const level of this.config.levels) {
                 checkImmutable(state, key, endDate, getBucket);
 
-                const levelValue = levelToValue[level](date);
+                const levelValue = levelToValue[level.range](date);
                 const found = goInState(
                     state,
                     levelValue,
                     date,
-                    levelMax[level],
+                    levelMax[level.range],
                 );
 
                 state = found.value.deep;
@@ -281,8 +285,8 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
 
                 const nextBucket = getBucket(key);
                 if (!found.found) {
-                    const minDate = levelMin[level](date).toISOString();
-                    const maxDate = levelMax[level](date).toISOString();
+                    const minDate = levelMin[level.range](date).toISOString();
+                    const maxDate = levelMax[level.range](date).toISOString();
 
                     addRelation(
                         bucket,
@@ -301,7 +305,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
                     );
                 }
                 bucket = nextBucket;
-                if (found.value.count < this.config.maxSize) {
+                if (found.value.count < level.amount) {
                     found.value.count += 1;
                     break;
                 }

@@ -109,6 +109,23 @@
   ].
 
 [ ] a sh:NodeShape;
+  sh:targetClass tree:timeBucket;
+  sh:property [
+    sh:name "range";
+    sh:path tree:range;
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:string;
+    sh:in ( "year" "month" "day-of-month" "hour" "minute" "second" "millisecond" );
+  ], [
+    sh:name "amount";
+    sh:path tree:maxSize;
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:integer;
+  ].
+
+[ ] a sh:NodeShape;
   sh:targetClass tree:TimeBucketFragmentation;
   sh:property [
     sh:name "path";
@@ -123,17 +140,10 @@
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:name "maxSize";
-    sh:path tree:maxSize;
-    sh:datatype xsd:integer;
-    sh:maxCount 1;
-    sh:minCount 1;
-  ], [
     sh:name "levels";
     sh:path tree:level;
-    sh:datatype xsd:string;
+    sh:class tree:timeBucket;
     sh:minCount 1;
-    sh:in ( "year" "month" "day-of-month" "hour" "minute" "second" "millisecond" );
   ], [
     sh:name "timeBufferMs";
     sh:path tree:buffer;
