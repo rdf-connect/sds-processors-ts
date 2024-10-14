@@ -17,7 +17,7 @@ export type Level =
     | "millisecond";
 
 export type TimeBucket = {
-    range: Level;
+    ranges: Level[];
     amount: number;
 };
 
@@ -228,7 +228,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
     private readonly state: State = {};
 
     constructor(config: TimeBucketTreeConfig, save?: string) {
-        if (!levelsAreValid(config.levels.map((x) => x.range))) {
+        if (!levelsAreValid(config.levels.flatMap((x) => x.ranges))) {
             throw (
                 "Levels are not valid, duplicate keys are a thing! " +
                 JSON.stringify(config.levels)
@@ -272,21 +272,31 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
             for (const level of this.config.levels) {
                 checkImmutable(state, key, endDate, getBucket);
 
-                const levelValue = levelToValue[level.range](date);
-                const found = goInState(
-                    state,
-                    levelValue,
-                    date,
-                    levelMax[level.range],
-                );
+                const levelValue = level.ranges
+                    .map((x) => levelToValue[x](date))
+                    .join("-");
+
+                const lastF = (date: Date) =>
+                    level.ranges.reduce(
+                        (date, level) => levelMax[level](date),
+                        date,
+                    );
+
+                const minF = (date: Date) =>
+                    level.ranges.reduce(
+                        (date, level) => levelMin[level](date),
+                        date,
+                    );
+
+                const found = goInState(state, levelValue, date, lastF);
 
                 state = found.value.deep;
                 key = concat_key(key, levelValue);
 
                 const nextBucket = getBucket(key);
                 if (!found.found) {
-                    const minDate = levelMin[level.range](date).toISOString();
-                    const maxDate = levelMax[level.range](date).toISOString();
+                    const minDate = minF(date).toISOString();
+                    const maxDate = lastF(date).toISOString();
 
                     addRelation(
                         bucket,
