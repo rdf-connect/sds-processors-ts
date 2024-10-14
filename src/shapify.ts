@@ -1,4 +1,4 @@
-import { Stream, Writer } from "@rdfc/js-runner";
+import type { Stream, Writer } from "@rdfc/js-runner";
 import { Quad, Term } from "@rdfjs/types";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Parser, Writer as NWriter } from "n3";
