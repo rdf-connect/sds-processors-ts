@@ -118,6 +118,7 @@ This processor takes a stream of raw entities (e.g., out from a RML transformati
 ### [`js:LdesifySDS`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L82)
 
 Transform SDS-records in SDS-members, creating versioned objects.
+The resulting objects are encapsulated in a graph (overriding other graphs).
 
 Specify: 
 - `js:input` input channel

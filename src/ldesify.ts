@@ -244,7 +244,10 @@ export function ldesify_sds(
             cache[rec.data.id.value] = hash;
 
             const date = new Date();
-            const id = new NamedNode(rec.data.id.value + date.getTime());
+            const addHashtag = rec.data.id.value.includes("#") ? "-" : "#";
+            const id = new NamedNode(
+                rec.data.id.value + addHashtag + date.getTime(),
+            );
 
             const quads = [
                 df.quad(
