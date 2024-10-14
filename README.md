@@ -114,6 +114,32 @@ When a member arrives, all buckets that hold members with a timestamp older than
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
 
+
+### [`js:LdesifySDS`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L82)
+
+Transform SDS-records in SDS-members, creating versioned objects.
+
+Specify: 
+- `js:input` input channel
+- `js:output` output channel
+- `js:statePath` path for state file
+- optional `js:sourceStream`
+- `js:targetStream` newly created sds stream id
+- optional `js:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
+- optional `js:versionOfPath`, defaults to `http://purl.org/dc/terms/isVersionOf`
+
+
+### [`js:Shapify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/shapify.ttl#L14)
+
+Execute [Extract CBD Shape algorithm](https://github.com/TREEcg/extract-cbd-shape) on all sds records.
+**Note:** this processor does not create a new sds stream.
+
+Specify:
+- `js:input` input channel
+- `js:output` output channel
+- `js:shape` used `sh:NodeShape`
+
+
 ### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)
 
 This processor can be used to join multiple input streams or Reader Channels (`js:input`) and pipe their data flow into a single output stream or Writer Channel (`js:output`). The processor will guarantee that all data elements are delivered downstream and will close the output if all inputs are closed.
