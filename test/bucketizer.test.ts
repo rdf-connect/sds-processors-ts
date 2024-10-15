@@ -34,7 +34,7 @@ describe("Bucketizer configs", () => {
   tree:fragmentationPath (<b> <c>).
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -67,7 +67,7 @@ describe("Bucketizer configs", () => {
   tree:fragmentationPath <b>.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -99,7 +99,7 @@ describe("Bucketizer configs", () => {
   tree:minBucketSpan 3600.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -131,7 +131,7 @@ describe("Bucketizer configs", () => {
   tree:pageSize 42.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -161,7 +161,7 @@ describe("Bucketizer behavior", () => {
   tree:pageSize 2.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -209,7 +209,7 @@ describe("Bucketizer behavior", () => {
   tree:fragmentationPath ( ).
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -257,7 +257,7 @@ describe("Bucketizer behavior", () => {
   tree:fragmentationPathName ex:test.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
@@ -326,11 +326,11 @@ describe("Bucketizer behavior", () => {
   tree:pageSize 2.
 `;
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const config1: BucketizerConfig = lens.execute({
+        const config1: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("a"),
             quads,
         });
-        const config2: BucketizerConfig = lens.execute({
+        const config2: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("b"),
             quads,
         });
