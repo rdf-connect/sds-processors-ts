@@ -95,7 +95,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 `;
 
         const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
-        const output: BucketizerConfig = lens.execute({
+        const output: BucketizerConfig = <BucketizerConfig>lens.execute({
             id: namedNode("http://example.org/Fragmentation"),
             quads,
         });
@@ -578,7 +578,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 // { id: "root", immutable: false, relations: 2 },
                 {
                     id: `root/${encodeURIComponent(b0.toISOString())}_${ts(b0, b1)}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -602,7 +602,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2,
                         b0_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -618,7 +618,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0,
                         b0_2_1,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -674,7 +674,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0_3,
                         b0_2_0_4,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -698,7 +698,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0_3_2,
                         b0_2_0_3_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -730,7 +730,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0_3_2_2,
                         b0_2_0_3_2_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1029,7 +1029,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             ],
         );
 
-        console.log("============ futheer -----------");
+        console.log("============ further -----------");
         // Rb2 - Rb10 should just be added.
         for (let i = 1; i < 10; i++) {
             output = [];
@@ -1110,7 +1110,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0_3_3,
                         b0_2_0_3_4,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1126,7 +1126,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_0_3_3_1,
                         b0_2_0_3_3_2,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1587,7 +1587,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1,
                         b0_2_2,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1595,7 +1595,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_0,
                         b0_2_1_1,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1627,7 +1627,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_0_0,
                         b0_2_1_0_1,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -1659,7 +1659,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_0_0_0,
                         b0_2_1_0_0_1,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -2230,7 +2230,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_0_2,
                         b0_2_1_0_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -2849,7 +2849,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_2,
                         b0_2_1_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -2857,7 +2857,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_2_0,
                         b0_2_1_2_1,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -2905,7 +2905,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_2_0_2,
                         b0_2_1_2_0_3,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -3272,7 +3272,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_2_1,
                         b0_2_1_2_2,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {
@@ -3940,7 +3940,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                         b0_2_1_3,
                         b0_2_1_4,
                     )}_0`,
-                    immutable: false,
+                    immutable: true,
                     relations: 8,
                 },
                 {

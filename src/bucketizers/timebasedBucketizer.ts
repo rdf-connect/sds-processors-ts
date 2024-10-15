@@ -194,6 +194,7 @@ export default class TimebasedBucketizer implements Bucketizer {
                         const newMutableLeafBuckets = [];
                         const parentBucket = candidateBucket;
                         parentBucket.empty = true;
+                        parentBucket.immutable = true;
 
                         const recordTime = new Date(timestamp).getTime();
                         for (let i = 0; i < this.k; i++) {
