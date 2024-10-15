@@ -266,27 +266,23 @@ export default class TimeBucketBucketizer implements Bucketizer {
         for (const value of values) {
             const date = new Date(value.value);
             const endDate = new Date(date.getTime() - this.config.timeBufferMs);
+            console.log({ endDate });
+
             let key = "";
             let state = this.state;
             let bucket = getBucket(key, true);
             for (const level of this.config.levels) {
                 checkImmutable(state, key, endDate, getBucket);
+                const rangeCount = level.ranges.length;
 
                 const levelValue = level.ranges
                     .map((x) => levelToValue[x](date))
                     .join("-");
 
-                const lastF = (date: Date) =>
-                    level.ranges.reduce(
-                        (date, level) => levelMax[level](date),
-                        date,
-                    );
+                console.log("last range", level.ranges[rangeCount - 1]);
 
-                const minF = (date: Date) =>
-                    level.ranges.reduce(
-                        (date, level) => levelMin[level](date),
-                        date,
-                    );
+                const lastF = levelMax[level.ranges[rangeCount - 1]];
+                const minF = levelMin[level.ranges[rangeCount - 1]];
 
                 const found = goInState(state, levelValue, date, lastF);
 
@@ -349,6 +345,11 @@ function checkImmutable(
 ) {
     for (const key of Object.keys(state)) {
         const inner = state[key];
+        console.log(
+            "check immutable",
+            { key, end, innerEnd: inner.end },
+            inner.end < end,
+        );
         if (!inner.immutable && inner.end < end) {
             const innerPath = concatKey(path, key);
             const bucket = getBucket(innerPath);
@@ -368,6 +369,7 @@ function goInState(
     const out = state[value];
     if (out) return { found: true, value: out };
 
+    console.log("endF", date_value, end_f(date_value));
     state[value] = {
         deep: {},
         count: 0,
