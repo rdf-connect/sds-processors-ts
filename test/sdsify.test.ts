@@ -1,4 +1,4 @@
-import { describe, test, expect } from "vitest";
+import { describe, expect, test } from "vitest";
 import { SimpleStream } from "@rdfc/js-runner";
 import { DataFactory } from "rdf-data-factory";
 import { RdfStore } from "rdf-stores";
@@ -201,7 +201,7 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(input, output, STREAM_ID);
+        await sdsify(input, output, STREAM_ID);
 
         // Push some data in
         await input.push(INPUT_1);
@@ -245,7 +245,7 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(
+        await sdsify(
             input,
             output,
             STREAM_ID,
@@ -298,7 +298,7 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(
+        await sdsify(
             input,
             output,
             STREAM_ID,
@@ -365,7 +365,7 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(
+        await sdsify(
             input,
             output,
             STREAM_ID,
@@ -424,7 +424,14 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, undefined, MULTI_SHAPE);
+        await sdsify(
+            input,
+            output,
+            STREAM_ID,
+            undefined,
+            undefined,
+            MULTI_SHAPE,
+        );
 
         // Push some data in
         await input.push(INPUT_1);
@@ -443,16 +450,12 @@ describe("Functional tests for the sdsify function", () => {
             .on("end", () => {});
 
         // Execute function
-        sdsify(input, output, STREAM_ID, undefined, undefined, BAD_SHAPE_1);
-        try {
-            // Push some data in
-            expect(await input.push(INPUT_1)).toThrow(Error);
-        } catch (err) {
-            expect(err.message).toBe(
-                "There are multiple main node shapes in a given shape." +
-                    " Use sh:xone or sh:or to provide multiple unrelated shapes together.",
-            );
-        }
+        await expect(
+            sdsify(input, output, STREAM_ID, undefined, undefined, BAD_SHAPE_1),
+        ).rejects.toThrow(
+            "There are multiple main node shapes in a given shape." +
+                " Use sh:xone or sh:or to provide multiple unrelated shapes together.",
+        );
     });
 
     test("Time stamp-based ordering of SHACL-based extraction", async () => {
@@ -544,7 +547,7 @@ describe("Functional tests for the sdsify function", () => {
             });
 
         // Execute function
-        sdsify(
+        await sdsify(
             input,
             output,
             STREAM_ID,

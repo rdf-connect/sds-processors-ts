@@ -1,0 +1,74 @@
+@prefix dcterms: <http://purl.org/dc/terms/>.
+@prefix sosa: <http://www.w3.org/ns/sosa/>.
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix fno: <https://w3id.org/function/ontology#>.
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix owl: <http://www.w3.org/2002/07/owl#>.
+@prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
+
+js:Shapify a js:JsProcess;
+  dc:title "Shapify processor";
+  dc:description "";
+  js:file <../lib/shapify.js>;
+  js:function "shapify";
+  js:location <../>;
+  js:mapping [
+    a fno:Mapping;
+    fno:parameterMapping [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data input channel";
+      fnom:implementationParameterPosition "0"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data output channel";
+      fnom:implementationParameterPosition "1"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Shape";
+      fnom:implementationParameterPosition "2"^^xsd:int;
+    ];
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass js:Shape;
+  sh:property [
+    sh:datatype xsd:any;
+    sh:path ( );
+    sh:name "id";
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:class rdfl:Context;
+    sh:path ( );
+    sh:name "quads";
+    sh:minCount 1;
+    sh:maxCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass js:Shapify;
+  sh:property [
+    sh:class :ReaderChannel;
+    sh:path js:input;
+    sh:name "Data input channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:class :WriterChannel;
+    sh:path js:output;
+    sh:name "Data output channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:class js:Shape;
+    sh:path js:shape;
+    sh:name "Shape";
+    sh:minCount 1;
+    sh:maxCount 1;
+  ].
+
