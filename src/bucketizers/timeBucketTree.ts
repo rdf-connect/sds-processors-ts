@@ -222,7 +222,7 @@ function hydrate(state: State) {
     }
 }
 
-export default class TimeBucketTreeBucketizer implements Bucketizer {
+export default class TimeBucketBucketizer implements Bucketizer {
     private readonly config: TimeBucketTreeConfig;
     private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
     private readonly state: State = {};
@@ -291,7 +291,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
                 const found = goInState(state, levelValue, date, lastF);
 
                 state = found.value.deep;
-                key = concat_key(key, levelValue);
+                key = concatKey(key, levelValue);
 
                 const nextBucket = getBucket(key);
                 if (!found.found) {
@@ -314,6 +314,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
                         this.config.pathQuads,
                     );
                 }
+
                 bucket = nextBucket;
                 if (found.value.count < level.amount) {
                     found.value.count += 1;
@@ -332,7 +333,7 @@ export default class TimeBucketTreeBucketizer implements Bucketizer {
     }
 }
 
-function concat_key(path: string, key: string): string {
+function concatKey(path: string, key: string): string {
     if (path.length === 0) {
         return key;
     } else {
@@ -349,7 +350,7 @@ function checkImmutable(
     for (const key of Object.keys(state)) {
         const inner = state[key];
         if (!inner.immutable && inner.end < end) {
-            const innerPath = concat_key(path, key);
+            const innerPath = concatKey(path, key);
             const bucket = getBucket(innerPath);
             inner.immutable = true;
             bucket.immutable = true;

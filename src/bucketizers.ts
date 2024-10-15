@@ -320,7 +320,6 @@ export async function bucketize(
                 newMembers,
                 newRelations,
                 prefix,
-                // sourceStream?.value || "/",
             );
 
             record_buckets.forEach((x) => requestedBuckets.add(x));

@@ -109,7 +109,7 @@
   ].
 
 [ ] a sh:NodeShape;
-  sh:targetClass tree:timeBucket;
+  sh:targetClass tree:TimeBucketLevel;
   sh:property [
     sh:name "ranges";
     sh:path tree:range;
@@ -141,7 +141,7 @@
   ], [
     sh:name "levels";
     sh:path tree:level;
-    sh:class tree:timeBucket;
+    sh:class tree:TimeBucketLevel;
     sh:minCount 1;
   ], [
     sh:name "timeBufferMs";

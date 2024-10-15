@@ -118,11 +118,8 @@ When a member arrives, all buckets that hold members with a timestamp older than
   tree:timestampPath <http://def.isotc211.org/iso19156/2011/Observation#OM_Observation.resultTime>;
   tree:buffer 5000;   # members can arrive 5 seconds out of sync () 
   tree:level ( [      # Create 5 levels, resulting uri's <year>/<month>/<day>/<hour>/<minute>
-    tree:range "year";
+    tree:range "year", "month";
     tree:maxSize 0;   # place no members at this level 
-  ] [
-    tree:range "month";
-    tree:maxSize 0;  # place no members at this level
   ] [
     tree:range "day-of-month";
     tree:maxSize 1000;    # place at most 1000 members at this level
@@ -134,6 +131,8 @@ When a member arrives, all buckets that hold members with a timestamp older than
     tree:maxSize 10000;   # place at most 10000 members at this level, this is the last level thus excess members are also put in this level
   ] ).
 ```
+
+This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute}` after ingesting 2001 members in the same hour (filling day and hour).
 
 
 ### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)

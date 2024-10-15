@@ -14,9 +14,7 @@ import SubjectBucketizer from "./subjectBucketizer";
 import TimebasedBucketizer from "./timebasedBucketizer";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
-import TimeBucketTreeBucketizer, {
-    TimeBucketTreeConfig,
-} from "./timeBucketTree";
+import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
 
@@ -86,12 +84,20 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
                 save,
             );
         case TREE.custom("TimeBucketFragmentation"):
-            return new TimeBucketTreeBucketizer(
+            return new TimeBucketBucketizer(
                 <TimeBucketTreeConfig>config.config,
                 save,
             );
     }
     throw "Unknown bucketizer " + config.type.value;
+}
+
+function combineIds(id1: string, id2: string) {
+    const id1Slash = id1.endsWith("/");
+    const id2Slash = id1.startsWith("/");
+    if (id1Slash && id2Slash) return id1 + id2.slice(1);
+    if (id1 === "" || id1Slash || id2Slash) return id1 + id2;
+    return id1 + "/" + id2;
 }
 
 export class BucketizerOrchestrator {
@@ -158,16 +164,10 @@ export class BucketizerOrchestrator {
                     const key = value.endsWith("/")
                         ? encodedValue
                         : encodedValue + "/";
-                    // const key = value;
                     // If the requested bucket is the root, it actually is the previous bucket
 
                     // avoid double slashes and leading slashes
-                    const next =
-                        prefix.endsWith("/") ||
-                        prefix == "" ||
-                        key.startsWith("/")
-                            ? prefix + key
-                            : prefix + "/" + key;
+                    const next = combineIds(prefix, key);
                     const id = root ? prefix : next;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
