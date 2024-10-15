@@ -450,25 +450,12 @@ describe("Functional tests for the sdsify function", () => {
             .on("end", () => {});
 
         // Execute function
-        try {
-            await sdsify(
-                input,
-                output,
-                STREAM_ID,
-                undefined,
-                undefined,
-                BAD_SHAPE_1,
-            );
-
-            // Push some data in
-            expect(true).toBeFalsy();
-        } catch (err) {
-            console.log("Got error!");
-            expect(err.message).toBe(
-                "There are multiple main node shapes in a given shape." +
-                    " Use sh:xone or sh:or to provide multiple unrelated shapes together.",
-            );
-        }
+        await expect(
+            sdsify(input, output, STREAM_ID, undefined, undefined, BAD_SHAPE_1),
+        ).rejects.toThrow(
+            "There are multiple main node shapes in a given shape." +
+                " Use sh:xone or sh:or to provide multiple unrelated shapes together.",
+        );
     });
 
     test("Time stamp-based ordering of SHACL-based extraction", async () => {
