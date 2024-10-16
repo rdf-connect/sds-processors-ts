@@ -1,6 +1,6 @@
 {
   "name": "@rdfc/sds-processors-ts",
-  "version": "1.0.0-alpha.3",
+  "version": "1.0.0",
   "type": "module",
   "scripts": {
     "build": "tspc && tsc-alias",
