@@ -1,5 +1,3 @@
-import { readFileSync } from "fs";
-import * as path from "path";
 import { Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
 import {
@@ -16,13 +14,18 @@ import SubjectBucketizer from "./subjectBucketizer";
 import TimebasedBucketizer from "./timebasedBucketizer";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
+import HourBucketizer from "./hourBucketizer";
 
 const df = new DataFactory();
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
 
 export type BucketizerConfig = {
     type: Term;
-    config: SubjectFragmentation | PageFragmentation | TimebasedFragmentation;
+    config:
+        | SubjectFragmentation
+        | PageFragmentation
+        | TimebasedFragmentation
+        | HourFragmentation;
 };
 
 export type SubjectFragmentation = {
@@ -42,6 +45,12 @@ export type TimebasedFragmentation = {
     maxSize: number;
     k: number;
     minBucketSpan: number;
+};
+
+export type HourFragmentation = {
+    path: BasicLensM<Cont, Cont>;
+    pathQuads: Cont;
+    unorderedRelations?: boolean;
 };
 
 export type AddRelation = (
@@ -78,6 +87,8 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
                 <TimebasedFragmentation>config.config,
                 save,
             );
+        case TREE.custom("HourFragmentation"):
+            return new HourBucketizer(<HourFragmentation>config.config, save);
     }
     throw "Unknown bucketizer " + config.type.value;
 }

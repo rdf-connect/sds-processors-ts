@@ -108,3 +108,25 @@
     sh:minCount 1;
   ].
 
+[ ] a sh:NodeShape;
+    sh:targetClass tree:HourFragmentation;
+    sh:property [
+        sh:name "path";
+        sh:path tree:timestampPath;
+        sh:class rdfl:PathLens;
+        sh:maxCount 1;
+        sh:minCount 1;
+      ], [
+        sh:name "pathQuads";
+        sh:path tree:timestampPath;
+        sh:class <RdfThing>;
+        sh:maxCount 1;
+        sh:minCount 1;
+      ], [
+        sh:name "unorderedRelations";
+        sh:path tree:unorderedRelations;
+        sh:datatype xsd:boolean;
+        sh:maxCount 1;
+        sh:minCount 0;
+      ].
+

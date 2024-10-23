@@ -10,7 +10,7 @@ import { extractShapes, pred } from "rdf-lens";
 import { SimpleStream } from "@rdfc/js-runner";
 import { bucketize } from "../lib/main";
 import { RDF, SDS } from "@treecg/types";
-import namedNode = DataFactory.namedNode;
+const { namedNode } = DataFactory;
 
 type Member = { id: string; timestamp: Date; text: string };
 
