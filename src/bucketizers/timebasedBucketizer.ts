@@ -117,6 +117,16 @@ export default class TimebasedBucketizer implements Bucketizer {
                         );
                         return [];
                     } else if (
+                        this.members.length > 0 &&
+                        recordTimestamp.getTime() <
+                            this.members[this.members.length - 1].timestamp
+                    ) {
+                        // The record is out of order. This should not happen.
+                        this.logger.error(
+                            `Record timestamp is before the last record timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
+                        );
+                        return [];
+                    } else if (
                         recordTimestamp.getTime() >=
                         bucketTimestamp.getTime() + bucketSpan
                     ) {
@@ -172,7 +182,9 @@ export default class TimebasedBucketizer implements Bucketizer {
                         addRelation(
                             candidateBucket,
                             newBucket,
-                            TREE.terms.Relation,
+                            TREE.terms.GreaterThanOrEqualToRelation,
+                            literal(timestamp, namedNode(XSD.dateTime)),
+                            this.pathQuads,
                         );
 
                         // Update the members for the new bucket.
