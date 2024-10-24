@@ -72,6 +72,18 @@
     sh:datatype xsd:integer;
     sh:maxCount 1;
     sh:minCount 1;
+  ], [
+    sh:name "path";
+    sh:path tree:timestampPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 0;
+  ], [
+    sh:name "pathQuads";
+    sh:path tree:timestampPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 0;
   ].
 
 [ ] a sh:NodeShape;

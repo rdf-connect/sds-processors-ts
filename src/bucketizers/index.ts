@@ -37,6 +37,8 @@ export type SubjectFragmentation = {
 
 export type PageFragmentation = {
     pageSize: number;
+    path?: BasicLensM<Cont, Cont>;
+    pathQuads?: Cont;
 };
 
 export type TimebasedFragmentation = {
