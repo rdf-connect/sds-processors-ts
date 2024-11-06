@@ -42,9 +42,9 @@
     "@rdfjs/types": "^1.1.2",
     "@types/jsonld": "^1.5.15",
     "@types/n3": "^1.21.1",
-    "@types/node": "^22.8.7",
-    "@typescript-eslint/eslint-plugin": "^8.12.2",
-    "@typescript-eslint/parser": "^8.12.2",
+    "@types/node": "^22.9.0",
+    "@typescript-eslint/eslint-plugin": "^8.13.0",
+    "@typescript-eslint/parser": "^8.13.0",
     "@vitest/coverage-v8": "^2.1.4",
     "dotenv": "^16.4.5",
     "eslint": "^9.9.1",
@@ -56,7 +56,7 @@
     "ts-patch": "^3.2.1",
     "tsc-alias": "^1.8.10",
     "typescript": "^5.6.3",
-    "vite-tsconfig-paths": "^5.0.1",
+    "vite-tsconfig-paths": "^5.1.0",
     "vitest": "^2.1.4"
   }
 }
