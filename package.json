@@ -29,12 +29,12 @@
     "csv-parse": "^5.5.6",
     "extract-cbd-shape": "^0.1.8",
     "jsonld": "^8.3.2",
-    "n3": "^1.22.3",
+    "n3": "^1.23.0",
     "rdf-canonize": "^4.0.1",
     "rdf-data-factory": "^1.1.2",
     "rdf-lens": "^1.3.0",
     "rdf-stores": "^1.0.0",
-    "winston": "^3.16.0"
+    "winston": "^3.17.0"
   },
   "devDependencies": {
     "@ajuvercr/ts-transformer-inline-file": "^0.2.0",
@@ -43,8 +43,8 @@
     "@types/jsonld": "^1.5.15",
     "@types/n3": "^1.21.1",
     "@types/node": "^22.9.0",
-    "@typescript-eslint/eslint-plugin": "^8.13.0",
-    "@typescript-eslint/parser": "^8.13.0",
+    "@typescript-eslint/eslint-plugin": "^8.14.0",
+    "@typescript-eslint/parser": "^8.14.0",
     "@vitest/coverage-v8": "^2.1.4",
     "dotenv": "^16.4.5",
     "eslint": "^9.9.1",
@@ -56,7 +56,7 @@
     "ts-patch": "^3.2.1",
     "tsc-alias": "^1.8.10",
     "typescript": "^5.6.3",
-    "vite-tsconfig-paths": "^5.1.0",
+    "vite-tsconfig-paths": "^5.1.2",
     "vitest": "^2.1.4"
   }
 }
