@@ -79,14 +79,14 @@ ex:Fragmentation a tree:HourFragmentation ;
         const record2 = memberToRecord(member2);
 
         const firstBucketExpected = "";
-        const secondBucketExpected = `/${encodeURIComponent(
+        const secondBucketExpected = `${encodeURIComponent(
             new Date(
                 member2.timestamp.getFullYear(),
                 member2.timestamp.getMonth(),
                 member2.timestamp.getDate(),
                 member2.timestamp.getHours(),
             ).toISOString(),
-        )}`;
+        )}/`;
 
         // Insert first record
         const record1Buckets = orchestrator.bucketize(
@@ -185,14 +185,14 @@ ex:Fragmentation a tree:HourFragmentation ;
         const record2 = memberToRecord(member2);
 
         const firstBucketExpected = "";
-        const secondBucketExpected = `/${encodeURIComponent(
+        const secondBucketExpected = `${encodeURIComponent(
             new Date(
                 member2.timestamp.getFullYear(),
                 member2.timestamp.getMonth(),
                 member2.timestamp.getDate(),
                 member2.timestamp.getHours(),
             ).toISOString(),
-        )}`;
+        )}/`;
 
         // Insert first record
         const record1Buckets = orchestrator.bucketize(

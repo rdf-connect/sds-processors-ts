@@ -71,7 +71,7 @@ describe("SDS processors tests", async () => {
 
         const argss = extractSteps(proc, quads, config);
         expect(argss.length).toBe(1);
-        expect(argss[0].length).toBe(5);
+        expect(argss[0].length).toBe(6);
 
         const [[c, loc, save, si, so]] = argss;
 
