@@ -17,6 +17,7 @@ import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
+import HourBucketizer from "./hourBucketizer";
 
 const df = new DataFactory();
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
@@ -27,7 +28,8 @@ export type BucketizerConfig = {
         | SubjectFragmentation
         | PageFragmentation
         | TimebasedFragmentation
-        | TimeBucketTreeConfig;
+        | TimeBucketTreeConfig
+        | HourFragmentation;
 };
 
 export type SubjectFragmentation = {
@@ -39,6 +41,8 @@ export type SubjectFragmentation = {
 
 export type PageFragmentation = {
     pageSize: number;
+    path?: BasicLensM<Cont, Cont>;
+    pathQuads?: Cont;
 };
 
 export type TimebasedFragmentation = {
@@ -47,6 +51,12 @@ export type TimebasedFragmentation = {
     maxSize: number;
     k: number;
     minBucketSpan: number;
+};
+
+export type HourFragmentation = {
+    path: BasicLensM<Cont, Cont>;
+    pathQuads: Cont;
+    unorderedRelations?: boolean;
 };
 
 export type AddRelation = (
@@ -88,6 +98,8 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
                 <TimeBucketTreeConfig>config.config,
                 save,
             );
+        case TREE.custom("HourFragmentation"):
+            return new HourBucketizer(<HourFragmentation>config.config, save);
     }
     throw "Unknown bucketizer " + config.type.value;
 }

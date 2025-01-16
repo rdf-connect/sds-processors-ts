@@ -11,12 +11,18 @@ export function Cleanup(callback: () => void | Promise<void>) {
 
     // Make sure we only call the callback once.
     let callbackCalled = false;
-    const fn = async function (event: string, code?: number) {
+    const fn = async function (event: string, code?: number, message?: Error) {
         if (!callbackCalled) {
             callbackCalled = true;
             logger.debug(
                 `[Cleanup] Callback called on '${event}' with code '${code}'.`,
             );
+            if (message) {
+                logger.error(
+                    `[Cleanup] Uncaught Exception: ${message.name} - ${message.message}`,
+                );
+                logger.debug(message.stack);
+            }
             await callback();
         } else {
             logger.debug(
@@ -41,6 +47,6 @@ export function Cleanup(callback: () => void | Promise<void>) {
     //catch uncaught exceptions, trace, then exit normally
     process.on(
         "uncaughtException",
-        async () => await fn("uncaughtException", 99),
+        async (error) => await fn("uncaughtException", 99, error),
     );
 }
