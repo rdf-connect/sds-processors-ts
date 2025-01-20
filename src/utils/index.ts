@@ -1,4 +1,4 @@
-import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
+import { NamedNode, Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
@@ -11,7 +11,7 @@ import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 
 const df = new DataFactory();
 
-export const SDS_GRAPH = SDS.terms.custom("DataDescription");
+export const SDS_GRAPH: NamedNode = SDS.terms.custom("DataDescription");
 
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/sds_shapes.ttl");
 
