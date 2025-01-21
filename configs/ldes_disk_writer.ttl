@@ -1,0 +1,59 @@
+@prefix js: <https://w3id.org/conn/js#>.
+@prefix fno: <https://w3id.org/function/ontology#>.
+@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+@prefix : <https://w3id.org/conn#>.
+@prefix sh: <http://www.w3.org/ns/shacl#>.
+
+js:LdesDiskWriter a js:JsProcess;
+  js:file <../lib/ldesDiskWriter.js>;
+  js:function "ldesDiskWriter";
+  js:location <../>;
+  js:mapping [
+    a fno:Mapping;
+    fno:parameterMapping [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Data Input Channel";
+      fnom:implementationParameterPosition "0"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Metadata Input Channel";
+      fnom:implementationParameterPosition "1"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Directory";
+      fnom:implementationParameterPosition "2"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "LDES Identifier";
+      fnom:implementationParameterPosition "3"^^xsd:int;
+    ];
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass js:LdesDiskWriter;
+  sh:property [
+    sh:class :ReaderChannel;
+    sh:path js:dataInput;
+    sh:name "Data Input Channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:class :ReaderChannel;
+    sh:path js:metadataInput;
+    sh:name "Metadata Input Channel";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:datatype  xsd:string;
+    sh:path js:directory;
+    sh:name "Directory";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:datatype  xsd:iri;
+    sh:path js:ldesId;
+    sh:name "LDES Identifier";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ].

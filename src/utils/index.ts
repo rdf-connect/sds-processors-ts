@@ -307,3 +307,12 @@ export function getOrDefaultMap<T1, T2>(
 ): T2 {
     return map.get(key) || map.set(key, def).get(key)!;
 }
+
+export function maybeParse(data: Quad[] | string): Quad[] {
+    if (typeof data === "string" || data instanceof String) {
+        const parse = new Parser();
+        return parse.parse(<string>data);
+    } else {
+        return data;
+    }
+}
