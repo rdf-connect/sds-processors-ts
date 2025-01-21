@@ -4,7 +4,6 @@ import { Term } from "@rdfjs/types";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE } from "@treecg/types";
 import { getLoggerFor } from "../utils/logUtil";
-import { Writer } from "n3";
 
 export default class SubjectBucketizer implements Bucketizer {
     protected readonly logger = getLoggerFor(this);
