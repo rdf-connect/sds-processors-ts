@@ -165,6 +165,15 @@ Specify:
 - `js:output` output channel
 - `js:shape` used `sh:NodeShape`
 
+### [`js:MemberAsNamedGraph`](https://github.com/rdf-connect/sds-processors/blob/master/configs/member_as_graph.ttl#L10)
+
+Transform all sds records payload members into named graph-based members.
+**Note:** this processor does not create a new sds stream.
+
+Specify:
+- `js:input` input channel
+- `js:output` output channel
+
 
 ### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)
 

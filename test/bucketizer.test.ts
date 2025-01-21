@@ -49,7 +49,7 @@ describe("Bucketizer configs", () => {
         expect(applied.map((x) => x.id.value)).toEqual(["42"]);
 
         expect(config.pathQuads).toBeDefined();
-        expect(config.pathQuads.id.termType).toBe("BlankNode");
+        expect(config.pathQuads.id.termType).toBe("NamedNode");
         expect(config.pathQuads.quads.length).toBe(4);
     });
 
