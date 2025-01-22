@@ -77,6 +77,7 @@ You can define bucketizers as follows:
   js:outputStreamId <MyEpicStream>.
 ```
 
+
 #### Example of a time-based fragmentation
 
 ```turtle
@@ -110,6 +111,30 @@ The members need to be arrived in order of their timestamps.
 When a member arrives, all buckets that hold members with a timestamp older than the new member's timestamp will be made immutable and no new members can be added to them.
 
 
+#### Example of a timebucket based fragmentation
+
+```turtle
+<timebucket-fragmentation> a tree:TimeBucketFragmentation;
+  tree:timestampPath <http://def.isotc211.org/iso19156/2011/Observation#OM_Observation.resultTime>;
+  tree:buffer 5000;   # members can arrive 5 seconds out of sync () 
+  tree:level ( [      # Create 5 levels, resulting uri's <year>/<month>/<day>/<hour>/<minute>
+    tree:range "year", "month";
+    tree:maxSize 0;   # place no members at this level 
+  ] [
+    tree:range "day-of-month";
+    tree:maxSize 1000;    # place at most 1000 members at this level
+  ] [
+    tree:range "hour";
+    tree:maxSize 1000;    # place at most 1000 members at this level
+  ] [
+    tree:range "minute";
+    tree:maxSize 10000;   # place at most 10000 members at this level, this is the last level thus excess members are also put in this level
+  ] ).
+```
+
+This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute}` after ingesting 2001 members in the same hour (filling day and hour).
+
+
 ### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
@@ -139,6 +164,15 @@ Specify:
 - `js:input` input channel
 - `js:output` output channel
 - `js:shape` used `sh:NodeShape`
+
+### [`js:MemberAsNamedGraph`](https://github.com/rdf-connect/sds-processors/blob/master/configs/member_as_graph.ttl#L10)
+
+Transform all sds records payload members into named graph-based members.
+**Note:** this processor does not create a new sds stream.
+
+Specify:
+- `js:input` input channel
+- `js:output` output channel
 
 
 ### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)

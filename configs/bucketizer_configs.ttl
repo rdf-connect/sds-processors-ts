@@ -121,24 +121,81 @@
   ].
 
 [ ] a sh:NodeShape;
-    sh:targetClass tree:HourFragmentation;
-    sh:property [
-        sh:name "path";
-        sh:path tree:timestampPath;
-        sh:class rdfl:PathLens;
-        sh:maxCount 1;
-        sh:minCount 1;
-      ], [
-        sh:name "pathQuads";
-        sh:path tree:timestampPath;
-        sh:class <RdfThing>;
-        sh:maxCount 1;
-        sh:minCount 1;
-      ], [
-        sh:name "unorderedRelations";
-        sh:path tree:unorderedRelations;
-        sh:datatype xsd:boolean;
-        sh:maxCount 1;
-        sh:minCount 0;
-      ].
+  sh:property [
+    sh:name "ranges";
+    sh:path tree:range;
+    sh:minCount 1;
+    sh:datatype xsd:string;
+    sh:in ( "year" "month" "day-of-month" "hour" "minute" "second" "millisecond" );
+  ], [
+    sh:name "amount";
+    sh:path tree:maxSize;
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:integer;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:TimeBucketLevel;
+  sh:property [
+    sh:name "ranges";
+    sh:path tree:range;
+    sh:minCount 1;
+    sh:datatype xsd:string;
+    sh:in ( "year" "month" "day-of-month" "hour" "minute" "second" "millisecond" );
+  ], [
+    sh:name "amount";
+    sh:path tree:maxSize;
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:integer;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:TimeBucketFragmentation;
+  sh:property [
+    sh:name "path";
+    sh:path tree:timestampPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "pathQuads";
+    sh:path tree:timestampPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "levels";
+    sh:path tree:level;
+    sh:class tree:TimeBucketLevel;
+    sh:minCount 1;
+  ], [
+    sh:name "timeBufferMs";
+    sh:path tree:buffer;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass tree:HourFragmentation;
+  sh:property [
+    sh:name "path";
+    sh:path tree:timestampPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "pathQuads";
+    sh:path tree:timestampPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "unorderedRelations";
+    sh:path tree:unorderedRelations;
+    sh:datatype xsd:boolean;
+    sh:maxCount 1;
+    sh:minCount 0;
+  ].
 

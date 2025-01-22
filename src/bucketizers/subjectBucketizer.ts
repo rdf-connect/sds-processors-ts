@@ -42,7 +42,7 @@ export default class SubjectBucketizer implements Bucketizer {
 
         const out: Bucket[] = [];
 
-        const root = getBucket("root", true);
+        const root = getBucket("", true);
 
         if (values.length === 0 && this.defaultName) {
             values.push({ value: this.defaultName });

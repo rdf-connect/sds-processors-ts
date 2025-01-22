@@ -38,6 +38,10 @@ js:Bucketize a js:JsProcess;
       a fnom:PositionParameterMapping;
       fnom:functionParameter "ID of Stream to produce";
       fnom:implementationParameterPosition "4"^^xsd:int;
+    ], [
+      a fnom:PositionParameterMapping;
+      fnom:functionParameter "Bucket Prefix";
+      fnom:implementationParameterPosition "5"^^xsd:int;
     ];
   ].
 
@@ -129,6 +133,11 @@ js:Bucketize a js:JsProcess;
     sh:datatype xsd:string;
     sh:path js:savePath;
     sh:name "Path to use to save state files";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:string;
+    sh:path js:prefix;
+    sh:name "Bucket Prefix";
     sh:maxCount 1;
   ].
 

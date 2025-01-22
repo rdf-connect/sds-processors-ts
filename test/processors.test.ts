@@ -19,6 +19,7 @@ describe("SDS processors tests", async () => {
   <./configs/ldesify.ttl>,
   <./configs/sdsify.ttl>,
   <./configs/stream_join.ttl>,
+  <./configs/member_as_graph.ttl>,
   <./configs/ldes_disk_writer.ttl>.
 
 [ ] a :Channel;
@@ -72,7 +73,7 @@ describe("SDS processors tests", async () => {
 
         const argss = extractSteps(proc, quads, config);
         expect(argss.length).toBe(1);
-        expect(argss[0].length).toBe(5);
+        expect(argss[0].length).toBe(6);
 
         const [[c, loc, save, si, so]] = argss;
 
@@ -209,7 +210,76 @@ describe("SDS processors tests", async () => {
         await checkProc(proc.file, proc.func);
     });
 
-    test("js:LdesDiskWriter is properly defined", async () => {
+    test("streamJoin", async () => {
+      const processor = `
+      [ ] a js:StreamJoin;
+        js:input <jr>, <jr2>;
+        js:output <jw>.
+      `;
+
+      const source: Source = {
+          value: pipeline + processor,
+          baseIRI,
+          type: "memory",
+      };
+
+      const {
+          processors,
+          quads,
+          shapes: config,
+      } = await extractProcessors(source);
+
+      const proc = processors[0];
+      expect(proc).toBeDefined();
+
+      const argss = extractSteps(proc, quads, config);
+      expect(argss.length).toBe(1);
+      expect(argss[0].length).toBe(2);
+
+      const [[inputs, output]] = argss;
+
+      expect(inputs.length).toBe(2);
+      inputs.forEach(i => testReader(i));
+      testWriter(output);
+
+      await checkProc(proc.file, proc.func);
+  });
+  
+    test("memberAsNamedGraph", async () => {
+      const processor = `
+      [ ] a js:MemberAsNamedGraph;
+        js:input <jr>;
+        js:output <jw>.
+      `;
+
+      const source: Source = {
+          value: pipeline + processor,
+          baseIRI,
+          type: "memory",
+      };
+
+      const {
+          processors,
+          quads,
+          shapes: config,
+      } = await extractProcessors(source);
+
+      const proc = processors[0];
+      expect(proc).toBeDefined();
+
+      const argss = extractSteps(proc, quads, config);
+      expect(argss.length).toBe(1);
+      expect(argss[0].length).toBe(2);
+
+      const [[input, output]] = argss;
+
+      testReader(input);
+      testWriter(output);
+
+      await checkProc(proc.file, proc.func);
+  });
+
+  test("js:LdesDiskWriter is properly defined", async () => {
         const processor = `
         [ ] a js:LdesDiskWriter;
             js:dataInput <jr>;
