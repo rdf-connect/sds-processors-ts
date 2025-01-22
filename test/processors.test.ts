@@ -18,7 +18,8 @@ describe("SDS processors tests", async () => {
   <./configs/generator.ttl>,
   <./configs/ldesify.ttl>,
   <./configs/sdsify.ttl>,
-  <./configs/stream_join.ttl>.
+  <./configs/stream_join.ttl>,
+  <./configs/ldes_disk_writer.ttl>.
 
 [ ] a :Channel;
   :reader <jr>;
@@ -204,6 +205,43 @@ describe("SDS processors tests", async () => {
         expect(typeFilters[1].value).toBe("http://ex.org/AnotherType");
         expect(timestamp.value).toBe("http://ex.org/timestamp");
         expect(new Parser().parse(shape).length).toBe(2);
+
+        await checkProc(proc.file, proc.func);
+    });
+
+    test("js:LdesDiskWriter is properly defined", async () => {
+        const processor = `
+        [ ] a js:LdesDiskWriter;
+            js:dataInput <jr>;
+            js:metadataInput <jr>;
+            js:directory "/tmp/ldes-disk/";
+            js:ldesId <http://localhost:8000/>.
+        `;
+
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
+
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
+
+        const proc = processors[0];
+        expect(proc).toBeDefined();
+
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(4);
+
+        const [[dataInput, metadataInput, directory, ldesId]] = argss;
+        testReader(dataInput);
+        testReader(metadataInput);
+        expect(directory).toBe("/tmp/ldes-disk/");
+        expect(ldesId.value).toBe("http://localhost:8000/");
 
         await checkProc(proc.file, proc.func);
     });
