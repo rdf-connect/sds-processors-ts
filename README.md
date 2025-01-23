@@ -74,7 +74,8 @@ You can define bucketizers as follows:
     tree:pageSize 2;
   ] );
   js:savePath <./buckets_save.json>;
-  js:outputStreamId <MyEpicStream>.
+  js:outputStreamId <MyEpicStream>;
+  js:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
 ```
 
 
@@ -96,7 +97,8 @@ You can define bucketizers as follows:
     tree:minBucketSpan 3600;        # In seconds
   ]);
   js:savePath <./buckets_save.json>;
-  js:outputStreamId <MyEpicStream>.
+  js:outputStreamId <MyEpicStream>;
+  js:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
 ```
 
 This will create buckets based on a time-based fragmentation.
