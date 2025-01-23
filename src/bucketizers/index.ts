@@ -12,7 +12,6 @@ import { DataFactory } from "rdf-data-factory";
 import PagedBucketizer from "./pagedBucketizer";
 import SubjectBucketizer from "./subjectBucketizer";
 import TimebasedBucketizer from "./timebasedBucketizer";
-
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 
@@ -134,7 +133,7 @@ export class BucketizerOrchestrator {
             origin: Bucket;
             relation: BucketRelation;
         }[],
-        prefix: string = "",
+        prefix: string,
     ): string[] {
         let queue = [prefix];
 
