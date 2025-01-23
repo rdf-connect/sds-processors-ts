@@ -8,6 +8,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
+import path from "node:path";
 
 const df = new DataFactory();
 
@@ -315,4 +316,8 @@ export function maybeParse(data: Quad[] | string): Quad[] {
     } else {
         return data;
     }
+}
+
+export function joinUriParts(...parts: string[]): string {
+    return path.posix.join(...parts).replace(":/", "://");
 }

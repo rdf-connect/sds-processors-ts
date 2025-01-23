@@ -1,6 +1,6 @@
 import { NamedNode, Quad, Quad_Object } from "@rdfjs/types";
 import { Stream } from "@rdfc/js-runner";
-import { maybeParse } from "./utils";
+import { joinUriParts, maybeParse } from "./utils";
 import { getLoggerFor } from "./utils/logUtil";
 import { Extractor } from "./utils/extractor";
 import path from "node:path";
@@ -53,9 +53,7 @@ export function ldesDiskWriter(
         // Add information about the different views (defined by the streams) in the LDES.
         for (const stream of streams) {
             const viewId = df.namedNode(
-                path.posix
-                    .join(ldesId.value, encodeURIComponent(stream.value))
-                    .replace(":/", "://"),
+                joinUriParts(ldesId.value, encodeURIComponent(stream.value)),
             );
             metadataQuads.push(df.quad(ldesId, TREE.terms.view, viewId));
             metadataQuads.push(
@@ -144,13 +142,11 @@ export function ldesDiskWriter(
                 bucket.id,
             );
             const bucketId = df.namedNode(
-                path.posix
-                    .join(
-                        ldesId.value,
-                        encodeURIComponent(bucket.streamId),
-                        bucket.id,
-                    )
-                    .replace(":/", "://"),
+                joinUriParts(
+                    ldesId.value,
+                    encodeURIComponent(bucket.streamId),
+                    bucket.id,
+                ),
             );
 
             // Make sure bucket directory exists
@@ -241,12 +237,10 @@ export function ldesDiskWriter(
                     const quads = [
                         df.quad(
                             df.namedNode(
-                                path.posix
-                                    .join(
-                                        ldesId.value,
-                                        encodeURIComponent(bucket.streamId),
-                                    )
-                                    .replace(":/", "://"),
+                                joinUriParts(
+                                    ldesId.value,
+                                    encodeURIComponent(bucket.streamId),
+                                ),
                             ),
                             TREE.terms.relation,
                             bn,
@@ -302,13 +296,11 @@ export function ldesDiskWriter(
             const quads = [
                 df.quad(
                     df.namedNode(
-                        path.posix
-                            .join(
-                                ldesId.value,
-                                encodeURIComponent(relation.stream),
-                                relation.origin,
-                            )
-                            .replace(":/", "://"),
+                        joinUriParts(
+                            ldesId.value,
+                            encodeURIComponent(relation.stream),
+                            relation.origin,
+                        ),
                     ),
                     TREE.terms.relation,
                     bn,
@@ -318,13 +310,11 @@ export function ldesDiskWriter(
                     bn,
                     TREE.terms.node,
                     df.namedNode(
-                        path.posix
-                            .join(
-                                ldesId.value,
-                                encodeURIComponent(relation.stream),
-                                relation.bucket,
-                            )
-                            .replace(":/", "://"),
+                        joinUriParts(
+                            ldesId.value,
+                            encodeURIComponent(relation.stream),
+                            relation.bucket,
+                        ),
                     ),
                 ),
             ];
