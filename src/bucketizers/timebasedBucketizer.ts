@@ -37,6 +37,52 @@ export default class TimebasedBucketizer implements Bucketizer {
         }
     }
 
+    getMyBucket(
+        bucketKey: string | undefined,
+        timestamp: string,
+        getBucket: (key: string, root?: boolean) => Bucket,
+        addRelation: AddRelation,
+    ): Bucket {
+        if (bucketKey) return getBucket(bucketKey);
+
+        // No more leaf buckets to check. We need to generate a new year bucket.
+        const root = getBucket("", true);
+        const newBucketTimestamp = new Date(timestamp);
+        newBucketTimestamp.setUTCMonth(0);
+        newBucketTimestamp.setUTCDate(1);
+        newBucketTimestamp.setUTCHours(0, 0, 0, 0);
+        // Support leap years.
+        const yearTimespan =
+            new Date(newBucketTimestamp.getUTCFullYear(), 1, 29).getDate() ===
+            29
+                ? 31622400000
+                : 31536000000;
+
+        this.logger.info(
+            `Creating new year bucket with timestamp ${newBucketTimestamp.toISOString()} and timespan ${yearTimespan}.`,
+        );
+
+        const yearBucket = getBucket(
+            `${newBucketTimestamp.toISOString()}_${yearTimespan}_0`,
+            false,
+        );
+
+        // Add the new year bucket to the root bucket
+        this.addTimestampRelations(
+            root,
+            yearBucket,
+            newBucketTimestamp,
+            yearTimespan,
+            addRelation,
+        );
+
+        // Add the new bucket to the list of leaf buckets.
+        this.mutableLeafBucketKeys.push(yearBucket.id.value);
+        this.members = [];
+
+        return yearBucket;
+    }
+
     bucketize(
         record: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
@@ -59,48 +105,12 @@ export default class TimebasedBucketizer implements Bucketizer {
                 let candidateBucket: Bucket | undefined = undefined;
                 let bucketKey = this.mutableLeafBucketKeys[0];
                 while (!candidateBucket) {
-                    if (!bucketKey) {
-                        // No more leaf buckets to check. We need to generate a new year bucket.
-                        const root = getBucket("", true);
-                        const newBucketTimestamp = new Date(timestamp);
-                        newBucketTimestamp.setUTCMonth(0);
-                        newBucketTimestamp.setUTCDate(1);
-                        newBucketTimestamp.setUTCHours(0, 0, 0, 0);
-                        // Support leap years.
-                        const yearTimespan =
-                            new Date(
-                                newBucketTimestamp.getUTCFullYear(),
-                                1,
-                                29,
-                            ).getDate() === 29
-                                ? 31622400000
-                                : 31536000000;
-
-                        this.logger.info(
-                            `Creating new year bucket with timestamp ${newBucketTimestamp.toISOString()} and timespan ${yearTimespan}.`,
-                        );
-
-                        const yearBucket = getBucket(
-                            `${newBucketTimestamp.toISOString()}_${yearTimespan}_0`,
-                            false,
-                        );
-
-                        // Add the new year bucket to the root bucket
-                        this.addTimestampRelations(
-                            root,
-                            yearBucket,
-                            newBucketTimestamp,
-                            yearTimespan,
-                            addRelation,
-                        );
-
-                        // Add the new bucket to the list of leaf buckets.
-                        this.mutableLeafBucketKeys.push(yearBucket.id.value);
-                        this.members = [];
-                        bucketKey = yearBucket.id.value;
-                    }
-
-                    const bucket = getBucket(bucketKey);
+                    const bucket = this.getMyBucket(
+                        bucketKey,
+                        timestamp,
+                        getBucket,
+                        addRelation,
+                    );
 
                     // Check if the record belongs to the current bucket.
                     const bucketNames = bucket.id.value.split("/");

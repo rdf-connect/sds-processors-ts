@@ -49,7 +49,7 @@ describe("Bucketizer configs", () => {
         expect(applied.map((x) => x.id.value)).toEqual(["42"]);
 
         expect(config.pathQuads).toBeDefined();
-        expect(config.pathQuads.id.termType).toBe("NamedNode");
+        expect(config.pathQuads.id.termType).toBe("BlankNode");
         expect(config.pathQuads.quads.length).toBe(4);
     });
 
@@ -189,6 +189,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -237,6 +238,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -304,6 +306,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -360,6 +363,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -443,6 +447,7 @@ describe("Bucketizer behavior", () => {
                     firstBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -462,6 +467,7 @@ describe("Bucketizer behavior", () => {
                     secondBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
@@ -487,6 +493,7 @@ describe("Bucketizer behavior", () => {
                     restBuckets,
                     newMembers,
                     newRelations,
+                    "",
                 ),
             );
         }
