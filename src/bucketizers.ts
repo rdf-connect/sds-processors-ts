@@ -265,7 +265,7 @@ export async function bucketize(
     savePath: string | undefined,
     sourceStream: Term | undefined,
     resultingStream: Term,
-    prefix = "",
+    prefix = "root",
 ) {
     set_metadata(channels, resultingStream, sourceStream, config);
     const save = read_save(savePath);
