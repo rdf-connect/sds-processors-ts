@@ -4,8 +4,11 @@ import { Bucket, Record } from "../utils";
 import { Term } from "@rdfjs/types";
 import { TREE, XSD } from "@treecg/types";
 import { DataFactory } from "n3";
+import { getLoggerFor } from "../utils/logUtil";
 
 const { literal, namedNode } = DataFactory;
+
+const logger = getLoggerFor("timeBucketTree.ts");
 
 export type Level =
     | "year"
@@ -223,6 +226,8 @@ function hydrate(state: State) {
 }
 
 export default class TimeBucketBucketizer implements Bucketizer {
+    protected readonly logger = getLoggerFor(this);
+
     private readonly config: TimeBucketTreeConfig;
     private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
     private readonly state: State = {};
@@ -266,7 +271,7 @@ export default class TimeBucketBucketizer implements Bucketizer {
         for (const value of values) {
             const date = new Date(value.value);
             const endDate = new Date(date.getTime() - this.config.timeBufferMs);
-            console.log({ endDate });
+            this.logger.verbose(endDate.toISOString());
 
             let key = "";
             let state = this.state;
@@ -279,7 +284,7 @@ export default class TimeBucketBucketizer implements Bucketizer {
                     .map((x) => levelToValue[x](date))
                     .join("-");
 
-                console.log("last range", level.ranges[rangeCount - 1]);
+                this.logger.debug(`last range ${level.ranges[rangeCount - 1]}`);
 
                 const lastF = levelMax[level.ranges[rangeCount - 1]];
                 const minF = levelMin[level.ranges[rangeCount - 1]];
@@ -345,10 +350,8 @@ function checkImmutable(
 ) {
     for (const key of Object.keys(state)) {
         const inner = state[key];
-        console.log(
-            "check immutable",
-            { key, end, innerEnd: inner.end },
-            inner.end < end,
+        logger.debug(
+            `check immutable {key: ${key}, end: ${end}, innerEnd: ${inner.end}}, innerEnd < end: ${inner.end < end}`,
         );
         if (!inner.immutable && inner.end < end) {
             const innerPath = concatKey(path, key);
@@ -369,7 +372,9 @@ function goInState(
     const out = state[value];
     if (out) return { found: true, value: out };
 
-    console.log("endF", date_value, end_f(date_value));
+    logger.debug(
+        `endF ${date_value.toISOString()} ${end_f(date_value).toISOString()}`,
+    );
     state[value] = {
         deep: {},
         count: 0,
