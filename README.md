@@ -198,6 +198,5 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 [ ] a js:LdesDiskWriter;
     js:dataInput <data/reader>;
     js:metadataInput <metadata/reader>;
-    js:directory </tmp/ldes-disk/>;
-    js:ldesId <http://localhost:8000/>.
+    js:directory </tmp/ldes-disk/>.
 ```

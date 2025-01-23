@@ -23,10 +23,6 @@ js:LdesDiskWriter a js:JsProcess;
       a fnom:PositionParameterMapping;
       fnom:functionParameter "Directory";
       fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "LDES Identifier";
-      fnom:implementationParameterPosition "3"^^xsd:int;
     ];
   ].
 
@@ -48,12 +44,6 @@ js:LdesDiskWriter a js:JsProcess;
     sh:datatype  xsd:string;
     sh:path js:directory;
     sh:name "Directory";
-    sh:maxCount 1;
-    sh:minCount 1;
-  ], [
-    sh:datatype  xsd:iri;
-    sh:path js:ldesId;
-    sh:name "LDES Identifier";
     sh:maxCount 1;
     sh:minCount 1;
   ].

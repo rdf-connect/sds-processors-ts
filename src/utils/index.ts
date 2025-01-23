@@ -317,7 +317,3 @@ export function maybeParse(data: Quad[] | string): Quad[] {
         return data;
     }
 }
-
-export function joinUriParts(...parts: string[]): string {
-    return path.posix.join(...parts).replace(":/", "://");
-}

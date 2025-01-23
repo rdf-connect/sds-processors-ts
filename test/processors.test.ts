@@ -211,81 +211,80 @@ describe("SDS processors tests", async () => {
     });
 
     test("streamJoin", async () => {
-      const processor = `
+        const processor = `
       [ ] a js:StreamJoin;
         js:input <jr>, <jr2>;
         js:output <jw>.
       `;
 
-      const source: Source = {
-          value: pipeline + processor,
-          baseIRI,
-          type: "memory",
-      };
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
 
-      const {
-          processors,
-          quads,
-          shapes: config,
-      } = await extractProcessors(source);
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
 
-      const proc = processors[0];
-      expect(proc).toBeDefined();
+        const proc = processors[0];
+        expect(proc).toBeDefined();
 
-      const argss = extractSteps(proc, quads, config);
-      expect(argss.length).toBe(1);
-      expect(argss[0].length).toBe(2);
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(2);
 
-      const [[inputs, output]] = argss;
+        const [[inputs, output]] = argss;
 
-      expect(inputs.length).toBe(2);
-      inputs.forEach(i => testReader(i));
-      testWriter(output);
+        expect(inputs.length).toBe(2);
+        inputs.forEach((i) => testReader(i));
+        testWriter(output);
 
-      await checkProc(proc.file, proc.func);
-  });
-  
+        await checkProc(proc.file, proc.func);
+    });
+
     test("memberAsNamedGraph", async () => {
-      const processor = `
+        const processor = `
       [ ] a js:MemberAsNamedGraph;
         js:input <jr>;
         js:output <jw>.
       `;
 
-      const source: Source = {
-          value: pipeline + processor,
-          baseIRI,
-          type: "memory",
-      };
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
 
-      const {
-          processors,
-          quads,
-          shapes: config,
-      } = await extractProcessors(source);
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
 
-      const proc = processors[0];
-      expect(proc).toBeDefined();
+        const proc = processors[0];
+        expect(proc).toBeDefined();
 
-      const argss = extractSteps(proc, quads, config);
-      expect(argss.length).toBe(1);
-      expect(argss[0].length).toBe(2);
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(2);
 
-      const [[input, output]] = argss;
+        const [[input, output]] = argss;
 
-      testReader(input);
-      testWriter(output);
+        testReader(input);
+        testWriter(output);
 
-      await checkProc(proc.file, proc.func);
-  });
+        await checkProc(proc.file, proc.func);
+    });
 
-  test("js:LdesDiskWriter is properly defined", async () => {
+    test("js:LdesDiskWriter is properly defined", async () => {
         const processor = `
         [ ] a js:LdesDiskWriter;
             js:dataInput <jr>;
             js:metadataInput <jr>;
-            js:directory "/tmp/ldes-disk/";
-            js:ldesId <http://localhost:8000/>.
+            js:directory "/tmp/ldes-disk/".
         `;
 
         const source: Source = {
@@ -305,13 +304,12 @@ describe("SDS processors tests", async () => {
 
         const argss = extractSteps(proc, quads, config);
         expect(argss.length).toBe(1);
-        expect(argss[0].length).toBe(4);
+        expect(argss[0].length).toBe(3);
 
-        const [[dataInput, metadataInput, directory, ldesId]] = argss;
+        const [[dataInput, metadataInput, directory]] = argss;
         testReader(dataInput);
         testReader(metadataInput);
         expect(directory).toBe("/tmp/ldes-disk/");
-        expect(ldesId.value).toBe("http://localhost:8000/");
 
         await checkProc(proc.file, proc.func);
     });

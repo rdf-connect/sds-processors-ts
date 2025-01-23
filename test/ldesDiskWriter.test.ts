@@ -1,4 +1,3 @@
-import { DataFactory } from "rdf-data-factory";
 import { afterEach, describe, expect, test, vi } from "vitest";
 import { SimpleStream } from "@rdfc/js-runner";
 import { ldesDiskWriter } from "../lib/ldesDiskWriter";
@@ -13,8 +12,6 @@ vi.mock("fs", async () => {
     return { default: memfs.fs, ...(memfs.fs as object) };
 });
 
-const df = new DataFactory();
-
 describe("Functional tests for the ldesDiskWriter function", () => {
     afterEach(() => {
         vol.reset();
@@ -23,10 +20,9 @@ describe("Functional tests for the ldesDiskWriter function", () => {
     test("LdesDiskWriter works", async () => {
         const dataInput = new SimpleStream<string>();
         const metadataInput = new SimpleStream<string>();
-        const directory = "/tmp/ldes-disk/";
-        const ldesId = df.namedNode("http://localhost:8000/");
+        const directory = "tmp/ldes-disk/";
 
-        ldesDiskWriter(dataInput, metadataInput, directory, ldesId);
+        ldesDiskWriter(dataInput, metadataInput, directory);
 
         const metadata = `
         @prefix ex: <http://example.org/ns#> .
@@ -97,12 +93,15 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         const index = fs.readFileSync(
             `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.ttl`,
         );
-        const quads = new Parser().parse(index.toString());
+        const quads = new Parser({
+            baseIRI:
+                "http://localhost/http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.ttl",
+        }).parse(index.toString());
         // Check if it contains the tree:member triple
         expect(
             quads.some(
                 (q) =>
-                    q.subject.value === ldesId.value &&
+                    q.subject.value === "http://localhost/index.ttl" &&
                     q.predicate.value === TREE.member &&
                     q.object.value ===
                         "http://marineregions.org/mrgid/3959?t=1104534000",
