@@ -19,7 +19,8 @@ describe("SDS processors tests", async () => {
   <./configs/ldesify.ttl>,
   <./configs/sdsify.ttl>,
   <./configs/stream_join.ttl>,
-  <./configs/member_as_graph.ttl>.
+  <./configs/member_as_graph.ttl>,
+  <./configs/ldes_disk_writer.ttl>.
 
 [ ] a :Channel;
   :reader <jr>;
@@ -210,73 +211,108 @@ describe("SDS processors tests", async () => {
     });
 
     test("streamJoin", async () => {
-      const processor = `
+        const processor = `
       [ ] a js:StreamJoin;
         js:input <jr>, <jr2>;
         js:output <jw>.
       `;
 
-      const source: Source = {
-          value: pipeline + processor,
-          baseIRI,
-          type: "memory",
-      };
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
 
-      const {
-          processors,
-          quads,
-          shapes: config,
-      } = await extractProcessors(source);
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
 
-      const proc = processors[0];
-      expect(proc).toBeDefined();
+        const proc = processors[0];
+        expect(proc).toBeDefined();
 
-      const argss = extractSteps(proc, quads, config);
-      expect(argss.length).toBe(1);
-      expect(argss[0].length).toBe(2);
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(2);
 
-      const [[inputs, output]] = argss;
+        const [[inputs, output]] = argss;
 
-      expect(inputs.length).toBe(2);
-      inputs.forEach(i => testReader(i));
-      testWriter(output);
+        expect(inputs.length).toBe(2);
+        inputs.forEach((i) => testReader(i));
+        testWriter(output);
 
-      await checkProc(proc.file, proc.func);
-  });
-  
+        await checkProc(proc.file, proc.func);
+    });
+
     test("memberAsNamedGraph", async () => {
-      const processor = `
+        const processor = `
       [ ] a js:MemberAsNamedGraph;
         js:input <jr>;
         js:output <jw>.
       `;
 
-      const source: Source = {
-          value: pipeline + processor,
-          baseIRI,
-          type: "memory",
-      };
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
 
-      const {
-          processors,
-          quads,
-          shapes: config,
-      } = await extractProcessors(source);
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
 
-      const proc = processors[0];
-      expect(proc).toBeDefined();
+        const proc = processors[0];
+        expect(proc).toBeDefined();
 
-      const argss = extractSteps(proc, quads, config);
-      expect(argss.length).toBe(1);
-      expect(argss[0].length).toBe(2);
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(2);
 
-      const [[input, output]] = argss;
+        const [[input, output]] = argss;
 
-      testReader(input);
-      testWriter(output);
+        testReader(input);
+        testWriter(output);
 
-      await checkProc(proc.file, proc.func);
-  });
+        await checkProc(proc.file, proc.func);
+    });
+
+    test("js:LdesDiskWriter is properly defined", async () => {
+        const processor = `
+        [ ] a js:LdesDiskWriter;
+            js:dataInput <jr>;
+            js:metadataInput <jr>;
+            js:directory "/tmp/ldes-disk/".
+        `;
+
+        const source: Source = {
+            value: pipeline + processor,
+            baseIRI,
+            type: "memory",
+        };
+
+        const {
+            processors,
+            quads,
+            shapes: config,
+        } = await extractProcessors(source);
+
+        const proc = processors[0];
+        expect(proc).toBeDefined();
+
+        const argss = extractSteps(proc, quads, config);
+        expect(argss.length).toBe(1);
+        expect(argss[0].length).toBe(3);
+
+        const [[dataInput, metadataInput, directory]] = argss;
+        testReader(dataInput);
+        testReader(metadataInput);
+        expect(directory).toBe("/tmp/ldes-disk/");
+
+        await checkProc(proc.file, proc.func);
+    });
 });
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

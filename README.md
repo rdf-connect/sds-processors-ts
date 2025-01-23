@@ -183,3 +183,20 @@ This processor can be used to join multiple input streams or Reader Channels (`j
 
 This a simple RDF data generator function used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.
 
+### [`js:LdesDiskWriter`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldes_disk_writer.ttl#L8)
+
+This processor can be used to transform an [SDS stream](https://w3id.org/sds/specification) and its correspondent stream of members into a LDES.
+It will persist the LDES as a set of files on disk.
+
+Alternative more advanced implementation: [sds-storage-writer-ts](https://github.com/rdf-connect/sds-storage-writer-ts) together with [LDES-Solid-Server](https://github.com/rdf-connect/LDES-Solid-Server).
+
+An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
+
+```turtle
+@prefix js: <https://w3id.org/conn/js#>.
+
+[ ] a js:LdesDiskWriter;
+    js:dataInput <data/reader>;
+    js:metadataInput <metadata/reader>;
+    js:directory </tmp/ldes-disk/>.
+```

@@ -2,7 +2,7 @@ import type { Stream, Writer } from "@rdfc/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
-import { getSubjects } from "./utils/index";
+import { getSubjects, maybeParse } from "./utils/index";
 import { Parser, Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
@@ -17,15 +17,6 @@ type SDSMember = {
     quads: Quad[];
     timestamp?: Term;
 };
-
-function maybeParse(data: Quad[] | string): Quad[] {
-    if (typeof data === "string" || data instanceof String) {
-        const parse = new Parser();
-        return parse.parse(<string>data);
-    } else {
-        return data;
-    }
-}
 
 // Find the main sh:NodeShape subject of a give Shape Graph.
 // We determine this by assuming that the main node shape

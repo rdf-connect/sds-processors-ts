@@ -8,6 +8,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
+import path from "node:path";
 
 const df = new DataFactory();
 
@@ -306,4 +307,13 @@ export function getOrDefaultMap<T1, T2>(
     def: T2,
 ): T2 {
     return map.get(key) || map.set(key, def).get(key)!;
+}
+
+export function maybeParse(data: Quad[] | string): Quad[] {
+    if (typeof data === "string" || data instanceof String) {
+        const parse = new Parser();
+        return parse.parse(<string>data);
+    } else {
+        return data;
+    }
 }
