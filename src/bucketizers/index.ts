@@ -167,7 +167,11 @@ export class BucketizerOrchestrator {
             for (const prefix of todo) {
                 const bucketizer = this.getBucketizer(i, prefix);
 
-                const getBucket = (value: string, root?: boolean) => {
+                const getBucket = (
+                    value: string,
+                    root?: boolean,
+                    keyIsId = false,
+                ) => {
                     const encodedValue = value
                         .split("/")
                         .map((x) => encodeURIComponent(decodeURIComponent(x)))
@@ -179,7 +183,7 @@ export class BucketizerOrchestrator {
 
                     // avoid double slashes and leading slashes
                     const next = combineIds(prefix, key);
-                    const id = root ? prefix : next;
+                    const id = keyIsId ? key : root ? prefix : next;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
 

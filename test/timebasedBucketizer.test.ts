@@ -186,6 +186,31 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         }
     });
 
+    test("bucketize with (k = 4, m = 100, s = 3600) and prefix root/ should all add to the first bucket", () => {
+        const orchestrator = getOrchestrator(4, 100, 3600);
+
+        const firstBucketExpected =
+            "root/" +
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") +
+            "/";
+
+        // All the members should fit in the first bucket.
+        for (let i = 0; i < 24; i++) {
+            const recordBuckets = orchestrator.bucketize(
+                memberToRecord(members[i]),
+                buckets,
+                new Set(),
+                new Map<string, Set<string>>(),
+                [],
+                "root/",
+            );
+            expect(recordBuckets.length).toBe(1);
+            expect(recordBuckets[0]).toBe(firstBucketExpected);
+            expect(buckets["root/"].root).toBeTruthy();
+            expect(buckets["root/"].links.length).toBe(2);
+        }
+    });
+
     test("bucketize with (k = 4, m = 10, s = 30000000000) should make new pages", () => {
         const orchestrator = getOrchestrator(4, 10, 30000000000);
 
@@ -237,6 +262,71 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 new Map<string, Set<string>>(),
                 [],
                 "",
+            );
+            expect(recordBuckets.length).toBe(1);
+            expect(recordBuckets[0]).toBe(thirdBucketExpected);
+            expect(buckets[secondBucketExpected].root).toBeFalsy();
+            expect(buckets[secondBucketExpected].links.length).toBe(1);
+        }
+    });
+
+    test("bucketize with (k = 4, m = 10, s = 30000000000) and prefix root/ should make new pages", () => {
+        const orchestrator = getOrchestrator(4, 10, 30000000000);
+
+        const firstBucketExpected =
+            "root/" +
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_0") +
+            "/";
+        const secondBucketExpected =
+            "root/" +
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_1") +
+            "/";
+        const thirdBucketExpected =
+            "root/" +
+            encodeURIComponent("2023-01-01T00:00:00.000Z_31536000000_2") +
+            "/";
+
+        // Add first 10 members, should all be added to the first single bucket.
+        for (let i = 0; i < 10; i++) {
+            const recordBuckets = orchestrator.bucketize(
+                memberToRecord(members[i]),
+                buckets,
+                new Set(),
+                new Map<string, Set<string>>(),
+                [],
+                "root/",
+            );
+            expect(recordBuckets.length).toBe(1);
+            expect(recordBuckets[0]).toBe(firstBucketExpected);
+            expect(buckets["root/"].root).toBeTruthy();
+            expect(buckets["root/"].links.length).toBe(2);
+        }
+
+        // The next 10 member should be added to a new page bucket, as we cannot split due to timespan constraints.
+        for (let i = 10; i < 20; i++) {
+            const recordBuckets = orchestrator.bucketize(
+                memberToRecord(members[i]),
+                buckets,
+                new Set(),
+                new Map<string, Set<string>>(),
+                [],
+                "root/",
+            );
+            expect(recordBuckets.length).toBe(1);
+            expect(recordBuckets[0]).toBe(secondBucketExpected);
+            expect(buckets[firstBucketExpected].root).toBeFalsy();
+            expect(buckets[firstBucketExpected].links.length).toBe(1);
+        }
+
+        // The next 4 member should be added to a new page bucket, as we cannot split due to timespan constraints.
+        for (let i = 20; i < 24; i++) {
+            const recordBuckets = orchestrator.bucketize(
+                memberToRecord(members[i]),
+                buckets,
+                new Set(),
+                new Map<string, Set<string>>(),
+                [],
+                "root/",
             );
             expect(recordBuckets.length).toBe(1);
             expect(recordBuckets[0]).toBe(thirdBucketExpected);
