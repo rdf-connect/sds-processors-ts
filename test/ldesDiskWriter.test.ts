@@ -74,7 +74,7 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         await dataInput.push(data);
 
         const files = fs.readdirSync(directory);
-        expect(files).toContain("index.ttl");
+        expect(files).toContain("index.trig");
         expect(files).toContain(
             "http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream",
         );
@@ -82,26 +82,26 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         const streamFiles = fs.readdirSync(
             `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream`,
         );
-        expect(streamFiles).toContain("index.ttl");
+        expect(streamFiles).toContain("index.trig");
         expect(streamFiles).toContain("root");
 
         const rootFiles = fs.readdirSync(
             `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root`,
         );
-        expect(rootFiles).toContain("index.ttl");
+        expect(rootFiles).toContain("index.trig");
 
         const index = fs.readFileSync(
-            `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.ttl`,
+            `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.trig`,
         );
         const quads = new Parser({
             baseIRI:
-                "http://localhost/http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.ttl",
+                "http://localhost/http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.trig",
         }).parse(index.toString());
         // Check if it contains the tree:member triple
         expect(
             quads.some(
                 (q) =>
-                    q.subject.value === "http://localhost/index.ttl" &&
+                    q.subject.value === "http://localhost/index.trig" &&
                     q.predicate.value === TREE.member &&
                     q.object.value ===
                         "http://marineregions.org/mrgid/3959?t=1104534000",
