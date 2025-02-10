@@ -400,5 +400,6 @@ function encodePathValue(value: string, alreadyUriEncoded = false): string {
     if (!alreadyUriEncoded) {
         value = encodeURIComponent(value);
     }
+    // Replace % with _ to avoid issues with simple HTTP servers like GH Pages, probably trying to wrongly decode the URI component.
     return value.replace(/%/g, "_");
 }
