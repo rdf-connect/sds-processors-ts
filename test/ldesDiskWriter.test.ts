@@ -76,26 +76,26 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         const files = fs.readdirSync(directory);
         expect(files).toContain("index.trig");
         expect(files).toContain(
-            "http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream",
+            "http_3A_2F_2Fexample.org_2Fns_23BenchmarkStream",
         );
 
         const streamFiles = fs.readdirSync(
-            `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream`,
+            `${directory}http_3A_2F_2Fexample.org_2Fns_23BenchmarkStream`,
         );
         expect(streamFiles).toContain("index.trig");
         expect(streamFiles).toContain("root");
 
         const rootFiles = fs.readdirSync(
-            `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root`,
+            `${directory}http_3A_2F_2Fexample.org_2Fns_23BenchmarkStream/root`,
         );
         expect(rootFiles).toContain("index.trig");
 
         const index = fs.readFileSync(
-            `${directory}http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.trig`,
+            `${directory}http_3A_2F_2Fexample.org_2Fns_23BenchmarkStream/root/index.trig`,
         );
         const quads = new Parser({
             baseIRI:
-                "http://localhost/http%3A%2F%2Fexample.org%2Fns%23BenchmarkStream/root/index.trig",
+                "http://localhost/http_3A_2F_2Fexample.org_2Fns_23BenchmarkStream/root/index.trig",
         }).parse(index.toString());
         // Check if it contains the tree:member triple
         expect(
