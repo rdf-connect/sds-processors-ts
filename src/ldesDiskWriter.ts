@@ -62,7 +62,7 @@ export function ldesDiskWriter(
         // Add information about the different views (defined by the streams) in the LDES.
         for (const stream of streams) {
             const viewId = df.namedNode(
-                path.join(encodeURIComponent(stream.value), "index.trig"),
+                path.join(encodePathValue(stream.value), "index.trig"),
             );
             metadataQuads.push(
                 df.quad(df.namedNode("index.trig"), TREE.terms.view, viewId),
@@ -112,7 +112,7 @@ export function ldesDiskWriter(
             // Create the directory and index file for the view
             const viewPath = path.join(
                 directory,
-                encodeURIComponent(stream.value),
+                encodePathValue(stream.value),
             );
             await fs.promises.mkdir(viewPath, { recursive: true });
 
@@ -161,8 +161,8 @@ export function ldesDiskWriter(
         for (const bucket of extract.getBuckets()) {
             const bucketPath = path.join(
                 directory,
-                encodeURIComponent(bucket.streamId),
-                bucket.id,
+                encodePathValue(bucket.streamId),
+                encodePathValue(bucket.id, true),
             );
 
             // Make sure bucket directory exists
@@ -175,8 +175,8 @@ export function ldesDiskWriter(
                     path.join(
                         path.relative(
                             path.join(
-                                encodeURIComponent(bucket.streamId),
-                                bucket.id,
+                                encodePathValue(bucket.streamId),
+                                encodePathValue(bucket.id, true),
                             ),
                             "",
                         ),
@@ -258,13 +258,13 @@ export function ldesDiskWriter(
                 // Check if a relation to the viewId from the bucketId already exists
                 const viewIndexPath = path.join(
                     directory,
-                    encodeURIComponent(bucket.streamId),
+                    encodePathValue(bucket.streamId),
                     "index.trig",
                 );
                 const content = await fs.promises.readFile(viewIndexPath);
                 const existingQuads = new Parser().parse(content.toString());
                 const relativeBucketId = df.namedNode(
-                    path.join(bucket.id, "index.trig"),
+                    path.join(encodePathValue(bucket.id, true), "index.trig"),
                 );
                 if (
                     !existingQuads.some(
@@ -295,8 +295,8 @@ export function ldesDiskWriter(
                 // Append the member contents to the file corresponding to the bucket
                 const bucketIndexPath = path.join(
                     directory,
-                    encodeURIComponent(record.stream),
-                    bucket,
+                    encodePathValue(record.stream),
+                    encodePathValue(bucket, true),
                     "index.trig",
                 );
 
@@ -304,8 +304,8 @@ export function ldesDiskWriter(
                     path.join(
                         path.relative(
                             path.join(
-                                encodeURIComponent(record.stream),
-                                bucket,
+                                encodePathValue(record.stream),
+                                encodePathValue(bucket, true),
                             ),
                             "",
                         ),
@@ -316,7 +316,7 @@ export function ldesDiskWriter(
                     df.quad(
                         relativeLdesId,
                         TREE.terms.member,
-                        df.namedNode(record.payload),
+                        df.namedNode(encodePathValue(record.payload, true)),
                     ),
                 ];
                 if (!record.dataless) {
@@ -334,8 +334,8 @@ export function ldesDiskWriter(
             // Append the relation to the file corresponding to the bucket
             const bucketIndexPath = path.join(
                 directory,
-                encodeURIComponent(relation.stream),
-                relation.origin,
+                encodePathValue(relation.stream),
+                encodePathValue(relation.origin, true),
                 "index.trig",
             );
 
@@ -348,7 +348,10 @@ export function ldesDiskWriter(
                     TREE.terms.node,
                     df.namedNode(
                         path.join(
-                            path.relative(relation.origin, relation.bucket),
+                            encodePathValue(
+                                path.relative(relation.origin, relation.bucket),
+                                true,
+                            ),
                             "index.trig",
                         ),
                     ),
@@ -391,4 +394,11 @@ async function quadsToString(quads: Quad[]) {
             }
         });
     });
+}
+
+function encodePathValue(value: string, alreadyUriEncoded = false): string {
+    if (!alreadyUriEncoded) {
+        value = encodeURIComponent(value);
+    }
+    return value.replace(/%/g, "_");
 }
