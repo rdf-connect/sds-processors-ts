@@ -247,6 +247,11 @@ function set_metadata(
             serializeQuads(await f(parseQuads(quads))),
         ),
     );
+
+    channels.metadataInput.on("end", async () => {
+        // Propagate the end event to the output metadata channel
+        await channels.metadataOutput.end();
+    })
 }
 
 function read_save(savePath?: string) {
@@ -374,4 +379,11 @@ export async function bucketize(
             new N3Writer().quadsToString(outputQuads),
         );
     });
-}
+
+    channels.dataInput.on("end", async () => {
+        // Save the state of the orchestrator (if any)
+        await writeState(savePath, orchestrator.save());
+        // Close downstream channel
+        await channels.dataOutput.end();
+    });
+;}
