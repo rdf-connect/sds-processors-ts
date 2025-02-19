@@ -1,4 +1,4 @@
-import { NamedNode, Quad, Quad_Object } from "@rdfjs/types";
+import { Quad, Quad_Object } from "@rdfjs/types";
 import { Stream } from "@rdfc/js-runner";
 import { maybeParse } from "./utils";
 import { getLoggerFor } from "./utils/logUtil";
@@ -34,7 +34,7 @@ export function ldesDiskWriter(
 
         metadataQuads.push(
             df.quad(
-                df.namedNode("index.ttl"),
+                df.namedNode("index.trig"),
                 RDF.terms.type,
                 LDES.terms.EventStream,
             ),
@@ -51,7 +51,7 @@ export function ldesDiskWriter(
                 .forEach((q) =>
                     metadataQuads.push(
                         df.quad(
-                            df.namedNode("index.ttl"),
+                            df.namedNode("index.trig"),
                             q.predicate,
                             q.object,
                         ),
@@ -62,10 +62,10 @@ export function ldesDiskWriter(
         // Add information about the different views (defined by the streams) in the LDES.
         for (const stream of streams) {
             const viewId = df.namedNode(
-                path.join(encodeURIComponent(stream.value), "index.ttl"),
+                path.join(encodePathValue(stream.value), "index.trig"),
             );
             metadataQuads.push(
-                df.quad(df.namedNode("index.ttl"), TREE.terms.view, viewId),
+                df.quad(df.namedNode("index.trig"), TREE.terms.view, viewId),
             );
             metadataQuads.push(
                 df.quad(viewId, RDF.terms.type, TREE.terms.Node),
@@ -98,7 +98,7 @@ export function ldesDiskWriter(
                 df.quad(
                     viewDescriptionId,
                     DC.terms.custom("servesDataset"),
-                    df.namedNode("index.ttl"),
+                    df.namedNode("index.trig"),
                 ),
             );
             metadataQuads.push(
@@ -112,38 +112,38 @@ export function ldesDiskWriter(
             // Create the directory and index file for the view
             const viewPath = path.join(
                 directory,
-                encodeURIComponent(stream.value),
+                encodePathValue(stream.value),
             );
             await fs.promises.mkdir(viewPath, { recursive: true });
 
-            const viewIndexPath = path.join(viewPath, "index.ttl");
+            const viewIndexPath = path.join(viewPath, "index.trig");
             if (!fs.existsSync(viewIndexPath)) {
                 const viewQuads = [
                     df.quad(
-                        df.namedNode("../index.ttl"),
+                        df.namedNode("../index.trig"),
                         RDF.terms.type,
                         LDES.terms.EventStream,
                     ),
                     df.quad(
-                        df.namedNode("index.ttl"),
+                        df.namedNode("index.trig"),
                         RDF.terms.type,
                         TREE.terms.Node,
                     ),
                     df.quad(
-                        df.namedNode("index.ttl"),
+                        df.namedNode("index.trig"),
                         DC.terms.custom("isPartOf"),
-                        df.namedNode("../index.ttl"),
+                        df.namedNode("../index.trig"),
                     ),
                 ];
-                const data = new Writer().quadsToString(viewQuads);
+                const data = await quadsToString(viewQuads);
                 await fs.promises.writeFile(viewIndexPath, data);
             }
         }
 
         // Always writing the metadata makes sure the metadata is always up-to-date.
-        const metadataString = new Writer().quadsToString(metadataQuads);
+        const metadataString = await quadsToString(metadataQuads);
         await fs.promises.writeFile(
-            path.join(directory, "index.ttl"),
+            path.join(directory, "index.trig"),
             metadataString,
         );
     });
@@ -161,26 +161,26 @@ export function ldesDiskWriter(
         for (const bucket of extract.getBuckets()) {
             const bucketPath = path.join(
                 directory,
-                encodeURIComponent(bucket.streamId),
-                bucket.id,
+                encodePathValue(bucket.streamId),
+                encodePathValue(bucket.id, true),
             );
 
             // Make sure bucket directory exists
             await fs.promises.mkdir(bucketPath, { recursive: true });
 
-            // If bucket index.ttl does not exist, create it with minimal metadata
-            const bucketIndexPath = path.join(bucketPath, "index.ttl");
+            // If bucket index.trig does not exist, create it with minimal metadata
+            const bucketIndexPath = path.join(bucketPath, "index.trig");
             if (!fs.existsSync(bucketIndexPath)) {
                 const relativeLdesId = df.namedNode(
                     path.join(
                         path.relative(
                             path.join(
-                                encodeURIComponent(bucket.streamId),
-                                bucket.id,
+                                encodePathValue(bucket.streamId),
+                                encodePathValue(bucket.id, true),
                             ),
                             "",
                         ),
-                        "index.ttl",
+                        "index.trig",
                     ),
                 );
                 const metadataQuads = [
@@ -190,17 +190,17 @@ export function ldesDiskWriter(
                         LDES.terms.EventStream,
                     ),
                     df.quad(
-                        df.namedNode("index.ttl"),
+                        df.namedNode("index.trig"),
                         RDF.terms.type,
                         TREE.terms.Node,
                     ),
                     df.quad(
-                        df.namedNode("index.ttl"),
+                        df.namedNode("index.trig"),
                         DC.terms.custom("isPartOf"),
                         relativeLdesId,
                     ),
                 ];
-                const data = new Writer().quadsToString(metadataQuads);
+                const data = await quadsToString(metadataQuads);
                 await fs.promises.writeFile(bucketIndexPath, data);
             }
 
@@ -250,10 +250,7 @@ export function ldesDiskWriter(
                 handleFullMember();
 
                 // We needed to empty bucket, so only add metadata and relations back to the file
-                const data = new Writer().quadsToString([
-                    ...metadata,
-                    ...relations,
-                ]);
+                const data = await quadsToString([...metadata, ...relations]);
                 await fs.promises.writeFile(bucketIndexPath, data);
             }
 
@@ -261,13 +258,13 @@ export function ldesDiskWriter(
                 // Check if a relation to the viewId from the bucketId already exists
                 const viewIndexPath = path.join(
                     directory,
-                    encodeURIComponent(bucket.streamId),
-                    "index.ttl",
+                    encodePathValue(bucket.streamId),
+                    "index.trig",
                 );
                 const content = await fs.promises.readFile(viewIndexPath);
                 const existingQuads = new Parser().parse(content.toString());
                 const relativeBucketId = df.namedNode(
-                    path.join(bucket.id, "index.ttl"),
+                    path.join(encodePathValue(bucket.id, true), "index.trig"),
                 );
                 if (
                     !existingQuads.some(
@@ -279,14 +276,14 @@ export function ldesDiskWriter(
                     const bn = df.blankNode();
                     const quads = [
                         df.quad(
-                            df.namedNode("index.ttl"),
+                            df.namedNode("index.trig"),
                             TREE.terms.relation,
                             bn,
                         ),
                         df.quad(bn, RDF.terms.type, TREE.terms.Relation),
                         df.quad(bn, TREE.terms.node, relativeBucketId),
                     ];
-                    const data = new Writer().quadsToString(quads);
+                    const data = await quadsToString(quads);
                     await fs.promises.appendFile(viewIndexPath, data);
                 }
             }
@@ -298,28 +295,28 @@ export function ldesDiskWriter(
                 // Append the member contents to the file corresponding to the bucket
                 const bucketIndexPath = path.join(
                     directory,
-                    encodeURIComponent(record.stream),
-                    bucket,
-                    "index.ttl",
+                    encodePathValue(record.stream),
+                    encodePathValue(bucket, true),
+                    "index.trig",
                 );
 
                 const relativeLdesId = df.namedNode(
                     path.join(
                         path.relative(
                             path.join(
-                                encodeURIComponent(record.stream),
-                                bucket,
+                                encodePathValue(record.stream),
+                                encodePathValue(bucket, true),
                             ),
                             "",
                         ),
-                        "index.ttl",
+                        "index.trig",
                     ),
                 );
                 const quads = [
                     df.quad(
                         relativeLdesId,
                         TREE.terms.member,
-                        df.namedNode(record.payload),
+                        df.namedNode(encodePathValue(record.payload, true)),
                     ),
                 ];
                 if (!record.dataless) {
@@ -327,7 +324,7 @@ export function ldesDiskWriter(
                 } else {
                     quads.push(...(members.get(record.payload) || []));
                 }
-                const data = new Writer().quadsToString(quads);
+                const data = await quadsToString(quads);
 
                 await fs.promises.appendFile(bucketIndexPath, data);
             }
@@ -337,22 +334,25 @@ export function ldesDiskWriter(
             // Append the relation to the file corresponding to the bucket
             const bucketIndexPath = path.join(
                 directory,
-                encodeURIComponent(relation.stream),
-                relation.origin,
-                "index.ttl",
+                encodePathValue(relation.stream),
+                encodePathValue(relation.origin, true),
+                "index.trig",
             );
 
             const bn = df.blankNode();
             const quads = [
-                df.quad(df.namedNode("index.ttl"), TREE.terms.relation, bn),
+                df.quad(df.namedNode("index.trig"), TREE.terms.relation, bn),
                 df.quad(bn, RDF.terms.type, df.namedNode(relation.type)),
                 df.quad(
                     bn,
                     TREE.terms.node,
                     df.namedNode(
                         path.join(
-                            path.relative(relation.origin, relation.bucket),
-                            "index.ttl",
+                            encodePathValue(
+                                path.relative(relation.origin, relation.bucket),
+                                true,
+                            ),
+                            "index.trig",
                         ),
                     ),
                 ),
@@ -373,11 +373,33 @@ export function ldesDiskWriter(
                 );
                 quads.push(...relation.value.quads);
             }
-            const data = new Writer().quadsToString(quads);
+            const data = await quadsToString(quads);
 
             await fs.promises.appendFile(bucketIndexPath, data);
         }
     });
 
     return async () => {};
+}
+
+async function quadsToString(quads: Quad[]) {
+    const writer = new Writer({ format: "application/trig" });
+    writer.addQuads(quads);
+    return new Promise<string>((resolve, reject) => {
+        writer.end((error, result) => {
+            if (error) {
+                reject(error);
+            } else {
+                resolve(result);
+            }
+        });
+    });
+}
+
+function encodePathValue(value: string, alreadyUriEncoded = false): string {
+    if (!alreadyUriEncoded) {
+        value = encodeURIComponent(value);
+    }
+    // Replace % with _ to avoid issues with simple HTTP servers like GH Pages, probably trying to wrongly decode the URI component.
+    return value.replace(/%/g, "_");
 }

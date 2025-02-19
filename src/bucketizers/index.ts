@@ -14,9 +14,9 @@ import SubjectBucketizer from "./subjectBucketizer";
 import TimebasedBucketizer from "./timebasedBucketizer";
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
+import HourBucketizer from "./hourBucketizer";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
-import HourBucketizer from "./hourBucketizer";
 
 const df = new DataFactory();
 export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
@@ -167,7 +167,11 @@ export class BucketizerOrchestrator {
             for (const prefix of todo) {
                 const bucketizer = this.getBucketizer(i, prefix);
 
-                const getBucket = (value: string, root?: boolean) => {
+                const getBucket = (
+                    value: string,
+                    root?: boolean,
+                    keyIsId = false,
+                ) => {
                     const encodedValue = value
                         .split("/")
                         .map((x) => encodeURIComponent(decodeURIComponent(x)))
@@ -179,7 +183,7 @@ export class BucketizerOrchestrator {
 
                     // avoid double slashes and leading slashes
                     const next = combineIds(prefix, key);
-                    const id = root ? prefix : next;
+                    const id = keyIsId ? key : root ? prefix : next;
                     if (!buckets[id]) {
                         buckets[id] = new Bucket(df.namedNode(id), [], false);
 
@@ -219,8 +223,11 @@ export class BucketizerOrchestrator {
 
     save(): string {
         for (const key of Object.keys(this.saves)) {
-            this.saves[key].save = this.saves[key].bucketizer?.save();
-            delete this.saves[key].bucketizer;
+            // Only update the saves for a key, if the bucketizer was actually used
+            if (this.saves[key].bucketizer) {
+                this.saves[key].save = this.saves[key].bucketizer?.save();
+                delete this.saves[key].bucketizer;
+            }
         }
         return JSON.stringify(this.saves);
     }
