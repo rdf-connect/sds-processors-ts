@@ -42,7 +42,7 @@ export function ldesDiskWriter(
 
         const datasetId = metadataQuads.find(
             (q) =>
-                streams.includes(q.subject) &&
+                streams.map((q) => q.value).includes(q.subject.value) &&
                 q.predicate.equals(SDS.terms.dataset),
         )?.object;
         if (datasetId) {
