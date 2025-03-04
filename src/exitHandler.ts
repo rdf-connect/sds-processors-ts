@@ -4,7 +4,7 @@ function noOp() {}
 
 const logger = getLoggerFor("ExitHandler");
 
-export function Cleanup(callback: () => void | Promise<void>) {
+export function handleExit(callback: () => void | Promise<void>) {
     // attach user callback to the process event emitter
     // if no callback, it will still exit gracefully on Ctrl-C
     callback = callback || noOp;
@@ -15,38 +15,35 @@ export function Cleanup(callback: () => void | Promise<void>) {
         if (!callbackCalled) {
             callbackCalled = true;
             logger.debug(
-                `[Cleanup] Callback called on '${event}' with code '${code}'.`,
+                `[handleExit] Callback called on '${event}' with code '${code}'.`,
             );
             if (message) {
                 logger.error(
-                    `[Cleanup] Uncaught Exception: ${message.name} - ${message.message}`,
+                    `[handleExit] Uncaught Exception: ${message.name} - ${message.message}`,
                 );
                 logger.debug(message.stack);
             }
             await callback();
         } else {
             logger.debug(
-                `[Cleanup] Callback has already been called. Ignoring '${event}' with code '${code}'.`,
+                `[handleExit] Callback has already been called. Ignoring '${event}' with code '${code}'.`,
             );
         }
-        if (code) {
+        if (code && process.listeners(<NodeJS.Signals>event).length <= 0) {
             process.exit(code);
         }
     };
 
-    // do app specific cleaning before exiting
-    process.on("exit", async () => await fn("exit"));
-
     // catch ctrl+c event and exit normally
-    process.on("SIGINT", async () => await fn("SIGINT", 2));
-    // process.on("SIGKILL", fn)
-    // process.on("SIGSTOP", fn)
-    process.on("SIGQUIT", async () => await fn("SIGQUIT", 2));
-    // process.on("SIG", fn)
-
-    //catch uncaught exceptions, trace, then exit normally
-    process.on(
+    process.once("SIGINT", async () => await fn("SIGINT", 2));
+    process.once("SIGTERM", async () => await fn("SIGTERM", 143));
+    process.once("SIGBREAK", async () => await fn("SIGBREAK", 149));
+    process.once(
         "uncaughtException",
-        async (error) => await fn("uncaughtException", 99, error),
+        async (error: Error) => await fn("uncaughtException", 99, error),
+    );
+    process.once(
+        "unhandledRejection",
+        async (error: Error) => await fn("unhandledRejection", 99, error)
     );
 }

@@ -8,7 +8,7 @@ import type { Stream, Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
-import { Cleanup } from "./exitHandler";
+import { handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
 
 const df = new DataFactory();
@@ -298,7 +298,7 @@ export async function bucketize(
         }
     });
 
-    Cleanup(async () => {
+    handleExit(async () => {
         const state = orchestrator.save();
         await writeState(savePath, state);
     });

@@ -9,7 +9,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 // @ts-expect-error no declaration file found
 import { canonize } from "rdf-canonize";
 import { SDS, XSD } from "@treecg/types";
-import { Cleanup } from "./exitHandler";
+import { handleExit } from "./exitHandler";
 
 const df = new DataFactory();
 
@@ -212,7 +212,7 @@ export function ldesify_sds(
     let cache: { [key: string]: string } = {};
     if (statePath) cache = getPrevState(statePath);
 
-    Cleanup(() => {
+    handleExit(() => {
         if (statePath) {
             writeFileSync(statePath, JSON.stringify(cache), {
                 encoding: "utf8",
