@@ -330,6 +330,65 @@ export function ldesDiskWriter(
             }
         }
 
+        for (const relation of extract.getRemoveRelations()) {
+            // Remove the relation from the file corresponding to the bucket
+            const bucketIndexPath = path.join(
+                directory,
+                encodePathValue(relation.stream),
+                encodePathValue(relation.origin, true),
+                "index.trig",
+            );
+
+            const content = await fs.promises.readFile(bucketIndexPath);
+            const quads = new Parser().parse(content.toString());
+            // Find blankNode subject of the relation and remove all related quads
+            const relationTargetIndexPath = path.join(
+                encodePathValue(
+                    path.relative(relation.origin, relation.bucket),
+                    true,
+                ),
+                "index.trig",
+            );
+            const blankNode = quads.find(
+                (bnQ) =>
+                    bnQ.predicate.equals(RDF.terms.type) &&
+                    bnQ.object.value === relation.type &&
+                    quads.some(
+                        (q) =>
+                            q.subject.equals(bnQ.subject) &&
+                            q.predicate.equals(TREE.terms.node) &&
+                            q.object.value === relationTargetIndexPath,
+                    ) &&
+                    (!relation.path ||
+                        quads.some(
+                            (q) =>
+                                q.subject.equals(bnQ.subject) &&
+                                q.predicate.equals(TREE.terms.path) &&
+                                q.object.equals(relation.path!.id),
+                        )) &&
+                    (!relation.value ||
+                        quads.some(
+                            (q) =>
+                                q.subject.equals(bnQ.subject) &&
+                                q.predicate.equals(TREE.terms.value) &&
+                                q.object.equals(relation.value!.id),
+                        )),
+            )?.subject;
+            if (!blankNode) {
+                logger.error(
+                    `Could not find blankNode to remove relation ${relation.type} from ${relation.origin} to ${relation.bucket}`,
+                );
+                continue;
+            }
+            const updatedQuads = quads.filter(
+                (q) =>
+                    !q.subject.equals(blankNode) && !q.object.equals(blankNode),
+            );
+            const data = await quadsToString(updatedQuads);
+
+            await fs.promises.writeFile(bucketIndexPath, data);
+        }
+
         for (const relation of extract.getRelations()) {
             // Append the relation to the file corresponding to the bucket
             const bucketIndexPath = path.join(
