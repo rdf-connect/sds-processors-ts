@@ -142,6 +142,29 @@ describe("Bucketizer configs", () => {
         const config = <PageFragmentation>output.config;
         expect(config.pageSize).toBe(42);
     });
+
+    test("ReversedPaged", () => {
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+
+<a> a tree:ReversedPageFragmentation;
+  tree:pageSize 42.
+`;
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output = <BucketizerConfig>lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#ReversedPageFragmentation",
+        );
+        const config = <PageFragmentation>output.config;
+        expect(config.pageSize).toBe(42);
+    });
 });
 
 describe("Bucketizer behavior", () => {
@@ -176,6 +199,10 @@ describe("Bucketizer behavior", () => {
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
@@ -189,6 +216,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -198,6 +226,62 @@ describe("Bucketizer behavior", () => {
         expect(buckets[""].root).toBeTruthy();
         expect(buckets[""].links.length).toBe(1);
         expect(buckets["page-1/"].links.length).toBe(0);
+    });
+
+    test("ReversedPaged", () => {
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+
+<a> a tree:ReversedPageFragmentation;
+  tree:pageSize 2.
+`;
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output = <BucketizerConfig>lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+
+        const orchestrator = new BucketizerOrchestrator([output]);
+        const stream = namedNode("MyStream");
+
+        const buckets: { [id: string]: Bucket } = {};
+        const requestedBuckets = new Set<string>();
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
+        const recordBuckets: string[] = [];
+        for (const member of [
+            new Record({ id: namedNode("a1"), quads: [] }, stream),
+            new Record({ id: namedNode("a2"), quads: [] }, stream),
+            new Record({ id: namedNode("a3"), quads: [] }, stream),
+        ]) {
+            recordBuckets.push(
+                ...orchestrator.bucketize(
+                    member,
+                    buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                    removeRelations,
+                    "",
+                ),
+            );
+        }
+
+        expect(recordBuckets).toEqual(["page-0/", "page-0/", "page-1/"]);
+        expect(buckets[""].root).toBeTruthy();
+        expect(buckets[""].links.length).toBe(1);
+        expect(buckets["page-0/"].links.length).toBe(0);
+        expect(buckets["page-1/"].links.length).toBe(1);
     });
 
     test("Subject", () => {
@@ -225,6 +309,10 @@ describe("Bucketizer behavior", () => {
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         for (const member of [
             new Record({ id: namedNode("a1"), quads: [] }, stream),
@@ -238,6 +326,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -274,6 +363,10 @@ describe("Bucketizer behavior", () => {
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
         const pred = namedNode("http://example.org/test");
         for (const member of [
@@ -306,6 +399,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -348,6 +442,10 @@ describe("Bucketizer behavior", () => {
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[] = [];
 
         for (const member of [
@@ -363,6 +461,7 @@ describe("Bucketizer behavior", () => {
                     requestedBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -436,6 +535,10 @@ describe("Bucketizer behavior", () => {
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
         const recordBuckets: string[][] = [];
 
         const firstBuckets = new Set<string>();
@@ -447,6 +550,7 @@ describe("Bucketizer behavior", () => {
                     firstBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -467,6 +571,7 @@ describe("Bucketizer behavior", () => {
                     secondBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );
@@ -493,6 +598,7 @@ describe("Bucketizer behavior", () => {
                     restBuckets,
                     newMembers,
                     newRelations,
+                    removeRelations,
                     "",
                 ),
             );

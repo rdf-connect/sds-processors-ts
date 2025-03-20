@@ -15,6 +15,7 @@ import TimebasedBucketizer from "./timebasedBucketizer";
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 import HourBucketizer from "./hourBucketizer";
+import ReversedPagedBucketizer from "./reversedPagedBucketizer";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
 
@@ -66,11 +67,20 @@ export type AddRelation = (
     path?: RdfThing,
 ) => void;
 
+export type RemoveRelation = (
+    origin: Bucket,
+    target: Bucket,
+    type: Term,
+    value?: Term,
+    path?: RdfThing,
+) => void;
+
 export interface Bucketizer {
     bucketize(
         sdsMember: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
         addRelation: AddRelation,
+        removeRelation: RemoveRelation,
     ): Bucket[];
 
     save(): string;
@@ -87,6 +97,11 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
             );
         case TREE.custom("PageFragmentation"):
             return new PagedBucketizer(<PageFragmentation>config.config, save);
+        case TREE.custom("ReversedPageFragmentation"):
+            return new ReversedPagedBucketizer(
+                <PageFragmentation>config.config,
+                save,
+            );
         case TREE.custom("TimebasedFragmentation"):
             return new TimebasedBucketizer(
                 <TimebasedFragmentation>config.config,
@@ -133,6 +148,10 @@ export class BucketizerOrchestrator {
             origin: Bucket;
             relation: BucketRelation;
         }[],
+        removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[],
         prefix: string,
     ): string[] {
         let queue = [prefix];
@@ -158,6 +177,37 @@ export class BucketizerOrchestrator {
 
             origin.links.push(relation);
             target.parent = origin;
+        };
+
+        const removeRelation = (
+            origin: Bucket,
+            target: Bucket,
+            type: Term,
+            value?: Term,
+            path?: RdfThing,
+        ) => {
+            const relation = {
+                type,
+                value,
+                path,
+                target: target.id,
+            };
+            const removeRel = {
+                origin,
+                relation,
+            };
+            removeRelations.push(removeRel);
+
+            origin.links = origin.links.filter(
+                (x) =>
+                    !(
+                        x.type.equals(type) &&
+                        x.target.equals(target.id) &&
+                        (!value || x.value?.equals(value)) &&
+                        (!path || x.path?.id.equals(path.id))
+                    ),
+            );
+            target.parent = undefined;
         };
 
         for (let i = 0; i < this.configs.length; i++) {
@@ -206,6 +256,7 @@ export class BucketizerOrchestrator {
                     record,
                     getBucket,
                     addRelation,
+                    removeRelation,
                 );
 
                 for (const bucket of foundBucket) {

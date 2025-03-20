@@ -95,6 +95,7 @@ ex:Fragmentation a tree:HourFragmentation ;
             new Set(),
             new Map<string, Set<string>>(),
             [],
+            [],
             "",
         );
 
@@ -103,12 +104,15 @@ ex:Fragmentation a tree:HourFragmentation ;
 
         // Insert second record
         const newRelations: { origin: Bucket; relation: BucketRelation }[] = [];
+        const removeRelations: { origin: Bucket; relation: BucketRelation }[] =
+            [];
         const record2Buckets = orchestrator.bucketize(
             record2,
             buckets,
             new Set(),
             new Map<string, Set<string>>(),
             newRelations,
+            removeRelations,
             "",
         );
 
@@ -123,6 +127,8 @@ ex:Fragmentation a tree:HourFragmentation ;
 
         expect(newRelations[1].origin.id.value).toBe(secondBucketExpected);
         expect(newRelations[1].relation.target.value).toBe(firstBucketExpected);
+
+        expect(removeRelations.length).toBe(0);
     });
 
     test("member in same hour should not create new bucket", () => {
@@ -150,6 +156,7 @@ ex:Fragmentation a tree:HourFragmentation ;
             new Set(),
             new Map<string, Set<string>>(),
             [],
+            [],
             "",
         );
 
@@ -158,12 +165,15 @@ ex:Fragmentation a tree:HourFragmentation ;
 
         // Insert second record
         const newRelations: { origin: Bucket; relation: BucketRelation }[] = [];
+        const removeRelations: { origin: Bucket; relation: BucketRelation }[] =
+            [];
         const record2Buckets = orchestrator.bucketize(
             record2,
             buckets,
             new Set(),
             new Map<string, Set<string>>(),
             newRelations,
+            removeRelations,
             "",
         );
 
@@ -171,6 +181,7 @@ ex:Fragmentation a tree:HourFragmentation ;
         expect(record2Buckets[0]).toBe(secondBucketExpected);
 
         expect(newRelations.length).toBe(0);
+        expect(removeRelations.length).toBe(0);
     });
 
     test("member in future hour (with a gap) should create new bucket for that future hour", () => {
@@ -205,6 +216,7 @@ ex:Fragmentation a tree:HourFragmentation ;
             new Set(),
             new Map<string, Set<string>>(),
             [],
+            [],
             "",
         );
 
@@ -213,12 +225,15 @@ ex:Fragmentation a tree:HourFragmentation ;
 
         // Insert second record
         const newRelations: { origin: Bucket; relation: BucketRelation }[] = [];
+        const removeRelations: { origin: Bucket; relation: BucketRelation }[] =
+            [];
         const record2Buckets = orchestrator.bucketize(
             record2,
             buckets,
             new Set(),
             new Map<string, Set<string>>(),
             newRelations,
+            removeRelations,
             "",
         );
 
@@ -233,5 +248,7 @@ ex:Fragmentation a tree:HourFragmentation ;
 
         expect(newRelations[1].origin.id.value).toBe(secondBucketExpected);
         expect(newRelations[1].relation.target.value).toBe(firstBucketExpected);
+
+        expect(removeRelations.length).toBe(0);
     });
 });
