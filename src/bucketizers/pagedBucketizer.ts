@@ -1,4 +1,9 @@
-import { AddRelation, Bucketizer, PageFragmentation } from "./index";
+import {
+    AddRelation,
+    Bucketizer,
+    PageFragmentation,
+    RemoveRelation,
+} from "./index";
 import { Bucket, RdfThing, Record } from "../utils";
 import { TREE, XSD } from "@treecg/types";
 import { getLoggerFor } from "../utils/logUtil";
@@ -11,11 +16,14 @@ const { literal, namedNode } = DataFactory;
 export default class PagedBucketizer implements Bucketizer {
     protected readonly logger = getLoggerFor(this);
 
-    private readonly pageSize: number;
-    private readonly path: BasicLensM<Cont, { value: string; literal?: Term }>;
-    private readonly pathQuads: RdfThing;
-    private count: number = 0;
-    private lastMemberTimestamp: number = 0;
+    protected readonly pageSize: number;
+    protected readonly path: BasicLensM<
+        Cont,
+        { value: string; literal?: Term }
+    >;
+    protected readonly pathQuads: RdfThing;
+    protected count: number = 0;
+    protected lastMemberTimestamp: number = 0;
 
     constructor(config: PageFragmentation, save?: string) {
         this.pageSize = config.pageSize;
@@ -40,11 +48,50 @@ export default class PagedBucketizer implements Bucketizer {
         record: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
         addRelation: AddRelation,
+        removeRelation: RemoveRelation,
     ): Bucket[] {
         const index = Math.floor(this.count / this.pageSize);
         this.count += 1;
-        const currentbucket = getBucket("page-" + index, index == 0);
+        const currentBucket = getBucket("page-" + index, index == 0);
 
+        const recordTimestamp: Date | undefined | null =
+            this.findRecordTimestamp(record);
+        if (recordTimestamp === null) {
+            return [];
+        }
+
+        if (this.count % this.pageSize == 1 && this.count > 1) {
+            const oldBucket = getBucket("page-" + (index - 1), index - 1 == 0);
+            oldBucket.immutable = true;
+            if (recordTimestamp) {
+                // Ordered paged bucketizer, add a ≥ relation to the previous bucket.
+                addRelation(
+                    oldBucket,
+                    currentBucket,
+                    TREE.terms.GreaterThanOrEqualToRelation,
+                    literal(
+                        recordTimestamp.toISOString(),
+                        namedNode(XSD.dateTime),
+                    ),
+                    this.pathQuads,
+                );
+            } else {
+                addRelation(oldBucket, currentBucket, TREE.terms.Relation);
+            }
+            this.logger.info(`Created new page bucket ${index}`);
+        }
+
+        return [currentBucket];
+    }
+
+    save() {
+        return JSON.stringify({
+            count: this.count,
+            lastMemberTimestamp: this.lastMemberTimestamp,
+        });
+    }
+
+    findRecordTimestamp(record: Record): Date | undefined | null {
         let recordTimestamp: Date | undefined = undefined;
         if (this.path) {
             const values = this.path
@@ -59,7 +106,7 @@ export default class PagedBucketizer implements Bucketizer {
                 this.logger.error(
                     `Expected exactly one timestamp value, got ${values.length}. Ignoring record '${record.data.id.value}'.`,
                 );
-                return [];
+                return null;
             }
 
             recordTimestamp = new Date(values[0].literal!.value);
@@ -69,39 +116,10 @@ export default class PagedBucketizer implements Bucketizer {
                 this.logger.error(
                     `Record timestamp is before the last record timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
                 );
-                return [];
+                return null;
             }
             this.lastMemberTimestamp = recordTimestamp.getTime();
         }
-
-        if (this.count % this.pageSize == 1 && this.count > 1) {
-            const oldBucket = getBucket("page-" + (index - 1), index - 1 == 0);
-            oldBucket.immutable = true;
-            if (recordTimestamp) {
-                // Ordered paged bucketizer, add a ≥ relation to the previous bucket.
-                addRelation(
-                    oldBucket,
-                    currentbucket,
-                    TREE.terms.GreaterThanOrEqualToRelation,
-                    literal(
-                        recordTimestamp.toISOString(),
-                        namedNode(XSD.dateTime),
-                    ),
-                    this.pathQuads,
-                );
-            } else {
-                addRelation(oldBucket, currentbucket, TREE.terms.Relation);
-            }
-            this.logger.info(`Created new page bucket ${index}`);
-        }
-
-        return [currentbucket];
-    }
-
-    save() {
-        return JSON.stringify({
-            count: this.count,
-            lastMemberTimestamp: this.lastMemberTimestamp,
-        });
+        return recordTimestamp;
     }
 }

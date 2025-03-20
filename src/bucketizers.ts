@@ -167,34 +167,27 @@ function bucket_to_quads(bucket: Bucket, stream?: Term): Quad[] {
     return out;
 }
 
-function relationToQuads(bucket: Bucket, rel: BucketRelation): Quad[] {
+function relationToQuads(
+    bucket: Bucket,
+    rel: BucketRelation,
+    stream?: Term,
+    remove?: boolean,
+): Quad[] {
+    const graph = remove
+        ? SDS.terms.custom("RemoveDataDescription")
+        : SDS.terms.custom("DataDescription");
     const out: Quad[] = [];
     const id = df.blankNode();
     out.push(
-        df.quad(
-            <Quad_Subject>bucket.id,
-            SDS.terms.relation,
-            id,
-            SDS.terms.custom("DataDescription"),
-        ),
+        df.quad(<Quad_Subject>bucket.id, SDS.terms.relation, id, graph),
         df.quad(
             id,
             RDF.terms.type,
             <Quad_Object>SDS.terms.custom("Relation"),
-            SDS.terms.custom("DataDescription"),
+            graph,
         ),
-        df.quad(
-            id,
-            SDS.terms.relationType,
-            <Quad_Object>rel.type,
-            SDS.terms.custom("DataDescription"),
-        ),
-        df.quad(
-            id,
-            SDS.terms.relationBucket,
-            <Quad_Object>rel.target,
-            SDS.terms.custom("DataDescription"),
-        ),
+        df.quad(id, SDS.terms.relationType, <Quad_Object>rel.type, graph),
+        df.quad(id, SDS.terms.relationBucket, <Quad_Object>rel.target, graph),
     );
 
     if (rel.path) {
@@ -203,26 +196,27 @@ function relationToQuads(bucket: Bucket, rel: BucketRelation): Quad[] {
                 id,
                 SDS.terms.relationPath,
                 <Quad_Object>rel.path.id,
-                SDS.terms.custom("DataDescription"),
+                graph,
             ),
             ...rel.path.quads.map((x) =>
-                df.quad(
-                    x.subject,
-                    x.predicate,
-                    x.object,
-                    SDS.terms.custom("DataDescription"),
-                ),
+                df.quad(x.subject, x.predicate, x.object, graph),
             ),
         );
     }
 
     if (rel.value) {
         out.push(
+            df.quad(id, SDS.terms.relationValue, <Quad_Object>rel.value, graph),
+        );
+    }
+
+    if (stream) {
+        out.push(
             df.quad(
-                id,
-                SDS.terms.relationValue,
-                <Quad_Object>rel.value,
-                SDS.terms.custom("DataDescription"),
+                <Quad_Subject>bucket.id,
+                SDS.terms.stream,
+                <Quad_Object>stream,
+                graph,
             ),
         );
     }
@@ -251,7 +245,7 @@ function set_metadata(
     channels.metadataInput.on("end", async () => {
         // Propagate the end event to the output metadata channel
         await channels.metadataOutput.end();
-    })
+    });
 }
 
 function read_save(savePath?: string) {
@@ -316,6 +310,10 @@ export async function bucketize(
             origin: Bucket;
             relation: BucketRelation;
         }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
 
         for (const record of records) {
             const record_buckets = orchestrator.bucketize(
@@ -324,6 +322,7 @@ export async function bucketize(
                 requestedBuckets,
                 newMembers,
                 newRelations,
+                removeRelations,
                 prefix,
             );
 
@@ -372,6 +371,11 @@ export async function bucketize(
         for (const { origin, relation } of newRelations) {
             outputQuads.push(...relationToQuads(origin, relation));
         }
+        for (const { origin, relation } of removeRelations) {
+            outputQuads.push(
+                ...relationToQuads(origin, relation, resultingStream, true),
+            );
+        }
 
         // await prettyPrintQuads(outputQuads);
 
@@ -386,4 +390,4 @@ export async function bucketize(
         // Close downstream channel
         await channels.dataOutput.end();
     });
-;}
+}
