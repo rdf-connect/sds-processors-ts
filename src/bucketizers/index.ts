@@ -16,6 +16,7 @@ import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 import HourBucketizer from "./hourBucketizer";
 import ReversedPagedBucketizer from "./reversedPagedBucketizer";
+import DumpBucketizer from "./dumpBucketizer";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
 
@@ -57,6 +58,11 @@ export type HourFragmentation = {
     path: BasicLensM<Cont, Cont>;
     pathQuads: Cont;
     unorderedRelations?: boolean;
+};
+
+export type DumpFragmentation = {
+    path?: BasicLensM<Cont, Cont>;
+    pathQuads?: Cont;
 };
 
 export type AddRelation = (
@@ -114,6 +120,8 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
             );
         case TREE.custom("HourFragmentation"):
             return new HourBucketizer(<HourFragmentation>config.config, save);
+        case TREE.custom("DumpFragmentation"):
+            return new DumpBucketizer(<DumpFragmentation>config.config, save);
     }
     throw "Unknown bucketizer " + config.type.value;
 }

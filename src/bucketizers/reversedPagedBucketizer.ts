@@ -4,7 +4,7 @@ import {
     PageFragmentation,
     RemoveRelation,
 } from "./index";
-import { Bucket, Record } from "../utils";
+import { Bucket, findAndValidateRecordTimestamp, Record } from "../utils";
 import { getLoggerFor } from "../utils/logUtil";
 import PagedBucketizer from "./pagedBucketizer";
 import { TREE, XSD } from "@treecg/types";
@@ -33,9 +33,17 @@ export default class ReversedPagedBucketizer
         const currentBucket = getBucket("page-" + index);
 
         const recordTimestamp: Date | undefined | null =
-            this.findRecordTimestamp(record);
+            findAndValidateRecordTimestamp(
+                record,
+                this.path,
+                this.lastMemberTimestamp,
+                this.logger,
+            );
         if (recordTimestamp === null) {
             return [];
+        }
+        if (recordTimestamp) {
+            this.lastMemberTimestamp = recordTimestamp.getTime();
         }
 
         if (this.count === 1) {

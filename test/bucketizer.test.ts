@@ -9,6 +9,7 @@ import {
     SubjectFragmentation,
     TimebasedFragmentation,
     TimeBucketTreeConfig,
+    DumpFragmentation,
 } from "../lib/bucketizers/index";
 import { Bucket, Record } from "../lib/";
 import { BucketRelation } from "../lib/utils";
@@ -164,6 +165,36 @@ describe("Bucketizer configs", () => {
         );
         const config = <PageFragmentation>output.config;
         expect(config.pageSize).toBe(42);
+    });
+
+    test("Dump", () => {
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
+
+<test> <tsp> "2024-01-01T00:00:00Z"^^xsd:dateTime.
+
+<a> a tree:DumpFragmentation;
+    tree:timestampPath <tsp>.
+`;
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const output = <BucketizerConfig>lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+
+        expect(output.type.value).toBe(
+            "https://w3id.org/tree#DumpFragmentation",
+        );
+        const config = <DumpFragmentation>output.config;
+        expect(config.path).toBeDefined();
+
+        const applied = config.path?.execute({ id: namedNode("test"), quads });
+        expect(applied?.map((x) => x.id.value)).toEqual([
+            "2024-01-01T00:00:00Z",
+        ]);
     });
 });
 
@@ -607,5 +638,75 @@ describe("Bucketizer behavior", () => {
         expect(recordBuckets[3]).toEqual(["2024/april-1/"]);
         expect(buckets["2024/march-31/"].immutable).toBeFalsy();
         expect(buckets["2024/april-1/"].immutable).toBeFalsy();
+    });
+
+    test("Dump", () => {
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+<a> a tree:DumpFragmentation;
+    tree:timestampPath <time>.
+`;
+        let idCount = 0;
+        const stream = namedNode("MyStream");
+        const record = (date: Date) => {
+            const id = namedNode("a" + idCount);
+            idCount += 1;
+
+            return new Record(
+                {
+                    id,
+                    quads: [
+                        quad(
+                            id,
+                            namedNode("time"),
+                            literal(date.toISOString()),
+                        ),
+                    ],
+                },
+                stream,
+            );
+        };
+
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+        const config = <BucketizerConfig>lens.execute({
+            id: namedNode("a"),
+            quads,
+        });
+
+        const orchestrator = new BucketizerOrchestrator([config]);
+
+        const buckets: { [id: string]: Bucket } = {};
+        const newMembers = new Map<string, Set<string>>();
+        const newRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
+        const removeRelations: {
+            origin: Bucket;
+            relation: BucketRelation;
+        }[] = [];
+        const recordBuckets: string[][] = [];
+
+        const firstBuckets = new Set<string>();
+
+        for (const member of [record(new Date(Date.UTC(2024, 1, 1)))]) {
+            recordBuckets.push(
+                orchestrator.bucketize(
+                    member,
+                    buckets,
+                    firstBuckets,
+                    newMembers,
+                    newRelations,
+                    removeRelations,
+                    "",
+                ),
+            );
+        }
+
+        expect(firstBuckets).toEqual(new Set([""]));
+        expect(recordBuckets[0]).toEqual([""]);
     });
 });
