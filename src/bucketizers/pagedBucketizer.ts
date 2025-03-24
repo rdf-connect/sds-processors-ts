@@ -4,7 +4,12 @@ import {
     PageFragmentation,
     RemoveRelation,
 } from "./index";
-import { Bucket, RdfThing, Record } from "../utils";
+import {
+    Bucket,
+    findAndValidateRecordTimestamp,
+    RdfThing,
+    Record,
+} from "../utils";
 import { TREE, XSD } from "@treecg/types";
 import { getLoggerFor } from "../utils/logUtil";
 import { BasicLensM, Cont } from "rdf-lens";
@@ -55,9 +60,17 @@ export default class PagedBucketizer implements Bucketizer {
         const currentBucket = getBucket("page-" + index, index == 0);
 
         const recordTimestamp: Date | undefined | null =
-            this.findRecordTimestamp(record);
+            findAndValidateRecordTimestamp(
+                record,
+                this.path,
+                this.lastMemberTimestamp,
+                this.logger,
+            );
         if (recordTimestamp === null) {
             return [];
+        }
+        if (recordTimestamp) {
+            this.lastMemberTimestamp = recordTimestamp.getTime();
         }
 
         if (this.count % this.pageSize == 1 && this.count > 1) {
@@ -89,37 +102,5 @@ export default class PagedBucketizer implements Bucketizer {
             count: this.count,
             lastMemberTimestamp: this.lastMemberTimestamp,
         });
-    }
-
-    findRecordTimestamp(record: Record): Date | undefined | null {
-        let recordTimestamp: Date | undefined = undefined;
-        if (this.path) {
-            const values = this.path
-                .execute(record.data)
-                .filter(
-                    (x, i, arr) =>
-                        arr.findIndex((y) => x.value === y.value) == i,
-                )
-                .filter((value) => value.literal);
-
-            if (values.length !== 1) {
-                this.logger.error(
-                    `Expected exactly one timestamp value, got ${values.length}. Ignoring record '${record.data.id.value}'.`,
-                );
-                return null;
-            }
-
-            recordTimestamp = new Date(values[0].literal!.value);
-
-            // Check if the record is out of order.
-            if (recordTimestamp.getTime() < this.lastMemberTimestamp) {
-                this.logger.error(
-                    `Record timestamp is before the last record timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
-                );
-                return null;
-            }
-            this.lastMemberTimestamp = recordTimestamp.getTime();
-        }
-        return recordTimestamp;
     }
 }

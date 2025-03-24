@@ -3,12 +3,19 @@ import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
 import { SDS, XSD } from "@treecg/types";
-import { BasicLensM, extractShapes, match, Shapes, subject } from "rdf-lens";
+import {
+    BasicLensM,
+    Cont,
+    extractShapes,
+    match,
+    Shapes,
+    subject,
+} from "rdf-lens";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
-import path from "node:path";
+import { Logger } from "winston";
 
 const df = new DataFactory();
 
@@ -316,4 +323,39 @@ export function maybeParse(data: Quad[] | string): Quad[] {
     } else {
         return data;
     }
+}
+
+export function findAndValidateRecordTimestamp(
+    record: Record,
+    path: BasicLensM<Cont, { value: string; literal?: Term }>,
+    lastMemberTimestamp: number,
+    logger: Logger,
+): Date | undefined | null {
+    let recordTimestamp: Date | undefined = undefined;
+    if (path) {
+        const values = path
+            .execute(record.data)
+            .filter(
+                (x, i, arr) => arr.findIndex((y) => x.value === y.value) == i,
+            )
+            .filter((value) => value.literal);
+
+        if (values.length !== 1) {
+            logger.error(
+                `Expected exactly one timestamp value, got ${values.length}. Ignoring record '${record.data.id.value}'.`,
+            );
+            return null;
+        }
+
+        recordTimestamp = new Date(values[0].literal!.value);
+
+        // Check if the record is out of order.
+        if (recordTimestamp.getTime() < lastMemberTimestamp) {
+            logger.error(
+                `Record timestamp is before the last record timestamp. Are your records out of order? Ignoring record '${record.data.id.value}'.`,
+            );
+            return null;
+        }
+    }
+    return recordTimestamp;
 }
