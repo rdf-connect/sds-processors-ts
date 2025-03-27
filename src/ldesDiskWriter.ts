@@ -12,6 +12,15 @@ import * as fs from "node:fs";
 const logger = getLoggerFor("ldesDiskWriter");
 const df = new DataFactory();
 
+// for an i, add /0/1/2/3/.../i to the base URI
+const INTERNAL_TEMP_BASE_HOST = "http://ldes-disk-writer.internal/";
+const INTERNAL_TEMP_BASE_URI =
+    INTERNAL_TEMP_BASE_HOST +
+    Array.from({ length: 20 }, (_, i) => i)
+        .map((i) => i.toString())
+        .join("/") +
+    "/";
+
 export function ldesDiskWriter(
     data: Stream<string | Quad[]>,
     metadata: Stream<string | Quad[]>,
@@ -208,7 +217,9 @@ export function ldesDiskWriter(
                 logger.debug(`[data] Emptying bucket ${bucket.id}`);
                 // Go over quads, group them by metadata, members, and relations.
                 const content = await fs.promises.readFile(bucketIndexPath);
-                const quads = new Parser().parse(content.toString());
+                const quads = new Parser({
+                    baseIRI: INTERNAL_TEMP_BASE_URI,
+                }).parse(content.toString());
 
                 const metadata = [];
                 let memberId: Quad_Object | undefined = undefined;
@@ -262,14 +273,22 @@ export function ldesDiskWriter(
                     "index.trig",
                 );
                 const content = await fs.promises.readFile(viewIndexPath);
-                const existingQuads = new Parser().parse(content.toString());
-                const relativeBucketId = df.namedNode(
-                    path.join(encodePathValue(bucket.id, true), "index.trig"),
+                const existingQuads = new Parser({
+                    baseIRI: INTERNAL_TEMP_BASE_URI,
+                }).parse(content.toString());
+                const absoluteRelativeBucketId = df.namedNode(
+                    new URL(
+                        path.join(
+                            encodePathValue(bucket.id, true),
+                            "index.trig",
+                        ),
+                        INTERNAL_TEMP_BASE_URI,
+                    ).href,
                 );
                 if (
                     !existingQuads.some(
                         (q) =>
-                            q.object.equals(relativeBucketId) &&
+                            q.object.equals(absoluteRelativeBucketId) &&
                             q.predicate.equals(TREE.terms.node),
                     )
                 ) {
@@ -281,7 +300,7 @@ export function ldesDiskWriter(
                             bn,
                         ),
                         df.quad(bn, RDF.terms.type, TREE.terms.Relation),
-                        df.quad(bn, TREE.terms.node, relativeBucketId),
+                        df.quad(bn, TREE.terms.node, absoluteRelativeBucketId),
                     ];
                     const data = await quadsToString(quads);
                     await fs.promises.appendFile(viewIndexPath, data);
@@ -322,7 +341,12 @@ export function ldesDiskWriter(
                 if (!record.dataless) {
                     quads.push(...extract.getData());
                 } else {
-                    quads.push(...(members.get(record.payload) || []));
+                    quads.push(
+                        ...(members.get(
+                            new URL(record.payload, INTERNAL_TEMP_BASE_URI)
+                                .href,
+                        ) || []),
+                    );
                 }
                 const data = await quadsToString(quads);
 
@@ -340,7 +364,9 @@ export function ldesDiskWriter(
             );
 
             const content = await fs.promises.readFile(bucketIndexPath);
-            const quads = new Parser().parse(content.toString());
+            const quads = new Parser({ baseIRI: INTERNAL_TEMP_BASE_URI }).parse(
+                content.toString(),
+            );
             // Find blankNode subject of the relation and remove all related quads
             const relationTargetIndexPath = path.join(
                 encodePathValue(
@@ -357,7 +383,14 @@ export function ldesDiskWriter(
                         (q) =>
                             q.subject.equals(bnQ.subject) &&
                             q.predicate.equals(TREE.terms.node) &&
-                            q.object.value === relationTargetIndexPath,
+                            q.object.equals(
+                                df.namedNode(
+                                    new URL(
+                                        relationTargetIndexPath,
+                                        INTERNAL_TEMP_BASE_URI,
+                                    ).href,
+                                ),
+                            ),
                     ) &&
                     (!relation.path ||
                         quads.some(
@@ -442,9 +475,12 @@ export function ldesDiskWriter(
 }
 
 async function quadsToString(quads: Quad[]) {
-    const writer = new Writer({ format: "application/trig" });
+    const writer = new Writer({
+        format: "application/trig",
+        baseIRI: INTERNAL_TEMP_BASE_URI,
+    });
     writer.addQuads(quads);
-    return new Promise<string>((resolve, reject) => {
+    return await new Promise<string>((resolve, reject) => {
         writer.end((error, result) => {
             if (error) {
                 reject(error);
