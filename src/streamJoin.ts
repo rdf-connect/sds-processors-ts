@@ -1,17 +1,24 @@
-import type { Stream, Writer } from "@rdfc/js-runner";
+import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 
-export function streamJoin(inputs: Stream<string>[], output: Writer<string>) {
-    let count = 0;
-
-    inputs.forEach((input) => {
-        input.data(async (data) => await output.push(data));
-
-        input.on("end", async () => {
-            if (count < inputs.length - 1) {
-                count += 1;
-            } else {
-                await output.end();
-            }
-        });
-    });
+type Args = {
+    inputs: Reader[];
+    output: Writer;
+};
+export class StreamJoin extends Processor<Args> {
+    async init(this: Args & this): Promise<void> {
+        // nothing
+    }
+    async transform(this: Args & this): Promise<void> {
+        // TODO this should be better
+        await Promise.all(this.inputs.map((x) => this.setupReader(x)));
+        await this.output.close();
+    }
+    async produce(this: Args & this): Promise<void> {
+        // nothing
+    }
+    async setupReader(this: Args & this, reader: Reader) {
+        for await (const x of reader.strings()) {
+            await this.output.string(x);
+        }
+    }
 }

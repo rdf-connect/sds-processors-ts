@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
@@ -6,57 +7,38 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-<outputProperty> sh:class :WriterChannel;
-  sh:path js:output;
-  sh:maxCount 1;
-  sh:name "Data output channel".
-
-<outputMapping> a fnom:PositionParameterMapping;
-  fnom:functionParameter "Data output channel";
-  fnom:implementationParameterPosition "0"^^xsd:int.
-
-js:Generate a js:JsProcess;
-  dc:title "Simple Data Generator";
-  dc:description "Simple RDF data generator used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.";
-  js:file <../lib/generator.js>;
-  js:function "generate";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping <outputMapping>;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Count";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Wait duration";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp path";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ];
-  ].
+js:Generate a rdfc:JsProcessor, owl:Class;
+  rdfs:label "Simple Data Generator";
+  rdfs:description "Simple RDF data generator used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.";
+  rdfc:file <../lib/generator.js>;
+  rdfc:entrypoint <../>;
+  rdfc:class "Generator".
 
 [ ] a sh:NodeShape;
   sh:targetClass js:Generate;
-  sh:property <outputProperty>;
+  sh:property [
+    sh:class rdfc:Writer;
+    sh:path js:output;
+    sh:minCount 1;
+    sh:maxCount 1;
+    sh:name "writer";
+  ];
   sh:property [
     sh:datatype xsd:integer;
     sh:path js:count;
-    sh:name "Count";
+    sh:name "count";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:integer;
     sh:path js:waitMS;
-    sh:name "Wait duration";
+    sh:name "wait";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:timestampPath;
-    sh:name "Timestamp path";
+    sh:name "timestampPath";
     sh:maxCount 1;
   ].
 
