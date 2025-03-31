@@ -6,52 +6,25 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-js:Ldesify a js:JsProcess;
+rdfc:Ldesify a rdfc:JsProcessor;
   dc:title "Ldesify processor";
   dc:description "";
-  js:file <../lib/ldesify.js>;
-  js:function "ldesify";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "State file path";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Check properties";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp Path";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Version Of Path";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ];
-  ].
+  rdfc:file <../lib/ldesify.js>;
+  rdfc:class "Ldesify";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Ldesify;
+  sh:targetClass rdfc:Ldesify;
   sh:property [
-    sh:class :ReaderChannel;
+    sh:class rdfc:Reader;
     sh:path js:input;
     sh:name "Data input channel";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
+    sh:class rdfc:Writer;
     sh:path js:output;
     sh:name "Data output channel";
     sh:maxCount 1;
@@ -78,57 +51,23 @@ js:Ldesify a js:JsProcess;
     sh:maxCount 1;
   ].
 
-
-js:LdesifySDS a js:JsProcess;
+rdfc:LdesifySDS a rdfc:Processor;
   dc:title "Ldesify processor (for sds streams)";
   dc:description "";
-  js:file <../lib/ldesify.js>;
-  js:function "ldesify_sds";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "State file path";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Source Stream";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Target Stream";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp Path";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Version Of Path";
-      fnom:implementationParameterPosition "6"^^xsd:int;
-    ];
-  ].
- 
+  rdfc:file <../lib/ldesify.js>;
+  rdfc:class "LdesifySDS";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:LdesifySDS;
+  sh:targetClass rdfc:LdesifySDS;
   sh:property [
-    sh:class :ReaderChannel;
+    sh:class rdfc:Reader;
     sh:path js:input;
     sh:name "Data input channel";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
+    sh:class rdfc:Writer;
     sh:path js:output;
     sh:name "Data output channel";
     sh:maxCount 1;
@@ -160,3 +99,4 @@ js:LdesifySDS a js:JsProcess;
     sh:name "Version Of Path";
     sh:maxCount 1;
   ].
+

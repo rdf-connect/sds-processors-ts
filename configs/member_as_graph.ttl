@@ -7,35 +7,23 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-js:MemberAsNamedGraph a js:JsProcess;
+rdfc:MemberAsNamedGraph a rdfc:Processor;
   dc:title "Member to Named Graph member";
   dc:description "Transform a stream of SDS wrapped members into a named graph-based member.";
-  js:file <../lib/memberAsNamedGraph.js>;
-  js:function "memberAsNamedGraph";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Input Stream";
-      fnom:implementationParameterPosition "0"^^xsd:int
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Output stream";
-      fnom:implementationParameterPosition "1"^^xsd:int
-    ]
-  ].
+  rdfc:file <../lib/memberAsNamedGraph.js>;
+  rdfc:class "MemberAsNamedGraph";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:MemberAsNamedGraph;
+  sh:targetClass rdfc:MemberAsNamedGraph;
   sh:property [
-    sh:class :ReaderChannel;
+    sh:class rdfc:Reader;
     sh:path js:input;
     sh:name "Input Stream";
     sh:minCount 1;
     sh:maxCount 1
   ], [
-    sh:class :WriterChannel;
+    sh:class rdfc:Writer;
     sh:path js:output;
     sh:name "Output stream";
     sh:maxCount 1;

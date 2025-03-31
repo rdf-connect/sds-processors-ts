@@ -17,15 +17,14 @@ js:Generate a rdfc:JsProcessor, owl:Class;
   rdfc:class "Generator".
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Generate;
+  sh:targetClass rdfc:Generate;
   sh:property [
     sh:class rdfc:Writer;
     sh:path js:output;
     sh:minCount 1;
     sh:maxCount 1;
     sh:name "writer";
-  ];
-  sh:property [
+  ], [
     sh:datatype xsd:integer;
     sh:path js:count;
     sh:name "count";

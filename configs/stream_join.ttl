@@ -7,34 +7,22 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 
-js:StreamJoin a js:JsProcess;
+rdfc:StreamJoin a rdfc:Processor;
   dc:title "Stream Join processor";
   dc:description "Handle and pipe multiple input data streams into a single output stream.";
-  js:file <../lib/streamJoin.js>;
-  js:function "streamJoin";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Input Streams";
-      fnom:implementationParameterPosition "0"^^xsd:int
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Output stream";
-      fnom:implementationParameterPosition "1"^^xsd:int
-    ]
-  ].
+  rdfc:file <../lib/streamJoin.js>;
+  rdfc:class "StreamJoin";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:StreamJoin;
+  sh:targetClass rdfc:StreamJoin;
   sh:property [
-    sh:class :ReaderChannel;
+    sh:class rdfc:Reader;
     sh:path js:input;
     sh:name "Input Streams";
     sh:minCount 1
   ], [
-    sh:class :WriterChannel;
+    sh:class rdfc:Writer;
     sh:path js:output;
     sh:name "Output stream";
     sh:maxCount 1;
