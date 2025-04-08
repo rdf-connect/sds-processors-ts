@@ -4,8 +4,9 @@
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
+@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:LdesDiskWriter a rdfc:Processor;
+rdfc:LdesDiskWriter a rdfc:JsProcessor;
   rdfc:file <../lib/ldesDiskWriter.js>;
   rdfc:class "LdesDiskWriter";
   rdfc:entrypoint <../>.
@@ -15,19 +16,19 @@ rdfc:LdesDiskWriter a rdfc:Processor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:dataInput;
-    sh:name "Data Input Channel";
+    sh:name "data";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Reader;
     sh:path js:metadataInput;
-    sh:name "Metadata Input Channel";
+    sh:name "metadata";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype  xsd:string;
     sh:path js:directory;
-    sh:name "Directory";
+    sh:name "directory";
     sh:maxCount 1;
     sh:minCount 1;
   ].

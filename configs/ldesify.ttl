@@ -20,38 +20,38 @@ rdfc:Ldesify a rdfc:JsProcessor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Data input channel";
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Data output channel";
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:boolean;
     sh:path js:checkProps;
-    sh:name "Check properties";
+    sh:name "check_properties";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:timestampPath;
-    sh:name "Timestamp Path";
+    sh:name "modifiedPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:versionOfPath;
-    sh:name "Version Of Path";
+    sh:name "isVersionOfPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:path;
-    sh:name "State file path";
+    sh:name "statePath";
     sh:maxCount 1;
   ].
 
-rdfc:LdesifySDS a rdfc:Processor;
+rdfc:LdesifySDS a rdfc:JsProcessor;
   dc:title "Ldesify processor (for sds streams)";
   dc:description "";
   rdfc:file <../lib/ldesify.js>;
@@ -63,40 +63,40 @@ rdfc:LdesifySDS a rdfc:Processor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Data input channel";
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Data output channel";
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:statePath;
-    sh:name "State file path";
+    sh:name "statePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:sourceStream;
-    sh:name "Source Stream";
+    sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:targetStream;
-    sh:name "Target Stream";
+    sh:name "targetStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:timestampPath;
-    sh:name "Timestamp Path";
+    sh:name "modifiedPathM";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:versionOfPath;
-    sh:name "Version Of Path";
+    sh:name "isVersionOfPathM";
     sh:maxCount 1;
   ].
 

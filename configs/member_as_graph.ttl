@@ -6,8 +6,9 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:MemberAsNamedGraph a rdfc:Processor;
+rdfc:MemberAsNamedGraph a rdfc:JsProcessor;
   dc:title "Member to Named Graph member";
   dc:description "Transform a stream of SDS wrapped members into a named graph-based member.";
   rdfc:file <../lib/memberAsNamedGraph.js>;
@@ -19,13 +20,14 @@ rdfc:MemberAsNamedGraph a rdfc:Processor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Input Stream";
+    sh:name "input";
     sh:minCount 1;
-    sh:maxCount 1
+    sh:maxCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Output stream";
+    sh:name "output";
     sh:maxCount 1;
-    sh:minCount 1
+    sh:minCount 1;
   ].
+

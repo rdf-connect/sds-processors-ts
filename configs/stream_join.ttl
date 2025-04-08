@@ -6,8 +6,9 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:StreamJoin a rdfc:Processor;
+rdfc:StreamJoin a rdfc:JsProcessor;
   dc:title "Stream Join processor";
   dc:description "Handle and pipe multiple input data streams into a single output stream.";
   rdfc:file <../lib/streamJoin.js>;
@@ -19,12 +20,12 @@ rdfc:StreamJoin a rdfc:Processor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Input Streams";
+    sh:name "inputs";
     sh:minCount 1
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Output stream";
+    sh:name "output";
     sh:maxCount 1;
     sh:minCount 1
   ].

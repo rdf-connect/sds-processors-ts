@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
@@ -10,8 +11,8 @@
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
 rdfc:Sdsify a rdfc:JsProcessor;
-  dc:title "Sdsify processor";
-  dc:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
+  rdfs:title "Sdsify processor";
+  rdfs:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
   rdfc:file <../lib/sdsify.js>;
   rdfc:class "Sdsify";
   rdfc:entrypoint <../>.
@@ -22,36 +23,36 @@ rdfc:Sdsify a rdfc:JsProcessor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Data input channel";
+    sh:name "input";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Data output channel";
+    sh:name "output";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:stream;
-    sh:name "Target stream";
+    sh:name "streamNode";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:typeFilter;
-    sh:name "Type filter";
+    sh:name "types";
     sh:minCount 0;
   ], [
     sh:datatype xsd:iri;
     sh:path js:timestampPath;
-    sh:name "Timestamp path";
+    sh:name "timestampPath";
     sh:minCount 0;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:shape;
-    sh:name "Shape";
+    sh:name "shape";
     sh:minCount 0;
     sh:maxCount 1;
   ].

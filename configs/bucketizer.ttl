@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix tree: <https://w3id.org/tree#>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 @prefix js: <https://w3id.org/conn/js#>.
@@ -12,9 +13,9 @@
 
 
 <> owl:imports <./bucketizer_configs.ttl>.
-rdfc:Bucketize a rdfc:Processor;
-  dc:title "Bucketizer processor";
-  dc:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
+rdfc:Bucketize a rdfc:JsProcessor;
+  rdfs:title "Bucketizer processor";
+  rdfs:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
   rdfc:file <../lib/bucketizers.js>;
   rdfc:class "Bucketizer";
   rdfc:entrypoint <../>.
@@ -89,29 +90,29 @@ rdfc:Bucketize a rdfc:Processor;
   ], [
     sh:class <Config>;
     sh:path js:bucketizeStrategy;
-    sh:name "Bucketization strategy";
+    sh:name "config";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:inputStreamId;
-    sh:name "ID of Stream to transform";
+    sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path js:outputStreamId;
-    sh:name "ID of Stream to produce";
+    sh:name "resultingStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:savePath;
-    sh:name "Path to use to save state files";
+    sh:name "savePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path js:prefix;
-    sh:name "Bucket Prefix";
+    sh:name "prefix";
     sh:maxCount 1;
   ].
 
