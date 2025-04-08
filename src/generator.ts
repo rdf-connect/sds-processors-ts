@@ -56,21 +56,25 @@ type Args = {
     timestampPath?: Term;
 };
 export class Generator extends Processor<Args> {
-    constructor(args: Args, logger: Logger) {
-        super(Object.assign({ count: 100000, wait: 50 }, args), logger);
-    }
     async init(this: Args & this): Promise<void> {
+        this.count = this.count ?? 100000;
+        this.wait = this.wait ?? 50;
         // empty
     }
     async transform(this: Args & this): Promise<void> {
         // empty
     }
     async produce(this: Args & this): Promise<void> {
-        this.logger.debug("generate starting");
+        this.logger.debug(
+            "generate starting " +
+                JSON.stringify({ count: this.count, wait: this.wait }),
+        );
 
         for (let i = 0; i < this.count; i++) {
-            logger.debug(`${i}/${this.count}`);
+            this.logger.debug(`${i}/${this.count}`);
             await this.writer.string(generateMember(i, this.timestampPath));
+            this.logger.debug(`${i}/${this.count} done`);
+
             await new Promise((res) => setTimeout(res, this.wait));
         }
     }

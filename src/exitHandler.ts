@@ -44,6 +44,6 @@ export function handleExit(callback: () => void | Promise<void>) {
     );
     process.once(
         "unhandledRejection",
-        async (error: Error) => await fn("unhandledRejection", 99, error)
+        async (error: Error) => await fn("unhandledRejection", 99, error),
     );
 }

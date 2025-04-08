@@ -10,7 +10,6 @@ import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
-import { Logger } from "winston";
 
 const df = new DataFactory();
 
@@ -248,10 +247,8 @@ export class Bucketizer extends Processor<Args> {
     extractor: Extractor;
     buckets: { [id: string]: Bucket } = {};
 
-    constructor(args: Args, logger: Logger) {
-        super(Object.assign({ prefix: "root" }, args), logger);
-    }
     async init(this: Args & this): Promise<void> {
+        this.prefix = this.prefix ?? "root";
         const save = read_save(this.savePath);
         this.orchestrator = new BucketizerOrchestrator(
             this.config.strategy,

@@ -7,9 +7,6 @@ import { Parser, Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import { createHash } from "crypto";
-import { getLoggerFor } from "./utils/logUtil";
-
-const logger = getLoggerFor("sdsify");
 
 const df = new DataFactory();
 
@@ -87,6 +84,8 @@ export class Sdsify extends Processor<Args> {
     extractor: CBDShapeExtractor;
     shapeId: Term | undefined;
     async init(this: Args & this): Promise<void> {
+        this.logger.info("Found fields " + JSON.stringify(Object.keys(this)));
+
         // Setup member extractor
         const shapeStore = this.shape ? RdfStore.createDefault() : null;
         if (this.shape) {
@@ -103,7 +102,7 @@ export class Sdsify extends Processor<Args> {
         for await (const input of this.input.strings()) {
             const dataStore = RdfStore.createDefault();
             maybeParse(input).forEach((x) => dataStore.addQuad(x));
-            logger.debug(`Got input with ${dataStore.size} quads`);
+            this.logger.debug(`Got input with ${dataStore.size} quads`);
 
             const members: { [id: string]: SDSMember } = {};
             const t0 = new Date();
@@ -147,7 +146,7 @@ export class Sdsify extends Processor<Args> {
                 }),
             );
 
-            logger.debug(
+            this.logger.debug(
                 `Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
             );
 
@@ -214,14 +213,14 @@ export class Sdsify extends Processor<Args> {
                 membersCount += 1;
             }
 
-            logger.debug(
+            this.logger.debug(
                 `Successfully pushed ${membersCount} members in ${
                     new Date().getTime() - t0.getTime()
                 } ms`,
             );
         }
 
-        logger.info("Input channel was closed down");
+        this.logger.info("Input channel was closed down");
         await this.output.close();
     }
     async produce(this: Args & this): Promise<void> {
