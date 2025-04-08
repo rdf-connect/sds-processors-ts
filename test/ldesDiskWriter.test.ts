@@ -1,9 +1,10 @@
 import { afterEach, describe, expect, test, vi } from "vitest";
-import { SimpleStream } from "@rdfc/js-runner";
-import { ldesDiskWriter } from "../lib/ldesDiskWriter";
+import { LdesDiskWriter } from "../lib/ldesDiskWriter";
 import { fs, vol } from "memfs";
 import { Parser } from "n3";
 import { TREE } from "@treecg/types";
+import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { FullProc } from "@rdfc/js-runner";
 
 vi.mock("fs", async () => {
     const memfs = await vi.importActual("memfs");
@@ -18,11 +19,20 @@ describe("Functional tests for the ldesDiskWriter function", () => {
     });
 
     test("LdesDiskWriter works", async () => {
-        const dataInput = new SimpleStream<string>();
-        const metadataInput = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [metaWriter, metaReader] = createWriter();
         const directory = "tmp/ldes-disk/";
 
-        ldesDiskWriter(dataInput, metadataInput, directory);
+        const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
+            {
+                directory,
+                metadata: metaReader,
+                data: inputReader,
+            },
+            logger,
+        );
+        await proc.init();
+        const prom = proc.transform();
 
         const metadata = `
         @prefix ex: <http://example.org/ns#> .
@@ -70,8 +80,12 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         <root> <https://w3id.org/sds#stream> <http://example.org/ns#BenchmarkStream> <https://w3id.org/sds#DataDescription> .
         `;
 
-        await metadataInput.push(metadata);
-        await dataInput.push(data);
+        await metaWriter.string(metadata);
+        await inputWriter.string(data);
+
+        await metaWriter.close();
+        await inputWriter.close();
+        await prom;
 
         const files = fs.readdirSync(directory);
         expect(files).toContain("index.trig");

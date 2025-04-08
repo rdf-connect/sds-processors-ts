@@ -269,6 +269,7 @@ export class Bucketizer extends Processor<Args> {
         const promises: Promise<unknown>[] = [];
         promises.push(this.set_metadata());
         promises.push(this.extractShape());
+        promises.push(this.transformData());
 
         await Promise.all(promises);
     }

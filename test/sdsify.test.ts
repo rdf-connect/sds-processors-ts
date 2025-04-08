@@ -1,11 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { SimpleStream } from "@rdfc/js-runner";
+import { ReaderInstance, FullProc } from "@rdfc/js-runner";
 import { DataFactory } from "rdf-data-factory";
 import { RdfStore } from "rdf-stores";
 import { Parser } from "n3";
 import { getObjects } from "../lib/utils";
-import { sdsify } from "../lib/sdsify";
+import { Sdsify } from "../lib/sdsify";
 import { LDES, RDF, SDS, XSD } from "@treecg/types";
+import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
 
 const df = new DataFactory();
 
@@ -140,336 +141,339 @@ describe("Functional tests for the sdsify function", () => {
             sh:targetClass ex:SomeOtherClass.
     `;
 
+    async function updateStore(stream: ReaderInstance, store: RdfStore) {
+        for await (const data of stream.strings()) {
+            new Parser().parse(data).forEach((q) => store.addQuad(q));
+        }
+    }
+
     test("Default extraction without a given shape", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
+        updateStore(outputReader, store);
 
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(2);
-
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop1"),
-                        df.literal("some value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop2"),
-                        df.literal("some other value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/nestedProp1"),
-                        df.literal("50", XSD.terms.integer),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop4"),
-                        df.literal("some value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop5"),
-                        df.literal("15", XSD.terms.integer),
-                        null,
-                    ).length,
-                ).toBe(1);
-            });
-
-        // Execute function
-        await sdsify(input, output, STREAM_ID);
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+            },
+            logger,
+        );
+        await proc.init();
+        const done = proc.transform();
 
         // Push some data in
-        await input.push(INPUT_1);
-        await input.end();
+        await inputWriter.string(INPUT_1);
+        await inputWriter.close();
+        await done;
+
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(2);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop1"),
+                df.literal("some value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop2"),
+                df.literal("some other value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/nestedProp1"),
+                df.literal("50", XSD.terms.integer),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop4"),
+                df.literal("some value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop5"),
+                df.literal("15", XSD.terms.integer),
+                null,
+            ).length,
+        ).toBe(1);
     });
 
     test("Extraction of particular entity type based on a SHACL shape", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
+        updateStore(outputReader, store);
 
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(1);
-
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop4"),
-                        df.literal("some value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop5"),
-                        df.literal("15", XSD.terms.integer),
-                        null,
-                    ).length,
-                ).toBe(1);
-            });
-
-        // Execute function
-        await sdsify(
-            input,
-            output,
-            STREAM_ID,
-            [df.namedNode("http://ex.org/SomeOtherClass")],
-            undefined,
-            SHAPE_1,
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                types: [df.namedNode("http://ex.org/SomeOtherClass")],
+                shape: SHAPE_1,
+            },
+            logger,
         );
 
+        await proc.init();
+        const done = proc.transform();
+
         // Push some data in
-        await input.push(INPUT_1);
-        await input.end();
+        await inputWriter.string(INPUT_1);
+        await inputWriter.close();
+        await done;
+
+        // Check there number of members
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(1);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop4"),
+                df.literal("some value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop5"),
+                df.literal("15", XSD.terms.integer),
+                null,
+            ).length,
+        ).toBe(1);
     });
 
     test("Partial extraction of particular entity type based on a SHACL shape", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
+        updateStore(outputReader, store);
 
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(1);
-
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop2"),
-                        df.literal("some other value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-
-                // Check some properties were excluded
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop1"),
-                        null,
-                        null,
-                    ).length,
-                ).toBe(0);
-            });
-
-        // Execute function
-        await sdsify(
-            input,
-            output,
-            STREAM_ID,
-            [df.namedNode("http://ex.org/SomeClass")],
-            undefined,
-            SHAPE_2,
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                types: [df.namedNode("http://ex.org/SomeClass")],
+                shape: SHAPE_2,
+            },
+            logger,
         );
 
+        await proc.init();
+        const done = proc.transform();
+
         // Push some data in
-        await input.push(INPUT_1);
-        await input.end();
+        await inputWriter.string(INPUT_1);
+        await inputWriter.close();
+        await done;
+
+        // Check there number of members
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(1);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop2"),
+                df.literal("some other value"),
+                null,
+            ).length,
+        ).toBe(1);
+
+        // Check some properties were excluded
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop1"),
+                null,
+                null,
+            ).length,
+        ).toBe(0);
     });
 
     test("Partial extraction of particular entity type with a nested SHACL shape", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
+        updateStore(outputReader, store);
 
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(1);
-
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        RDF.terms.type,
-                        df.namedNode("http://ex.org/SomeClass"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop2"),
-                        df.namedNode("B"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        RDF.terms.type,
-                        df.namedNode("http://ex.org/SomeOtherClass"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop3"),
-                        df.literal("another value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-            });
-
-        // Execute function
-        await sdsify(
-            input,
-            output,
-            STREAM_ID,
-            [df.namedNode("http://ex.org/SomeClass")],
-            undefined,
-            SHAPE_3,
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                types: [df.namedNode("http://ex.org/SomeClass")],
+                shape: SHAPE_3,
+            },
+            logger,
         );
 
+        await proc.init();
+        const done = proc.transform();
+
         // Push some data in
-        await input.push(INPUT_2);
-        await input.end();
+        await inputWriter.string(INPUT_2);
+        await inputWriter.close();
+        await done;
+
+        // Check there number of members
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(1);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                RDF.terms.type,
+                df.namedNode("http://ex.org/SomeClass"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop2"),
+                df.namedNode("B"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                RDF.terms.type,
+                df.namedNode("http://ex.org/SomeOtherClass"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop3"),
+                df.literal("another value"),
+                null,
+            ).length,
+        ).toBe(1);
     });
 
     test("(Partial) extraction of multiples entity types based on SHACL shapes", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
+        updateStore(outputReader, store);
 
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(2);
-
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop2"),
-                        df.literal("some other value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop4"),
-                        df.literal("some value"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop5"),
-                        df.literal("15", XSD.terms.integer),
-                        null,
-                    ).length,
-                ).toBe(1);
-            });
-
-        // Execute function
-        await sdsify(
-            input,
-            output,
-            STREAM_ID,
-            undefined,
-            undefined,
-            MULTI_SHAPE,
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                shape: MULTI_SHAPE,
+            },
+            logger,
         );
 
+        await proc.init();
+        const done = proc.transform();
+
         // Push some data in
-        await input.push(INPUT_1);
-        await input.end();
+        await inputWriter.string(INPUT_1);
+        await inputWriter.close();
+        await done;
+        // Check there number of members
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(2);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop2"),
+                df.literal("some other value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop4"),
+                df.literal("some value"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop5"),
+                df.literal("15", XSD.terms.integer),
+                null,
+            ).length,
+        ).toBe(1);
     });
 
     test("Failure on shape with multiple main node shapes", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [_inputWriter, inputReader] = createWriter();
+        const [outputWriter, _outputReader] = createWriter();
 
-        const store = RdfStore.createDefault();
-        output
-            .data((data) => {
-                new Parser().parse(data).forEach((q) => store.addQuad(q));
-            })
-            .on("end", () => {});
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                shape: BAD_SHAPE_1,
+            },
+            logger,
+        );
 
         // Execute function
-        await expect(
-            sdsify(input, output, STREAM_ID, undefined, undefined, BAD_SHAPE_1),
-        ).rejects.toThrow(
+        await expect(proc.init()).rejects.toThrow(
             "There are multiple main node shapes in a given shape." +
                 " Use sh:xone or sh:or to provide multiple unrelated shapes together.",
         );
     });
 
     test("Time stamp-based ordering of SHACL-based extraction", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        const timestamps: string[] = [];
+        updateStore(outputReader, store);
 
-        output
-            .data(async (data) => {
-                const quads = new Parser().parse(data);
+        const timestamps: string[] = [];
+        (async () => {
+            for await (const st of outputReader.strings()) {
+                const quads = new Parser().parse(st);
                 const subj = quads[0].subject;
-                quads.forEach((q) => store.addQuad(q));
                 timestamps.push(
                     (
                         await getObjects(
@@ -479,85 +483,88 @@ describe("Functional tests for the sdsify function", () => {
                         )
                     )[0].value,
                 );
-            })
-            .on("end", async () => {
-                // Check there number of members
-                expect(
-                    (await getObjects(store, undefined, SDS.terms.payload))
-                        .length,
-                ).toBe(3);
+            }
+        })();
 
-                // Check all properties are extracted for members
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop1"),
-                        df.literal("some value A"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop1"),
-                        df.literal("some value B"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/prop1"),
-                        df.literal("some value C"),
-                        null,
-                    ).length,
-                ).toBe(1);
-                expect(
-                    store.getQuads(
-                        null,
-                        df.namedNode("http://ex.org/timestamp"),
-                        null,
-                        null,
-                    ).length,
-                ).toBe(3);
-
-                // Check all members belong to the same transaction and last one is marked as such
-                const tIds = await getObjects(
-                    store,
-                    undefined,
-                    LDES.terms.custom("transactionId"),
-                );
-                expect(tIds.every((id) => id.value === tIds[0].value));
-                expect(
-                    (
-                        await getObjects(
-                            store,
-                            undefined,
-                            LDES.terms.custom("isLastOfTransaction"),
-                        )
-                    ).length,
-                ).toBe(1);
-
-                let currT = 0;
-                for (const ts of timestamps) {
-                    const tsv = new Date(ts).getTime();
-                    expect(tsv).toBeGreaterThanOrEqual(currT);
-                    currT = tsv;
-                }
-            });
-
-        // Execute function
-        await sdsify(
-            input,
-            output,
-            STREAM_ID,
-            undefined,
-            df.namedNode("http://ex.org/timestamp"),
-            SHAPE_4,
+        const proc = <FullProc<Sdsify>>new Sdsify(
+            {
+                input: inputReader,
+                output: outputWriter,
+                streamNode: STREAM_ID,
+                timestampPath: df.namedNode("http://ex.org/timestamp"),
+                shape: SHAPE_4,
+            },
+            logger,
         );
 
+        await proc.init();
+        const done = proc.transform();
+
         // Push some data in
-        await input.push(INPUT_3);
-        await input.end();
+        await inputWriter.string(INPUT_3);
+        await inputWriter.close();
+        await done;
+
+        expect(
+            (await getObjects(store, undefined, SDS.terms.payload)).length,
+        ).toBe(3);
+
+        // Check all properties are extracted for members
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop1"),
+                df.literal("some value A"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop1"),
+                df.literal("some value B"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/prop1"),
+                df.literal("some value C"),
+                null,
+            ).length,
+        ).toBe(1);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("http://ex.org/timestamp"),
+                null,
+                null,
+            ).length,
+        ).toBe(3);
+
+        // Check all members belong to the same transaction and last one is marked as such
+        const tIds = await getObjects(
+            store,
+            undefined,
+            LDES.terms.custom("transactionId"),
+        );
+        expect(tIds.every((id) => id.value === tIds[0].value));
+        expect(
+            (
+                await getObjects(
+                    store,
+                    undefined,
+                    LDES.terms.custom("isLastOfTransaction"),
+                )
+            ).length,
+        ).toBe(1);
+
+        let currT = 0;
+        for (const ts of timestamps) {
+            const tsv = new Date(ts).getTime();
+            expect(tsv).toBeGreaterThanOrEqual(currT);
+            currT = tsv;
+        }
     });
 });

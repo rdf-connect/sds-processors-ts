@@ -1,15 +1,20 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { DataFactory, Parser } from "n3";
+import { DataFactory, Parser, Writer } from "n3";
 import {
     BucketizerConfig,
     BucketizerOrchestrator,
     SHAPES_TEXT,
 } from "../lib/bucketizers/index";
-import { Bucket, Record } from "../lib/";
+import { Bucket, Bucketizer, Record } from "../lib/";
 import { extractShapes, pred } from "rdf-lens";
-import { SimpleStream } from "@rdfc/js-runner";
-import { bucketize } from "../lib/main";
+import { FullProc, ReaderInstance, WriterInstance } from "@rdfc/js-runner";
 import { RDF, SDS } from "@treecg/types";
+import {
+    createReader,
+    createWriter,
+    logger,
+    one,
+} from "@rdfc/js-runner/lib/testUtils";
 const { namedNode } = DataFactory;
 
 type Member = { id: string; timestamp: Date; text: string };
@@ -577,8 +582,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
          * We add the records in batches per day and check if the records are added to the correct buckets.
          */
         // START SETUP
-        const incoming = new SimpleStream<string>();
-        const outgoing = new SimpleStream<string>();
+        const [incomingWriter, incoming] = createWriter("incoming");
+        const [outgoing, outgoingReader] = createWriter("outgoing");
 
         // Initialize the processor.
         await setupBucketizer(incoming, outgoing, 10, 4, 3600);
@@ -604,8 +609,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // First 10 should just be added
         for (let i = 0; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`ra${i + 1}`, dates[0][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`ra${i + 1}`, dates[0][i]));
             await outputPromise;
 
             const expected = [
@@ -641,8 +646,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Ra11 should split the bucket recursively until it has to make a new page.
         output = [];
-        let outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("ra11", dates[0][10]));
+        let outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("ra11", dates[0][10]));
         await outputPromise;
 
         // Expected splits
@@ -990,8 +995,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Ra12 - Ra15 should be added to the new page
         for (let i = 11; i < 15; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`ra${i + 1}`, dates[0][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`ra${i + 1}`, dates[0][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -1024,8 +1029,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-24), Rb1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rb1", dates[1][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rb1", dates[1][0]));
         await outputPromise;
 
         testOutput(
@@ -1155,8 +1160,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rb2 - Rb10 should just be added.
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rb${i + 1}`, dates[1][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rb${i + 1}`, dates[1][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -1189,8 +1194,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Rb11 should split the bucket recursively until it has to make a new page.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rb11", dates[1][10]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rb11", dates[1][10]));
         await outputPromise;
 
         // Expected splits
@@ -1392,8 +1397,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rb12 - Rb15 should be added to the new page
         for (let i = 11; i < 15; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rb${i + 1}`, dates[1][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rb${i + 1}`, dates[1][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -1426,8 +1431,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-25), Rc1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rc1", dates[2][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rc1", dates[2][0]));
         await outputPromise;
         testOutput(
             output,
@@ -1620,8 +1625,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rc2 - Rc10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rc${i + 1}`, dates[2][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rc${i + 1}`, dates[2][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -1654,8 +1659,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Rc11 should split the bucket recursively until it has to make a new page.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rc11", dates[2][10]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rc11", dates[2][10]));
         await outputPromise;
 
         // Expected splits
@@ -1933,8 +1938,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rc12 - Rc15 should be added to the new page
         for (let i = 11; i < 15; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rc${i + 1}`, dates[2][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rc${i + 1}`, dates[2][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -1967,8 +1972,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-26), Rd1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rd1", dates[3][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rd1", dates[3][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2065,8 +2070,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rd2 - Rd10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rd${i + 1}`, dates[3][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rd${i + 1}`, dates[3][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -2101,8 +2106,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-27), Re1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("re1", dates[4][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("re1", dates[4][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2191,8 +2196,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Re2 - Re10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`re${i + 1}`, dates[4][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`re${i + 1}`, dates[4][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -2227,8 +2232,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-28), Rf1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rf1", dates[5][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rf1", dates[5][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2285,8 +2290,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rf2 - Rf10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rf${i + 1}`, dates[5][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rf${i + 1}`, dates[5][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -2321,8 +2326,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-29), Rg1 should be added to same bucket as Rf1-Rf10, splitting that bucket.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rg1", dates[6][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rg1", dates[6][0]));
         await outputPromise;
 
         // Expected splits
@@ -2472,8 +2477,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rg2 - Rg10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rg${i + 1}`, dates[6][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rg${i + 1}`, dates[6][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -2510,8 +2515,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-07-31), Rh1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rh1", dates[8][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rh1", dates[8][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2632,8 +2637,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rh2 - Rh5 should just be added
         for (let i = 1; i < 5; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rh${i + 1}`, dates[8][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(createInput(`rh${i + 1}`, dates[8][i]));
             await outputPromise;
             testOutput(
                 output,
@@ -2666,8 +2671,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-01), Ri1 should be added to same bucket as Rh1-Rh5.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("ri1", dates[9][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("ri1", dates[9][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2699,8 +2704,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-02), Rj1 should be added to same bucket as Ri1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rj1", dates[10][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rj1", dates[10][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2732,8 +2737,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-03), Rk1 should be added to same bucket as Rj1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rk1", dates[11][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rk1", dates[11][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2765,8 +2770,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-04), Rl1 should be added to same bucket as Rk1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rl1", dates[12][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rl1", dates[12][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2798,8 +2803,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-05), Rm1 should be added to same bucket as Rl1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rm1", dates[13][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rm1", dates[13][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2831,8 +2836,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-06), Rn1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rn1", dates[14][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rn1", dates[14][0]));
         await outputPromise;
         testOutput(
             output,
@@ -2889,8 +2894,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rn2 - Rn10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rn${i + 1}`, dates[14][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rn${i + 1}`, dates[14][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -2923,8 +2930,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Rn11 should split the bucket recursively until it has to make a new page.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rn11", dates[14][10]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rn11", dates[14][10]));
         await outputPromise;
 
         // Expected splits
@@ -3163,8 +3170,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rn12 - Rn15 should be added to the new page.
         for (let i = 1; i < 5; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rn${i + 11}`, dates[14][10 + i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rn${i + 11}`, dates[14][10 + i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -3197,8 +3206,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-07), Ro1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("ro1", dates[15][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("ro1", dates[15][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3327,8 +3336,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Ro2 - Ro10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`ro${i + 1}`, dates[15][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`ro${i + 1}`, dates[15][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -3363,8 +3374,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-08), Rp1 should be added, recursively splitting the bucket Ro1 - Ro10 also belongs to.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rp1", dates[16][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rp1", dates[16][0]));
         await outputPromise;
 
         // Expected splits
@@ -3514,8 +3525,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rp2 - Rp10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rp${i + 1}`, dates[16][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rp${i + 1}`, dates[16][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -3550,8 +3563,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-09), Rq1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rq1", dates[17][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rq1", dates[17][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3640,8 +3653,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rq2 - Rq10 should just be added
         for (let i = 1; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rq${i + 1}`, dates[17][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rq${i + 1}`, dates[17][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -3676,8 +3691,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-10), Rr1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rr1", dates[18][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rr1", dates[18][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3734,8 +3749,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rr2 - Rr5 should just be added
         for (let i = 1; i < 5; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rr${i + 1}`, dates[18][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rr${i + 1}`, dates[18][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -3770,8 +3787,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-11), Rs1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rs1", dates[19][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rs1", dates[19][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3861,8 +3878,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-12), Rt1 should be added to the same bucket as Rs1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rt1", dates[20][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rt1", dates[20][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3896,8 +3913,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-13), Ru1 should be added to the same bucket as Rt1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("ru1", dates[21][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("ru1", dates[21][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3931,8 +3948,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-14), Rv1 should be added to the same bucket as Ru1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rv1", dates[22][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rv1", dates[22][0]));
         await outputPromise;
         testOutput(
             output,
@@ -3966,8 +3983,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-15), Rw1 should be added to the same bucket as Rv1.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rw1", dates[23][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rw1", dates[23][0]));
         await outputPromise;
         testOutput(
             output,
@@ -4002,8 +4019,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Next day (2024-08-16), Rx1 - Rx5 should be added to the same bucket as Rw1.
         for (let i = 1; i < 6; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rx${i}`, dates[24][i - 1]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rx${i}`, dates[24][i - 1]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -4036,8 +4055,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Rx6 should split the bucket recursively until it has to make a new page.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("rx6", dates[24][5]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("rx6", dates[24][5]));
         await outputPromise;
 
         // Expected splits
@@ -4182,8 +4201,10 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         // Rx7 - Rx10 should be added to the same bucket as Rx6.
         for (let i = 6; i < 10; i++) {
             output = [];
-            const outputPromise = outputListener(outgoing, output);
-            await incoming.push(createInput(`rx${i + 1}`, dates[24][i]));
+            const outputPromise = outputListener(outgoingReader, output);
+            await incomingWriter.string(
+                createInput(`rx${i + 1}`, dates[24][i]),
+            );
             await outputPromise;
             testOutput(
                 output,
@@ -4218,8 +4239,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
 
         // Next day (2024-08-17), Ry1 should be added, making previous buckets immutable.
         output = [];
-        outputPromise = outputListener(outgoing, output);
-        await incoming.push(createInput("ry1", dates[25][0]));
+        outputPromise = outputListener(outgoingReader, output);
+        await incomingWriter.string(createInput("ry1", dates[25][0]));
         await outputPromise;
         testOutput(
             output,
@@ -4499,27 +4520,27 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         return timespans;
     }
 
-    async function outputListener(
-        outgoing: SimpleStream<string>,
+    function outputListener(
+        outgoing: ReaderInstance,
         output: string[],
     ): Promise<void> {
-        return new Promise<void>((resolve) => {
-            outgoing.on("data", (data) => {
-                output.push(data);
-                resolve();
-            });
+        const prom = one(outgoing.strings());
+        return prom.then((st) => {
+            if (st) {
+                output.push(st);
+            }
         });
     }
 
     async function setupBucketizer(
-        incoming: SimpleStream<string>,
-        outgoing: SimpleStream<string>,
+        incoming: ReaderInstance,
+        outgoing: WriterInstance,
         maxSize: number,
         k: number,
         minBucketSpan: number,
     ): Promise<void> {
-        const metaIncoming = new SimpleStream<string>();
-        const metaOutgoing = new SimpleStream<string>();
+        const metaIncoming = createReader();
+        const [metaOutgoing, msgs] = createWriter();
         const channels = {
             dataInput: incoming,
             metadataInput: metaIncoming,
@@ -4574,13 +4595,20 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
             ],
         };
 
-        await bucketize(
-            channels,
-            config,
-            undefined,
-            undefined,
-            namedNode("https://w3id.org/sds#Stream"),
-            "",
+        const proc = <FullProc<Bucketizer>>new Bucketizer(
+            {
+                channels,
+                savePath: undefined,
+                sourceStream: undefined,
+                config,
+                prefix: "",
+                resultingStream: namedNode("https://w3id.org/sds#Stream"),
+            },
+            logger,
         );
+        await proc.init();
+
+        proc.transform();
+        await Promise.resolve();
     }
 });

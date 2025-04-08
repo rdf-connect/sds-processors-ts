@@ -1,10 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { SimpleStream } from "@rdfc/js-runner";
 import { DataFactory } from "rdf-data-factory";
 import { Parser, Quad_Object, Writer } from "n3";
-import { ldesify_sds } from "../lib/ldesify";
+import { LdesifySDS } from "../lib/ldesify";
 import { SDS } from "@treecg/types";
 import { Quad, Term } from "@rdfjs/types";
+import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { readStrings, strs } from "./utils";
+import { FullProc } from "@rdfc/js-runner";
 
 const df = new DataFactory();
 
@@ -43,27 +45,47 @@ function manQuads(id: Term, age: number): Quad[] {
 
 describe("Functional tests for the ldesify function", () => {
     test("LDESify works", async () => {
-        const input = new SimpleStream<string>();
-        const output = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
+
         const outs: string[] = [];
-        output.data((x) => {
-            outs.push(x);
-        });
-        ldesify_sds(input, output, undefined, undefined, stream);
+
+        readStrings(outputReader, outs);
+        const sts = strs(outputReader);
+
+        const proc = <FullProc<LdesifySDS>>new LdesifySDS(
+            {
+                reader: inputReader,
+                writer: outputWriter,
+                targetStream: stream,
+                statePath: undefined,
+                sourceStream: undefined,
+                isVersionOfPathM: undefined,
+                modifiedPathM: undefined,
+            },
+            logger,
+        );
+        await proc.init();
+        proc.transform();
 
         const p1 = df.namedNode("Person1");
         const p2 = df.namedNode("Person2");
-        await input.push(BuildSds(manQuads(p1, 45), p1));
-
+        await inputWriter.string(BuildSds(manQuads(p1, 45), p1));
+        await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(1);
-        await input.push(BuildSds(manQuads(p1, 45), p1));
+        await inputWriter.string(BuildSds(manQuads(p1, 45), p1));
+        await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(1);
 
-        await input.push(BuildSds(manQuads(p1, 46), p1));
+        await inputWriter.string(BuildSds(manQuads(p1, 46), p1));
+        await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(2);
-        await input.push(BuildSds(manQuads(p2, 46), p2));
+        await inputWriter.string(BuildSds(manQuads(p2, 46), p2));
+        await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(3);
-        await input.push(BuildSds(manQuads(p1, 46), p1));
-        expect(outs.length).toBe(3);
+        await inputWriter.string(BuildSds(manQuads(p1, 46), p1));
+        await inputWriter.close();
+        const strings = await sts;
+        expect(strings.length).toBe(3);
     });
 });

@@ -1,69 +1,11 @@
 import { describe, expect, test } from "vitest";
-import { Shape, shapify } from "../lib/shapify.js";
-import {
-    extractProcessors,
-    extractSteps,
-    SimpleStream,
-    Source,
-} from "@rdfc/js-runner";
+import { Shapify } from "../lib/shapify.js";
 import { NamedNode, Parser } from "n3";
 import { CBDShapeExtractor, Extractor } from "../lib";
+import { createWriter, logger, one } from "@rdfc/js-runner/lib/testUtils.js";
+import { FullProc } from "@rdfc/js-runner";
 
 describe("Functional tests for the shapify function", () => {
-    test("Shapify works with js-runner", async () => {
-        const value = `
-@prefix js: <https://w3id.org/conn/js#>.
-@prefix fno: <https://w3id.org/function/ontology#>.
-@prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix : <https://w3id.org/conn#>.
-@prefix sh: <http://www.w3.org/ns/shacl#>.
-@prefix owl: <http://www.w3.org/2002/07/owl#>.
-@prefix dc: <http://purl.org/dc/terms/>.
-@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
-
-<> owl:imports <./configs/shapify.ttl>.
-<> owl:imports <./node_modules/@rdfc/js-runner/ontology.ttl>.
-<> owl:imports <./node_modules/@rdfc/js-runner/channels/file.ttl>.
-<> owl:imports <./node_modules/@rdfc/js-runner/channels/http.ttl>.
-
-<ttl/writer> a js:JsWriterChannel.
-<ttl/reader> a js:JsReaderChannel.
-[ ] a :Channel, js:JsChannel;
-  :reader <ttl/reader>;
-  :writer <ttl/writer>.
-
-[] a js:Shapify;
-  js:input <ttl/reader>;
-  js:output <ttl/writer>;
-  js:shape <Shape>.
-`;
-        const baseIRI = process.cwd() + "/config.ttl";
-
-        const source: Source = {
-            value,
-            baseIRI,
-            type: "memory",
-        };
-
-        const {
-            processors,
-            quads,
-            shapes: config,
-        } = await extractProcessors(source, {});
-
-        const proc = processors.find(
-            (x) => x.ty.value === "https://w3id.org/conn/js#Shapify",
-        );
-        expect(proc).toBeDefined();
-
-        const argss = extractSteps(proc!, quads, config);
-        expect(argss).toBeDefined();
-        const shape = <Shape>argss[0][2];
-        expect(shape.quads.length).toBe(290);
-        expect(shape.id.value).toEqual(process.cwd() + "/Shape");
-    });
-
     test("Shapify works as expected for mumo", async () => {
         const shape = `
 @prefix dcterms: <http://purl.org/dc/terms/>.
@@ -111,10 +53,7 @@ describe("Functional tests for the shapify function", () => {
           sh:node <NodeShape>;
         ];
       ];
-    ].
-
-
-`;
+    ].`;
 
         const data = `
 @prefix sds: <https://w3id.org/sds#>.
@@ -154,27 +93,30 @@ sds:stream <blabla>.
 }
 `;
         const shapeQuads = new Parser().parse(shape);
-        const inputStream = new SimpleStream<string>();
-        const outputStream = new SimpleStream<string>();
+        const [inputWriter, inputReader] = createWriter();
+        const [outputWriter, outputReader] = createWriter();
 
-        const output: string[] = [];
-        outputStream.data((x) => {
-            output.push(x);
-        });
+        const proc = <FullProc<Shapify>>new Shapify(
+            {
+                shape: {
+                    id: new NamedNode("ValueShape"),
+                    quads: shapeQuads,
+                },
+                writer: outputWriter,
+                reader: inputReader,
+            },
+            logger,
+        );
+        await proc.init();
+        proc.transform();
 
-        shapify(inputStream, outputStream, {
-            id: new NamedNode("ValueShape"),
-            quads: shapeQuads,
-        });
-        await inputStream.push(data);
-
-        await new Promise((res) => setTimeout(res, 200));
-        expect(output.length, "output length is one").toBe(1);
+        const prom = one(outputReader.strings());
+        await inputWriter.string(data);
+        const st = await prom;
+        expect(st).toBeDefined();
 
         const extractor = new Extractor(new CBDShapeExtractor());
-        const records = await extractor.parse_records(
-            new Parser().parse(output[0]),
-        );
+        const records = await extractor.parse_records(new Parser().parse(st!));
 
         expect(records.length, "parsed records is one").toBe(1);
         expect(records[0].data.quads.length).toBe(10);
