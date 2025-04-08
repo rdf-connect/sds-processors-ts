@@ -12,7 +12,7 @@
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:Shapify a rdfc:Processor;
+rdfc:Shapify a rdfc:JsProcessor;
   dc:title "Shapify processor";
   dc:description "";
   rdfc:file <../lib/shapify.js>;
@@ -20,7 +20,7 @@ rdfc:Shapify a rdfc:Processor;
   rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass rdfc:Shape;
+  sh:targetClass <Shape>;
   sh:property [
     sh:datatype xsd:any;
     sh:path ( );
@@ -40,19 +40,19 @@ rdfc:Shapify a rdfc:Processor;
   sh:property [
     sh:class rdfc:Reader;
     sh:path js:input;
-    sh:name "Data input channel";
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
-    sh:name "Data output channel";
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class js:Shape;
+    sh:class <Shape>;
     sh:path js:shape;
-    sh:name "Shape";
+    sh:name "shape";
     sh:minCount 1;
     sh:maxCount 1;
   ].

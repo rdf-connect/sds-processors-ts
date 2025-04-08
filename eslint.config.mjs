@@ -11,31 +11,39 @@ const __dirname = path.dirname(__filename);
 const compat = new FlatCompat({
     baseDirectory: __dirname,
     recommendedConfig: js.configs.recommended,
-    allConfig: js.configs.all
+    allConfig: js.configs.all,
 });
 
-export default [{
-    ignores: ["**/lib", "**/node_modules"],
-}, ...compat.extends("eslint:recommended", "plugin:@typescript-eslint/recommended", "prettier"), {
-    plugins: {
-        "@typescript-eslint": typescriptEslint,
+export default [
+    {
+        ignores: ["**/lib", "**/node_modules"],
     },
-
-    languageOptions: {
-        globals: {
-            ...globals.browser,
+    ...compat.extends(
+        "eslint:recommended",
+        "plugin:@typescript-eslint/recommended",
+        "prettier",
+    ),
+    {
+        plugins: {
+            "@typescript-eslint": typescriptEslint,
         },
 
-        parser: tsParser,
-        ecmaVersion: "latest",
-        sourceType: "module",
-    },
+        languageOptions: {
+            globals: {
+                ...globals.browser,
+            },
 
-    rules: {
-        indent: ["error", 4],
-        "linebreak-style": ["error", "unix"],
-        quotes: ["error", "double"],
-        semi: ["error", "always"],
-        "@typescript-eslint/no-unused-vars": "warn",
+            parser: tsParser,
+            ecmaVersion: "latest",
+            sourceType: "module",
+        },
+
+        rules: {
+            indent: ["error", 4],
+            "linebreak-style": ["error", "unix"],
+            quotes: ["error", "double"],
+            semi: ["error", "always"],
+            "@typescript-eslint/no-unused-vars": "warn",
+        },
     },
-}];
+];

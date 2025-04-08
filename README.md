@@ -38,8 +38,8 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 
         <shape2> a sh:NodeShape;
             sh:targetClass ex:SomeOtherClass;
-            sh:property [ 
-                sh:path ex:someProperty 
+            sh:property [
+                sh:path ex:someProperty
             ], [
                 sh:path ex:someOtherProperty;
                 sh:node [
@@ -78,7 +78,6 @@ You can define bucketizers as follows:
   js:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
 ```
 
-
 #### Example of a time-based fragmentation
 
 ```turtle
@@ -112,16 +111,15 @@ If a bucket is full, but splitting the bucket would result in a bucket with a ti
 The members need to be arrived in order of their timestamps.
 When a member arrives, all buckets that hold members with a timestamp older than the new member's timestamp will be made immutable and no new members can be added to them.
 
-
 #### Example of a timebucket based fragmentation
 
 ```turtle
 <timebucket-fragmentation> a tree:TimeBucketFragmentation;
   tree:timestampPath <http://def.isotc211.org/iso19156/2011/Observation#OM_Observation.resultTime>;
-  tree:buffer 5000;   # members can arrive 5 seconds out of sync () 
+  tree:buffer 5000;   # members can arrive 5 seconds out of sync ()
   tree:level ( [      # Create 5 levels, resulting uri's <year>/<month>/<day>/<hour>/<minute>
     tree:range "year", "month";
-    tree:maxSize 0;   # place no members at this level 
+    tree:maxSize 0;   # place no members at this level
   ] [
     tree:range "day-of-month";
     tree:maxSize 1000;    # place at most 1000 members at this level
@@ -136,18 +134,17 @@ When a member arrives, all buckets that hold members with a timestamp older than
 
 This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute}` after ingesting 2001 members in the same hour (filling day and hour).
 
-
 ### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
-
 
 ### [`js:LdesifySDS`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L82)
 
 Transform SDS-records in SDS-members, creating versioned objects.
 The resulting objects are encapsulated in a graph (overriding other graphs).
 
-Specify: 
+Specify:
+
 - `js:input` input channel
 - `js:output` output channel
 - `js:statePath` path for state file
@@ -156,13 +153,13 @@ Specify:
 - optional `js:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
 - optional `js:versionOfPath`, defaults to `http://purl.org/dc/terms/isVersionOf`
 
-
 ### [`js:Shapify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/shapify.ttl#L14)
 
 Execute [Extract CBD Shape algorithm](https://github.com/TREEcg/extract-cbd-shape) on all sds records.
 **Note:** this processor does not create a new sds stream.
 
 Specify:
+
 - `js:input` input channel
 - `js:output` output channel
 - `js:shape` used `sh:NodeShape`
@@ -173,9 +170,9 @@ Transform all sds records payload members into named graph-based members.
 **Note:** this processor does not create a new sds stream.
 
 Specify:
+
 - `js:input` input channel
 - `js:output` output channel
-
 
 ### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)
 
