@@ -5,7 +5,7 @@ import { getLoggerFor } from "./utils/logUtil";
 import { Extractor } from "./utils/extractor";
 import path from "node:path";
 import { DataFactory } from "rdf-data-factory";
-import { DC, LDES, RDF, SDS, TREE } from "@treecg/types";
+import { DC, LDES, RDF, SDS, TREE, XSD } from "@treecg/types";
 import { Parser, Writer } from "n3";
 import * as fs from "node:fs";
 
@@ -304,6 +304,32 @@ export function ldesDiskWriter(
                     ];
                     const data = await quadsToString(quads);
                     await fs.promises.appendFile(viewIndexPath, data);
+                }
+            }
+
+            if (bucket.immutable) {
+                // Check if the bucket is already immutable, otherwise set it to immutable
+                const content = await fs.promises.readFile(bucketIndexPath);
+                const quads = new Parser({
+                    baseIRI: INTERNAL_TEMP_BASE_URI,
+                }).parse(content.toString());
+                const immutable = quads.some(
+                    (q) =>
+                        q.predicate.equals(LDES.terms.custom("immutable")) &&
+                        q.object.equals(
+                            df.literal("true", XSD.terms.custom("boolean")),
+                        ),
+                );
+                if (!immutable) {
+                    const quads = [
+                        df.quad(
+                            df.namedNode("index.trig"),
+                            LDES.terms.custom("immutable"),
+                            df.literal("true", XSD.terms.custom("boolean")),
+                        ),
+                    ];
+                    const data = await quadsToString(quads);
+                    await fs.promises.appendFile(bucketIndexPath, data);
                 }
             }
         }
