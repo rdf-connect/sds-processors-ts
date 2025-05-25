@@ -27,7 +27,7 @@
   "dependencies": {
     "@treecg/types": "^0.4.6",
     "csv-parse": "^5.6.0",
-    "extract-cbd-shape": "^0.1.12",
+    "extract-cbd-shape": "^0.1.14",
     "jsonld": "^8.3.3",
     "n3": "^1.25.2",
     "rdf-canonize": "^4.0.1",
@@ -62,6 +62,6 @@
   },
   "optionalDependencies": {
     "@esbuild/darwin-arm64": "^0.25.4",
-    "@rollup/rollup-linux-x64-gnu": "^4.41.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.41.1"
   }
 }
