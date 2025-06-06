@@ -67,6 +67,16 @@ export function ldesDiskWriter(
                     ),
                 );
         }
+        const shapeId = metadataQuads.find(
+            (q) =>
+                streams.map((q) => q.value).includes(q.subject.value) &&
+                q.predicate.equals(SDS.terms.shape),
+        )?.object;
+        if (shapeId) {
+            metadataQuads.push(
+                df.quad(df.namedNode("index.trig"), TREE.terms.shape, shapeId),
+            );
+        }
 
         // Add information about the different views (defined by the streams) in the LDES.
         for (const stream of streams) {
