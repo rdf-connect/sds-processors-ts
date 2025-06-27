@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
@@ -8,8 +9,11 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:MemberAsNamedGraph a rdfc:JsProcessor;
+rdfc:MemberAsNamedGraph a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Member to Named Graph member";
   dc:title "Member to Named Graph member";
+  rdfs:description "Transform a stream of SDS wrapped members into a named graph-based member.";
   dc:description "Transform a stream of SDS wrapped members into a named graph-based member.";
   rdfc:file <../lib/memberAsNamedGraph.js>;
   rdfc:class "MemberAsNamedGraph";

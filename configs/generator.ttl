@@ -9,7 +9,8 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:Generate a rdfc:JsProcessor, owl:Class;
+rdfc:Generate a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Simple Data Generator";
   rdfs:description "Simple RDF data generator used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.";
   rdfc:file <../lib/generator.js>;

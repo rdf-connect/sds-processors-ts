@@ -7,16 +7,15 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
-
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:Sdsify a rdfc:JsProcessor;
-  rdfs:title "Sdsify processor";
+rdfc:Sdsify a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Sdsify processor";
   rdfs:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
   rdfc:file <../lib/sdsify.js>;
   rdfc:class "Sdsify";
   rdfc:entrypoint <../>.
-
 
 [ ] a sh:NodeShape;
   sh:targetClass rdfc:Sdsify;
@@ -56,3 +55,4 @@ rdfc:Sdsify a rdfc:JsProcessor;
     sh:minCount 0;
     sh:maxCount 1;
   ].
+

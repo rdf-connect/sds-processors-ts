@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
@@ -8,9 +9,10 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:Ldesify a rdfc:JsProcessor;
+rdfc:Ldesify a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Ldesify processor";
   dc:title "Ldesify processor";
-  dc:description "";
   rdfc:file <../lib/ldesify.js>;
   rdfc:class "Ldesify";
   rdfc:entrypoint <../>.
@@ -51,8 +53,10 @@ rdfc:Ldesify a rdfc:JsProcessor;
     sh:maxCount 1;
   ].
 
-rdfc:LdesifySDS a rdfc:JsProcessor;
+rdfc:LdesifySDS a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
   dc:title "Ldesify processor (for sds streams)";
+  rdfs:label "Ldesify processor (for sds streams)";
   dc:description "";
   rdfc:file <../lib/ldesify.js>;
   rdfc:class "LdesifySDS";

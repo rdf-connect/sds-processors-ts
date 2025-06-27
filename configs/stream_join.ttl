@@ -1,3 +1,4 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
@@ -8,7 +9,9 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-rdfc:StreamJoin a rdfc:JsProcessor;
+rdfc:StreamJoin a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Stream Join processor";
   dc:title "Stream Join processor";
   dc:description "Handle and pipe multiple input data streams into a single output stream.";
   rdfc:file <../lib/streamJoin.js>;
@@ -21,11 +24,12 @@ rdfc:StreamJoin a rdfc:JsProcessor;
     sh:class rdfc:Reader;
     sh:path js:input;
     sh:name "inputs";
-    sh:minCount 1
+    sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
     sh:path js:output;
     sh:name "output";
     sh:maxCount 1;
-    sh:minCount 1
+    sh:minCount 1;
   ].
+

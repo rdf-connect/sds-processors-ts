@@ -11,10 +11,10 @@
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
 
-
 <> owl:imports <./bucketizer_configs.ttl>.
-rdfc:Bucketize a rdfc:JsProcessor;
-  rdfs:title "Bucketizer processor";
+rdfc:Bucketize a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Bucketizer processor";
   rdfs:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
   rdfc:file <../lib/bucketizers.js>;
   rdfc:class "Bucketizer";
