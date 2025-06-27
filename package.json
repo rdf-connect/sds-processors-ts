@@ -52,7 +52,7 @@
     "husky": "^9.1.7",
     "lint-staged": "^16.1.2",
     "memfs": "^4.17.2",
-    "prettier": "^3.6.0",
+    "prettier": "^3.6.1",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "tsc-alias": "^1.8.16",
@@ -62,6 +62,6 @@
   },
   "optionalDependencies": {
     "@esbuild/darwin-arm64": "^0.25.5",
-    "@rollup/rollup-linux-x64-gnu": "^4.44.0"
+    "@rollup/rollup-linux-x64-gnu": "^4.44.1"
   }
 }
