@@ -21,8 +21,14 @@ export class LdesDiskWriter extends Processor<Args> {
         // nothing
     }
     async transform(this: Args & this): Promise<void> {
-        await Promise.all([this.handleData(), this.handleMetata()]);
+        try {
+            await Promise.all([this.handleData(), this.handleMetata()]);
+        } catch (ex: unknown) {
+            console.error(ex);
+            throw ex;
+        }
     }
+
     async produce(this: Args & this): Promise<void> {
         // nothing
     }
