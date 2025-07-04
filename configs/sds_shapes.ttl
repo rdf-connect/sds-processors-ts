@@ -5,7 +5,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
-@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 [ ] a sh:NodeShape;
   sh:targetClass <RdfThing>;

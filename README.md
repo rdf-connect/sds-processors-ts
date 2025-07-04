@@ -16,16 +16,16 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 
 ```turtle
 @prefix : <https://w3id.org/conn#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
-[ ] a js:Sdsify;
-    js:input <inputChannelReader>;
-    js:output <outputChannerWriter>;
-    js:stream <http://ex.org/myStream>;
-    js:typeFilter ex:SomeClass, ex:SomeOtherClass;
-    js:timestampPath <http://ex.org/timestamp>;
-    js:shape """
+[ ] a rdfc:Sdsify;
+    rdfc:input <inputChannelReader>;
+    rdfc:output <outputChannerWriter>;
+    rdfc:stream <http://ex.org/myStream>;
+    rdfc:typeFilter ex:SomeClass, ex:SomeOtherClass;
+    rdfc:timestampPath <http://ex.org/timestamp>;
+    rdfc:shape """
         @prefix sh: <http://www.w3.org/ns/shacl#>.
         @prefix ex: <http://ex.org/>.
 
@@ -59,45 +59,45 @@ You can define bucketizers as follows:
 #### Example of a subject and page fragmentation
 
 ```turtle
-<bucketize> a js:Bucketize;
-  js:channels [
-    js:dataInput <...data input>;
-    js:metadataInput <... metadata input>;
-    js:dataOutput <... data output>;
-    js:metadataOutput <... metadata output>;
+<bucketize> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <...data input>;
+    rdfc:metadataInput <... metadata input>;
+    rdfc:dataOutput <... data output>;
+    rdfc:metadataOutput <... metadata output>;
   ];
-  js:bucketizeStrategy ( [            # One or more bucketize strategies
+  rdfc:bucketizeStrategy ( [            # One or more bucketize strategies
     a tree:SubjectFragmentation;      # Create a bucket based on this path
     tree:fragmentationPath ( );
   ] [
     a tree:PageFragmentation;         # Create a new bucket when the previous bucket has 2 members
     tree:pageSize 2;
   ] );
-  js:savePath <./buckets_save.json>;
-  js:outputStreamId <MyEpicStream>;
-  js:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
+  rdfc:savePath <./buckets_save.json>;
+  rdfc:outputStreamId <MyEpicStream>;
+  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
 ```
 
 #### Example of a time-based fragmentation
 
 ```turtle
-<bucketize> a js:Bucketize;
-  js:channels [
-    js:dataInput <...data input>;
-    js:metadataInput <... metadata input>;
-    js:dataOutput <... data output>;
-    js:metadataOutput <... metadata output>;
+<bucketize> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <...data input>;
+    rdfc:metadataInput <... metadata input>;
+    rdfc:dataOutput <... data output>;
+    rdfc:metadataOutput <... metadata output>;
   ];
-  js:bucketizeStrategy ( [
+  rdfc:bucketizeStrategy ( [
     a tree:TimebasedFragmentation;
     tree:timestampPath <https://www.w3.org/ns/activitystreams#published>;
     tree:maxSize 100;
     tree:k 4;
     tree:minBucketSpan 3600;        # In seconds
   ]);
-  js:savePath <./buckets_save.json>;
-  js:outputStreamId <MyEpicStream>;
-  js:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
+  rdfc:savePath <./buckets_save.json>;
+  rdfc:outputStreamId <MyEpicStream>;
+  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
 ```
 
 This will create buckets based on a time-based fragmentation.
@@ -192,10 +192,10 @@ Alternative more advanced implementation: [sds-storage-writer-ts](https://github
 An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
 
 ```turtle
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 
-[ ] a js:LdesDiskWriter;
-    js:dataInput <data/reader>;
-    js:metadataInput <metadata/reader>;
-    js:directory </tmp/ldes-disk/>.
+[ ] a rdfc:LdesDiskWriter;
+    rdfc:dataInput <data/reader>;
+    rdfc:metadataInput <metadata/reader>;
+    rdfc:directory </tmp/ldes-disk/>.
 ```

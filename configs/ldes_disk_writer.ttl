@@ -1,17 +1,16 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
-@prefix js: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
-@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Ldes Disk Writer";
-  rdfs:description "Writes a LDES to local files";
+  rdfs:comment "Writes a LDES to local files";
   rdfc:file <../lib/ldesDiskWriter.js>;
   rdfc:class "LdesDiskWriter";
   rdfc:entrypoint <../>.
@@ -20,19 +19,19 @@ rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
   sh:targetClass rdfc:LdesDiskWriter;
   sh:property [
     sh:class rdfc:Reader;
-    sh:path js:dataInput;
+    sh:path rdfc:dataInput;
     sh:name "data";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Reader;
-    sh:path js:metadataInput;
+    sh:path rdfc:metadataInput;
     sh:name "metadata";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:directory;
+    sh:path rdfc:directory;
     sh:name "directory";
     sh:maxCount 1;
     sh:minCount 1;

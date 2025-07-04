@@ -1,5 +1,5 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -7,7 +7,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
-@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 rdfc:Ldesify a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
@@ -21,34 +21,34 @@ rdfc:Ldesify a owl:Class, rdfs:Class;
   sh:targetClass rdfc:Ldesify;
   sh:property [
     sh:class rdfc:Reader;
-    sh:path js:input;
+    sh:path rdfc:input;
     sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
-    sh:path js:output;
+    sh:path rdfc:output;
     sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:boolean;
-    sh:path js:checkProps;
+    sh:path rdfc:checkProps;
     sh:name "check_properties";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
+    sh:path rdfc:timestampPath;
     sh:name "modifiedPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:versionOfPath;
+    sh:path rdfc:versionOfPath;
     sh:name "isVersionOfPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:path;
+    sh:path rdfc:path;
     sh:name "statePath";
     sh:maxCount 1;
   ].
@@ -66,40 +66,40 @@ rdfc:LdesifySDS a owl:Class, rdfs:Class;
   sh:targetClass rdfc:LdesifySDS;
   sh:property [
     sh:class rdfc:Reader;
-    sh:path js:input;
+    sh:path rdfc:input;
     sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:class rdfc:Writer;
-    sh:path js:output;
+    sh:path rdfc:output;
     sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:statePath;
+    sh:path rdfc:statePath;
     sh:name "statePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:sourceStream;
+    sh:path rdfc:sourceStream;
     sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:targetStream;
+    sh:path rdfc:targetStream;
     sh:name "targetStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
+    sh:path rdfc:timestampPath;
     sh:name "modifiedPathM";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:versionOfPath;
+    sh:path rdfc:versionOfPath;
     sh:name "isVersionOfPathM";
     sh:maxCount 1;
   ].

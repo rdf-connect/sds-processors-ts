@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, test } from "vitest";
-import { DataFactory, Parser, Writer } from "n3";
+import { DataFactory, Parser } from "n3";
 import {
     BucketizerConfig,
     BucketizerOrchestrator,
@@ -4540,7 +4540,7 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         minBucketSpan: number,
     ): Promise<void> {
         const metaIncoming = createReader();
-        const [metaOutgoing, msgs] = createWriter();
+        const [metaOutgoing] = createWriter();
         const channels = {
             dataInput: incoming,
             metadataInput: metaIncoming,
@@ -4549,8 +4549,8 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
         };
         const quads = new Parser({ baseIRI: "" }).parse(`
         @prefix tree: <https://w3id.org/tree#> .
-        @prefix js: <https://w3id.org/conn/js#> .
-        [] js:bucketizeStrategy ([
+        @prefix rdfc: <https://w3id.org/conn/js#> .
+        [] rdfc:bucketizeStrategy ([
            a tree:TimebasedFragmentation;
            tree:timestampPath <https://www.w3.org/ns/activitystreams#published>;
            tree:maxSize ${maxSize};

@@ -1,7 +1,7 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix tree: <https://w3id.org/tree#>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -9,7 +9,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
-@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 <> owl:imports <./bucketizer_configs.ttl>.
 rdfc:Bucketize a owl:Class, rdfs:Class;
@@ -24,25 +24,25 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
   sh:targetClass <Channels>;
   sh:property [
     sh:class rdfc:Reader;
-    sh:path js:dataInput;
+    sh:path rdfc:dataInput;
     sh:name "dataInput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:class rdfc:Reader;
-    sh:path js:metadataInput;
+    sh:path rdfc:metadataInput;
     sh:name "metadataInput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:class rdfc:Writer;
-    sh:path js:dataOutput;
+    sh:path rdfc:dataOutput;
     sh:name "dataOutput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:class rdfc:Writer;
-    sh:path js:metadataOutput;
+    sh:path rdfc:metadataOutput;
     sh:name "metadataOutput";
     sh:minCount 1;
     sh:maxCount 1;
@@ -83,35 +83,35 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
   sh:targetClass rdfc:Bucketize;
   sh:property [
     sh:class <Channels>;
-    sh:path js:channels;
+    sh:path rdfc:channels;
     sh:name "channels";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:class <Config>;
-    sh:path js:bucketizeStrategy;
+    sh:path rdfc:bucketizeStrategy;
     sh:name "config";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:inputStreamId;
+    sh:path rdfc:inputStreamId;
     sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:outputStreamId;
+    sh:path rdfc:outputStreamId;
     sh:name "resultingStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:savePath;
+    sh:path rdfc:savePath;
     sh:name "savePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:prefix;
+    sh:path rdfc:prefix;
     sh:name "prefix";
     sh:maxCount 1;
   ].

@@ -18,7 +18,14 @@ async function writeState(
     content: string,
 ): Promise<void> {
     if (path) {
-        writeFileSync(path, content, { encoding: "utf-8" });
+        let p = path;
+        try {
+            const url = new URL(path);
+            p = url.pathname;
+        } catch (_ex: unknown) {
+            // this is fine, the path was already a file path, not a uri
+        }
+        writeFileSync(p, content, { encoding: "utf-8" });
     }
 }
 

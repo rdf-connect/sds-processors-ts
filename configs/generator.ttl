@@ -1,5 +1,5 @@
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -7,7 +7,7 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
-@prefix rdfc: <https://w3id.org/rdf-connect/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 rdfc:Generate a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
@@ -21,23 +21,23 @@ rdfc:Generate a owl:Class, rdfs:Class;
   sh:targetClass rdfc:Generate;
   sh:property [
     sh:class rdfc:Writer;
-    sh:path js:output;
+    sh:path rdfc:output;
     sh:minCount 1;
     sh:maxCount 1;
     sh:name "writer";
   ], [
     sh:datatype xsd:integer;
-    sh:path js:count;
+    sh:path rdfc:count;
     sh:name "count";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:integer;
-    sh:path js:waitMS;
+    sh:path rdfc:waitMS;
     sh:name "wait";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
+    sh:path rdfc:timestampPath;
     sh:name "timestampPath";
     sh:maxCount 1;
   ].

@@ -11,7 +11,7 @@ describe("Functional tests for the shapify function", () => {
 @prefix dcterms: <http://purl.org/dc/terms/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.

@@ -1,15 +1,15 @@
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
-js:Log a js:JsProcess;
-    js:file <./lib/index.js>;
-    js:function "log";
-    js:location <./>;
-    js:mapping [
+js:Log a rdfc:JsProcess;
+    rdfc:file <./lib/index.js>;
+    rdfc:function "log";
+    rdfc:location <./>;
+    rdfc:mapping [
         a fno:Mapping;
         fno:parameterMapping [
             a fnom:PositionParameterMapping;
@@ -23,16 +23,16 @@ js:Log a js:JsProcess;
     ].
 
 [ ] a sh:NodeShape;
-    sh:targetClass js:Log;
+    sh:targetClass rdfc:Log;
     sh:property [
         sh:class :ReaderChannel;
-        sh:path js:incoming;
+        sh:path rdfc:incoming;
         sh:name "incoming";
         sh:maxCount 1;
         sh:minCount 1;
     ], [
         sh:class :WriterChannel;
-        sh:path js:outgoing;
+        sh:path rdfc:outgoing;
         sh:name "outgoing";
         sh:maxCount 1;
         sh:minCount 1;
