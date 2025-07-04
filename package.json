@@ -1,6 +1,6 @@
 {
     "name": "@rdfc/sds-processors-ts",
-    "version": "2.0.0-alpha.0",
+    "version": "2.0.0-alpha.2",
     "type": "module",
     "scripts": {
         "build": "tspc && tsc-alias",
@@ -38,7 +38,7 @@
     },
     "devDependencies": {
         "@ajuvercr/ts-transformer-inline-file": "^0.2.0",
-        "@rdfc/js-runner": "^2.0.0-alpha.6",
+        "@rdfc/js-runner": "^2.0.0-alpha.7",
         "@rdfjs/types": "^2.0.1",
         "@types/jsonld": "^1.5.15",
         "@types/n3": "^1.24.2",
