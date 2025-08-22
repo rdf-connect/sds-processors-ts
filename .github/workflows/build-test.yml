@@ -19,6 +19,6 @@ jobs:
                   node-version: 22.x
                   cache: "npm"
 
-            - run: npm ci # Install dependencies
+            - run: npm i # Install dependencies
             - run: npm run build # Build sources
             - run: npm run test # Run tests
