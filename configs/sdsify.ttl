@@ -1,4 +1,5 @@
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -6,77 +7,52 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-js:Sdsify a js:JsProcess;
-  dc:title "Sdsify processor";
-  dc:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
-  js:file <../lib/sdsify.js>;
-  js:function "sdsify";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Target stream";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Type filter";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp path";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Shape";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ];
-  ].
+rdfc:Sdsify a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Sdsify processor";
+  rdfs:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
+  rdfc:file <../lib/sdsify.js>;
+  rdfc:class "Sdsify";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Sdsify;
+  sh:targetClass rdfc:Sdsify;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Data input channel";
+    sh:class rdfc:Reader;
+    sh:path rdfc:input;
+    sh:name "input";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Data output channel";
-    sh:maxCount 1;
-    sh:minCount 1;
-  ], [
-    sh:datatype xsd:iri;
-    sh:path js:stream;
-    sh:name "Target stream";
+    sh:class rdfc:Writer;
+    sh:path rdfc:output;
+    sh:name "output";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:typeFilter;
-    sh:name "Type filter";
+    sh:path rdfc:stream;
+    sh:name "streamNode";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path rdfc:typeFilter;
+    sh:name "types";
     sh:minCount 0;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
-    sh:name "Timestamp path";
+    sh:path rdfc:timestampPath;
+    sh:name "timestampPath";
     sh:minCount 0;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:shape;
-    sh:name "Shape";
+    sh:path rdfc:shape;
+    sh:name "shape";
     sh:minCount 0;
     sh:maxCount 1;
   ].
+

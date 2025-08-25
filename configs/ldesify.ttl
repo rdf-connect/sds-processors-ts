@@ -1,4 +1,5 @@
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -6,157 +7,100 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-js:Ldesify a js:JsProcess;
+rdfc:Ldesify a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Ldesify processor";
   dc:title "Ldesify processor";
-  dc:description "";
-  js:file <../lib/ldesify.js>;
-  js:function "ldesify";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "State file path";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Check properties";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp Path";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Version Of Path";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ];
-  ].
+  rdfc:file <../lib/ldesify.js>;
+  rdfc:class "Ldesify";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Ldesify;
+  sh:targetClass rdfc:Ldesify;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Data input channel";
+    sh:class rdfc:Reader;
+    sh:path rdfc:input;
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Data output channel";
+    sh:class rdfc:Writer;
+    sh:path rdfc:output;
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:boolean;
-    sh:path js:checkProps;
-    sh:name "Check properties";
+    sh:path rdfc:checkProps;
+    sh:name "check_properties";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
-    sh:name "Timestamp Path";
+    sh:path rdfc:timestampPath;
+    sh:name "modifiedPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:versionOfPath;
-    sh:name "Version Of Path";
+    sh:path rdfc:versionOfPath;
+    sh:name "isVersionOfPath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:path;
-    sh:name "State file path";
+    sh:path rdfc:path;
+    sh:name "statePath";
     sh:maxCount 1;
   ].
 
-
-js:LdesifySDS a js:JsProcess;
+rdfc:LdesifySDS a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
   dc:title "Ldesify processor (for sds streams)";
+  rdfs:label "Ldesify processor (for sds streams)";
   dc:description "";
-  js:file <../lib/ldesify.js>;
-  js:function "ldesify_sds";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "State file path";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Source Stream";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Target Stream";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Timestamp Path";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Version Of Path";
-      fnom:implementationParameterPosition "6"^^xsd:int;
-    ];
-  ].
- 
+  rdfc:file <../lib/ldesify.js>;
+  rdfc:class "LdesifySDS";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:LdesifySDS;
+  sh:targetClass rdfc:LdesifySDS;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Data input channel";
+    sh:class rdfc:Reader;
+    sh:path rdfc:input;
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Data output channel";
+    sh:class rdfc:Writer;
+    sh:path rdfc:output;
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:statePath;
-    sh:name "State file path";
+    sh:path rdfc:statePath;
+    sh:name "statePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:sourceStream;
-    sh:name "Source Stream";
+    sh:path rdfc:sourceStream;
+    sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:targetStream;
-    sh:name "Target Stream";
+    sh:path rdfc:targetStream;
+    sh:name "targetStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:timestampPath;
-    sh:name "Timestamp Path";
+    sh:path rdfc:timestampPath;
+    sh:name "modifiedPathM";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:versionOfPath;
-    sh:name "Version Of Path";
+    sh:path rdfc:versionOfPath;
+    sh:name "isVersionOfPathM";
     sh:maxCount 1;
   ].
+

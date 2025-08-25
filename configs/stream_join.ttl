@@ -1,4 +1,5 @@
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -6,37 +7,29 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-js:StreamJoin a js:JsProcess;
+rdfc:StreamJoin a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Stream Join processor";
   dc:title "Stream Join processor";
   dc:description "Handle and pipe multiple input data streams into a single output stream.";
-  js:file <../lib/streamJoin.js>;
-  js:function "streamJoin";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Input Streams";
-      fnom:implementationParameterPosition "0"^^xsd:int
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Output stream";
-      fnom:implementationParameterPosition "1"^^xsd:int
-    ]
-  ].
+  rdfc:file <../lib/streamJoin.js>;
+  rdfc:class "StreamJoin";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:StreamJoin;
+  sh:targetClass rdfc:StreamJoin;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Input Streams";
-    sh:minCount 1
+    sh:class rdfc:Reader;
+    sh:path rdfc:input;
+    sh:name "inputs";
+    sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Output stream";
+    sh:class rdfc:Writer;
+    sh:path rdfc:output;
+    sh:name "output";
     sh:maxCount 1;
-    sh:minCount 1
+    sh:minCount 1;
   ].
+

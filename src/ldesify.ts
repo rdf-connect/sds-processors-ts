@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@rdfc/js-runner";
+import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { Quad, Quad_Predicate, Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import { DataFactory } from "rdf-data-factory";
@@ -10,6 +10,7 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { canonize } from "rdf-canonize";
 import { SDS, XSD } from "@treecg/types";
 import { handleExit } from "./exitHandler";
+import { Logger } from "winston";
 
 const df = new DataFactory();
 
@@ -167,122 +168,151 @@ class Transformer {
     }
 }
 
-export function ldesify(
-    reader: Stream<string>,
-    writer: Writer<string>,
-    statePath?: string,
-    check_properties: boolean = true,
-    modifiedPath?: Term,
-    isVersionOfPath?: Term,
-) {
-    let cache = {};
-    if (statePath) cache = getPrevState(statePath);
-    const transformer = new Transformer(
-        modifiedPath || MODIFIED,
-        isVersionOfPath || IS_VERSION_OF,
-        cache,
-    );
+type Args = {
+    reader: Reader;
+    writer: Writer;
+    statePath?: string;
+    check_properties: boolean;
+    modifiedPath?: Term;
+    isVersionOfPath?: Term;
+};
+export class Ldesify extends Processor<Args> {
+    transformer: Transformer;
+    constructor(args: Args, logger: Logger) {
+        super(Object.assign({ check_properties: true }, args), logger);
+    }
+    async init(this: Args & this): Promise<void> {
+        let cache = {};
+        if (this.statePath) cache = getPrevState(this.statePath);
+        this.transformer = new Transformer(
+            this.modifiedPath || MODIFIED,
+            this.isVersionOfPath || IS_VERSION_OF,
+            cache,
+        );
 
-    reader.on("end", () => {
-        if (statePath) {
-            writeFileSync(statePath, transformer.save(), { encoding: "utf8" });
+        handleExit(() => {
+            if (this.statePath) {
+                writeFileSync(this.statePath, this.transformer.save(), {
+                    encoding: "utf8",
+                });
+            }
+        });
+    }
+    async transform(this: Args & this): Promise<void> {
+        for await (const x of this.reader.strings()) {
+            const st = this.check_properties
+                ? this.transformer.transformCheckState(x)
+                : this.transformer.simpleTransform(x);
+            await this.writer.string(st);
         }
-    });
 
-    reader.data((x) => {
-        const st = check_properties
-            ? transformer.transformCheckState(x)
-            : transformer.simpleTransform(x);
-        return writer.push(st);
-    });
+        if (this.statePath) {
+            writeFileSync(this.statePath, this.transformer.save(), {
+                encoding: "utf8",
+            });
+        }
+        await this.writer.close();
+    }
+    async produce(this: Args & this): Promise<void> {
+        // nothing
+    }
 }
+type SDSArgs = {
+    reader: Reader;
+    writer: Writer;
+    statePath: string | undefined;
+    sourceStream: Term | undefined;
+    targetStream: Term;
+    modifiedPathM?: Term; // This are the things that are added to the new entities, not necessarily related to the real objects
+    isVersionOfPathM?: Term;
+};
+export class LdesifySDS extends Processor<SDSArgs> {
+    cache: { [key: string]: string } = {};
 
-export function ldesify_sds(
-    reader: Stream<string>,
-    writer: Writer<string>,
-    statePath: string | undefined,
-    sourceStream: Term | undefined,
-    targetStream: Term,
-    modifiedPathM?: Term, // This are the things that are added to the new entities, not necessarily related to the real objects
-    isVersionOfPathM?: Term,
-) {
-    const modifiedPath: Term = modifiedPathM || MODIFIED;
-    const versionPath: Term = isVersionOfPathM || IS_VERSION_OF;
+    async init(this: SDSArgs & this): Promise<void> {
+        if (this.statePath) this.cache = getPrevState(this.statePath);
 
-    let cache: { [key: string]: string } = {};
-    if (statePath) cache = getPrevState(statePath);
+        handleExit(() => {
+            if (this.statePath) {
+                writeFileSync(this.statePath, JSON.stringify(this.cache), {
+                    encoding: "utf8",
+                });
+            }
+        });
+    }
+    async transform(this: SDSArgs & this): Promise<void> {
+        const modifiedPath: Term = this.modifiedPathM || MODIFIED;
+        const versionPath: Term = this.isVersionOfPathM || IS_VERSION_OF;
+        const extractor = new Extractor(
+            new CBDShapeExtractor(),
+            this.sourceStream,
+        );
+        for await (const x of this.reader.strings()) {
+            const quads = new Parser().parse(x);
 
-    handleExit(() => {
-        if (statePath) {
-            writeFileSync(statePath, JSON.stringify(cache), {
+            const records = await extractor.parse_records(quads);
+
+            for (const rec of records) {
+                if (rec.data.quads.length === 0) continue;
+
+                const hash = await canonize(rec.data.quads, {
+                    algorithm: "RDFC-1.0",
+                });
+                if (this.cache[rec.data.id.value] === hash) continue;
+
+                this.cache[rec.data.id.value] = hash;
+
+                const date = new Date();
+                const addHashtag = rec.data.id.value.includes("#") ? "-" : "#";
+                const id = new NamedNode(
+                    rec.data.id.value + addHashtag + date.getTime(),
+                );
+
+                const quads = [
+                    df.quad(
+                        id,
+                        <Quad_Predicate>modifiedPath,
+                        df.literal(date.toISOString(), XSD.terms.dateTime),
+                    ),
+
+                    df.quad(
+                        id,
+                        <Quad_Predicate>versionPath,
+                        <Quad_Object>rec.data.id,
+                    ),
+
+                    ...rec.data.quads.map((q) =>
+                        df.quad(q.subject, q.predicate, q.object, id),
+                    ),
+                ];
+
+                quads.push(
+                    df.quad(
+                        id,
+                        SDS.terms.payload,
+                        id,
+                        SDS.terms.custom("DataDescription"),
+                    ),
+                    df.quad(
+                        id,
+                        SDS.terms.stream,
+                        <Quad_Object>this.targetStream,
+                        SDS.terms.custom("DataDescription"),
+                    ),
+                );
+
+                await this.writer.string(new N3Writer().quadsToString(quads));
+            }
+        }
+
+        if (this.statePath) {
+            writeFileSync(this.statePath, JSON.stringify(this.cache), {
                 encoding: "utf8",
             });
         }
-    });
-    reader.on("end", () => {
-        if (statePath) {
-            writeFileSync(statePath, JSON.stringify(cache), {
-                encoding: "utf8",
-            });
-        }
-    });
-
-    const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
-    reader.on("data", async (x) => {
-        const quads = new Parser().parse(x);
-
-        const records = await extractor.parse_records(quads);
-
-        for (const rec of records) {
-            if (rec.data.quads.length === 0) continue;
-
-            const hash = await canonize(rec.data.quads, {
-                algorithm: "RDFC-1.0",
-            });
-            if (cache[rec.data.id.value] === hash) continue;
-
-            cache[rec.data.id.value] = hash;
-
-            const date = new Date();
-            const addHashtag = rec.data.id.value.includes("#") ? "-" : "#";
-            const id = new NamedNode(
-                rec.data.id.value + addHashtag + date.getTime(),
-            );
-
-            const quads = [
-                df.quad(
-                    id,
-                    <Quad_Predicate>modifiedPath,
-                    df.literal(date.toISOString(), XSD.terms.dateTime),
-                ),
-
-                df.quad(
-                    id,
-                    <Quad_Predicate>versionPath,
-                    <Quad_Object>rec.data.id,
-                ),
-
-                ...rec.data.quads.map((q) =>
-                    df.quad(q.subject, q.predicate, q.object, id),
-                ),
-            ];
-
-            quads.push(
-                df.quad(
-                    id,
-                    SDS.terms.payload,
-                    id,
-                    SDS.terms.custom("DataDescription"),
-                ),
-                df.quad(
-                    id,
-                    SDS.terms.stream,
-                    <Quad_Object>targetStream,
-                    SDS.terms.custom("DataDescription"),
-                ),
-            );
-
-            await writer.push(new N3Writer().quadsToString(quads));
-        }
-    });
+        await this.writer.close();
+    }
+    async produce(this: SDSArgs & this): Promise<void> {
+        // nothing
+    }
 }

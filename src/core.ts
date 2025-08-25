@@ -1,4 +1,4 @@
-import type { Stream, Writer } from "@rdfc/js-runner";
+import type { Reader, Writer } from "@rdfc/js-runner";
 import type {
     BlankNode,
     NamedNode,
@@ -212,11 +212,3 @@ export function createProperty(
 
     return newId;
 }
-
-export type SR<T> = {
-    [P in keyof T]: Stream<T[P]>;
-};
-
-export type SW<T> = {
-    [P in keyof T]: Writer<T[P]>;
-};

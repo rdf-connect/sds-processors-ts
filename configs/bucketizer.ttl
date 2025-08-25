@@ -1,6 +1,7 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix tree: <https://w3id.org/tree#>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -8,66 +9,40 @@
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 <> owl:imports <./bucketizer_configs.ttl>.
-js:Bucketize a js:JsProcess;
-  dc:title "Bucketizer processor";
-  dc:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
-  js:file <../lib/bucketizers.js>;
-  js:function "bucketize";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "channels";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Bucketization strategy";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Path to use to save state files";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "ID of Stream to transform";
-      fnom:implementationParameterPosition "3"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "ID of Stream to produce";
-      fnom:implementationParameterPosition "4"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Bucket Prefix";
-      fnom:implementationParameterPosition "5"^^xsd:int;
-    ];
-  ].
+rdfc:Bucketize a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Bucketizer processor";
+  rdfs:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
+  rdfc:file <../lib/bucketizers.js>;
+  rdfc:class "Bucketizer";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
   sh:targetClass <Channels>;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:dataInput;
+    sh:class rdfc:Reader;
+    sh:path rdfc:dataInput;
     sh:name "dataInput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:class :ReaderChannel;
-    sh:path js:metadataInput;
+    sh:class rdfc:Reader;
+    sh:path rdfc:metadataInput;
     sh:name "metadataInput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:dataOutput;
+    sh:class rdfc:Writer;
+    sh:path rdfc:dataOutput;
     sh:name "dataOutput";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:metadataOutput;
+    sh:class rdfc:Writer;
+    sh:path rdfc:metadataOutput;
     sh:name "metadataOutput";
     sh:minCount 1;
     sh:maxCount 1;
@@ -105,39 +80,39 @@ js:Bucketize a js:JsProcess;
   ].
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Bucketize;
+  sh:targetClass rdfc:Bucketize;
   sh:property [
     sh:class <Channels>;
-    sh:path js:channels;
+    sh:path rdfc:channels;
     sh:name "channels";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:class <Config>;
-    sh:path js:bucketizeStrategy;
-    sh:name "Bucketization strategy";
+    sh:path rdfc:bucketizeStrategy;
+    sh:name "config";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:inputStreamId;
-    sh:name "ID of Stream to transform";
+    sh:path rdfc:inputStreamId;
+    sh:name "sourceStream";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
-    sh:path js:outputStreamId;
-    sh:name "ID of Stream to produce";
+    sh:path rdfc:outputStreamId;
+    sh:name "resultingStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:savePath;
-    sh:name "Path to use to save state files";
+    sh:path rdfc:savePath;
+    sh:name "savePath";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
-    sh:path js:prefix;
-    sh:name "Bucket Prefix";
+    sh:path rdfc:prefix;
+    sh:name "prefix";
     sh:maxCount 1;
   ].
 

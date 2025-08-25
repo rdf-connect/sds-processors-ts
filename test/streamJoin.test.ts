@@ -1,27 +1,38 @@
 import { describe, test, expect } from "vitest";
-import { SimpleStream } from "@rdfc/js-runner";
-import { streamJoin } from "../lib/streamJoin";
+import { StreamJoin } from "../lib/streamJoin";
+import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { strs } from "./utils";
+import { FullProc } from "@rdfc/js-runner";
 
 describe("Functional tests for streamJoin function", () => {
     test("All data is passed and output is closed properly", async () => {
-        const i1 = new SimpleStream<string>();
-        const i2 = new SimpleStream<string>();
-        const i3 = new SimpleStream<string>();
-        const out = new SimpleStream<string>();
+        const [w1, i1] = createWriter();
+        const [w2, i2] = createWriter();
+        const [w3, i3] = createWriter();
+        const [w4, out] = createWriter();
 
-        let dataRecord = "";
-        out.data((data) => {
-            dataRecord += data;
-        }).on("end", () => {
-            expect(dataRecord.includes("one"));
-            expect(dataRecord.includes("two"));
-            expect(dataRecord.includes("three"));
-        });
+        const prom = strs(out);
 
-        await streamJoin([i1, i2, i3], out);
+        const proc = <FullProc<StreamJoin>>new StreamJoin(
+            {
+                output: w4,
+                inputs: [i1, i2, i3],
+            },
+            logger,
+        );
+        await proc.init();
+        proc.transform();
 
-        await Promise.all([i1.push("one"), i2.push("two"), i3.push("three")]);
+        await Promise.all([
+            w1.string("one"),
+            w2.string("two"),
+            w3.string("three"),
+        ]);
+        await Promise.all([w1.close(), w2.close(), w3.close()]);
+        const strings = await prom;
 
-        await Promise.all([i1.end(), i2.end(), i3.end()]);
+        expect(strings.includes("one"));
+        expect(strings.includes("two"));
+        expect(strings.includes("three"));
     });
 });

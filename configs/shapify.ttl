@@ -1,7 +1,8 @@
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix dcterms: <http://purl.org/dc/terms/>.
 @prefix sosa: <http://www.w3.org/ns/sosa/>.
 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
-@prefix js: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/conn/js#>.
 @prefix fno: <https://w3id.org/function/ontology#>.
 @prefix fnom: <https://w3id.org/function/vocabulary/mapping#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
@@ -10,32 +11,19 @@
 @prefix owl: <http://www.w3.org/2002/07/owl#>.
 @prefix dc: <http://purl.org/dc/terms/>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-js:Shapify a js:JsProcess;
+rdfc:Shapify a owl:Class, rdfs:Class;
+  rdfc:jsImplementationOf rdfc:Processor;
+  rdfs:label "Shapify processor";
   dc:title "Shapify processor";
   dc:description "";
-  js:file <../lib/shapify.js>;
-  js:function "shapify";
-  js:location <../>;
-  js:mapping [
-    a fno:Mapping;
-    fno:parameterMapping [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data input channel";
-      fnom:implementationParameterPosition "0"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Data output channel";
-      fnom:implementationParameterPosition "1"^^xsd:int;
-    ], [
-      a fnom:PositionParameterMapping;
-      fnom:functionParameter "Shape";
-      fnom:implementationParameterPosition "2"^^xsd:int;
-    ];
-  ].
+  rdfc:file <../lib/shapify.js>;
+  rdfc:class "Shapify";
+  rdfc:entrypoint <../>.
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Shape;
+  sh:targetClass <Shape>;
   sh:property [
     sh:datatype xsd:any;
     sh:path ( );
@@ -51,23 +39,23 @@ js:Shapify a js:JsProcess;
   ].
 
 [ ] a sh:NodeShape;
-  sh:targetClass js:Shapify;
+  sh:targetClass rdfc:Shapify;
   sh:property [
-    sh:class :ReaderChannel;
-    sh:path js:input;
-    sh:name "Data input channel";
+    sh:class rdfc:Reader;
+    sh:path rdfc:input;
+    sh:name "reader";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class :WriterChannel;
-    sh:path js:output;
-    sh:name "Data output channel";
+    sh:class rdfc:Writer;
+    sh:path rdfc:output;
+    sh:name "writer";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class js:Shape;
-    sh:path js:shape;
-    sh:name "Shape";
+    sh:class <Shape>;
+    sh:path rdfc:shape;
+    sh:name "shape";
     sh:minCount 1;
     sh:maxCount 1;
   ].

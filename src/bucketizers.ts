@@ -4,7 +4,7 @@ import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { getLatestShape, getLatestStream, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS, XSD } from "@treecg/types";
-import type { Stream, Writer } from "@rdfc/js-runner";
+import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
@@ -18,7 +18,14 @@ async function writeState(
     content: string,
 ): Promise<void> {
     if (path) {
-        writeFileSync(path, content, { encoding: "utf-8" });
+        let p = path;
+        try {
+            const url = new URL(path);
+            p = url.pathname;
+        } catch (_ex: unknown) {
+            // this is fine, the path was already a file path, not a uri
+        }
+        writeFileSync(p, content, { encoding: "utf-8" });
     }
 }
 
@@ -57,10 +64,10 @@ function serializeQuads(quads: Quad[]): string {
 }
 
 type Channels = {
-    dataInput: Stream<string>;
-    metadataInput: Stream<string>;
-    dataOutput: Writer<string>;
-    metadataOutput: Writer<string>;
+    dataInput: Reader;
+    metadataInput: Reader;
+    dataOutput: Writer;
+    metadataOutput: Writer;
 };
 
 type Config = {
@@ -224,30 +231,6 @@ function relationToQuads(
     return out;
 }
 
-function set_metadata(
-    channels: Channels,
-    resultingStream: Term,
-    sourceStream: Term | undefined,
-    config: Config,
-) {
-    const f = transformMetadata(
-        resultingStream,
-        sourceStream,
-        "https://w3id.org/sds#Member",
-        (x, y) => addProcess(x, y, config.quads.id, config.quads.quads),
-    );
-    channels.metadataInput.data(async (quads) =>
-        channels.metadataOutput.push(
-            serializeQuads(await f(parseQuads(quads))),
-        ),
-    );
-
-    channels.metadataInput.on("end", async () => {
-        // Propagate the end event to the output metadata channel
-        await channels.metadataOutput.end();
-    });
-}
-
 function read_save(savePath?: string) {
     try {
         if (savePath) {
@@ -258,136 +241,186 @@ function read_save(savePath?: string) {
     }
 }
 
-export async function bucketize(
-    channels: Channels,
-    config: Config,
-    savePath: string | undefined,
-    sourceStream: Term | undefined,
-    resultingStream: Term,
-    prefix = "root",
-) {
-    set_metadata(channels, resultingStream, sourceStream, config);
-    const save = read_save(savePath);
-    const orchestrator = new BucketizerOrchestrator(config.strategy, save);
-    const extractor = new Extractor(new CBDShapeExtractor(), sourceStream);
+type Args = {
+    channels: Channels;
+    config: Config;
+    savePath: string | undefined;
+    sourceStream: Term | undefined;
+    resultingStream: Term;
+    prefix: string;
+};
+export class Bucketizer extends Processor<Args> {
+    orchestrator: BucketizerOrchestrator;
+    extractor: Extractor;
+    buckets: { [id: string]: Bucket } = {};
 
-    channels.metadataInput.data(async (x) => {
-        const quads = new Parser().parse(x);
+    async init(this: Args & this): Promise<void> {
+        this.prefix = this.prefix ?? "root";
+        const save = read_save(this.savePath);
+        this.orchestrator = new BucketizerOrchestrator(
+            this.config.strategy,
+            save,
+        );
+        this.extractor = new Extractor(
+            new CBDShapeExtractor(),
+            this.sourceStream,
+        );
 
-        const store = RdfStore.createDefault();
-        quads.forEach((q) => store.addQuad(q));
+        handleExit(async () => {
+            const state = this.orchestrator.save();
+            await writeState(this.savePath, state);
+        });
+    }
 
-        const latest = sourceStream || (await getLatestStream(store));
-        const latestShape = latest
-            ? await getLatestShape(latest, store)
-            : undefined;
+    async transform(this: Args & this): Promise<void> {
+        const promises: Promise<unknown>[] = [];
+        promises.push(this.set_metadata());
+        promises.push(this.extractShape());
+        promises.push(this.transformData());
 
-        if (latestShape) {
-            const rdfStore = RdfStore.createDefault();
-            quads.forEach((x) => rdfStore.addQuad(x));
-            const cbd_extract = new CBDShapeExtractor(rdfStore);
+        await Promise.all(promises);
+    }
+    async produce(this: Args & this): Promise<void> {
+        // nothing
+    }
 
-            extractor.extractor = cbd_extract;
-            extractor.shape = latestShape;
-        }
-    });
+    async set_metadata(this: Args & this) {
+        const f = transformMetadata(
+            this.resultingStream,
+            this.sourceStream,
+            "https://w3id.org/sds#Member",
+            (x, y) =>
+                addProcess(x, y, this.config.quads.id, this.config.quads.quads),
+        );
 
-    handleExit(async () => {
-        const state = orchestrator.save();
-        await writeState(savePath, state);
-    });
-
-    const buckets: { [id: string]: Bucket } = {};
-    channels.dataInput.data(async (x) => {
-        const outputQuads: Quad[] = [];
-        const quads = new Parser().parse(x);
-
-        const records = await extractor.parse_records(quads);
-        const requestedBuckets = new Set<string>();
-        const newMembers = new Map<string, Set<string>>();
-
-        const newRelations: {
-            origin: Bucket;
-            relation: BucketRelation;
-        }[] = [];
-        const removeRelations: {
-            origin: Bucket;
-            relation: BucketRelation;
-        }[] = [];
-
-        for (const record of records) {
-            const record_buckets = orchestrator.bucketize(
-                record,
-                buckets,
-                requestedBuckets,
-                newMembers,
-                newRelations,
-                removeRelations,
-                prefix,
-            );
-
-            record_buckets.forEach((x) => requestedBuckets.add(x));
-
-            // Write SDS Record for resulting stream
-            outputQuads.push(
-                ...record_to_quads(
-                    record,
-                    resultingStream,
-                    record_buckets.map((x) => buckets[x]),
-                ),
+        this.logger.info("Accepting metadata");
+        for await (const quads of this.channels.metadataInput.strings()) {
+            this.logger.info("Got metadata input " + quads);
+            await this.channels.metadataOutput.string(
+                serializeQuads(await f(parseQuads(quads))),
             );
         }
+        await this.channels.metadataOutput.close();
+    }
 
-        // Write records for the new members.
-        for (const [bucket, members] of newMembers) {
-            // Check if bucket is not in emptyBuckets, otherwise we optimize by skipping this entry.
-            if (buckets[bucket].empty) {
-                continue;
+    async extractShape(this: Args & this) {
+        for await (const x of this.channels.metadataInput.strings()) {
+            const quads = new Parser().parse(x);
+
+            const store = RdfStore.createDefault();
+            quads.forEach((q) => store.addQuad(q));
+
+            const latest = this.sourceStream || (await getLatestStream(store));
+            const latestShape = latest
+                ? await getLatestShape(latest, store)
+                : undefined;
+
+            if (latestShape) {
+                const rdfStore = RdfStore.createDefault();
+                quads.forEach((x) => rdfStore.addQuad(x));
+                const cbd_extract = new CBDShapeExtractor(rdfStore);
+
+                this.extractor.extractor = cbd_extract;
+                this.extractor.shape = latestShape;
             }
-            for (const member of members) {
+        }
+    }
+
+    async transformData(this: Args & this) {
+        for await (const x of this.channels.dataInput.strings()) {
+            const outputQuads: Quad[] = [];
+            const quads = new Parser().parse(x);
+
+            const records = await this.extractor.parse_records(quads);
+            const requestedBuckets = new Set<string>();
+            const newMembers = new Map<string, Set<string>>();
+
+            const newRelations: {
+                origin: Bucket;
+                relation: BucketRelation;
+            }[] = [];
+            const removeRelations: {
+                origin: Bucket;
+                relation: BucketRelation;
+            }[] = [];
+
+            for (const record of records) {
+                const record_buckets = this.orchestrator.bucketize(
+                    record,
+                    this.buckets,
+                    requestedBuckets,
+                    newMembers,
+                    newRelations,
+                    removeRelations,
+                    this.prefix,
+                );
+
+                record_buckets.forEach((x) => requestedBuckets.add(x));
+
+                // Write SDS Record for resulting stream
                 outputQuads.push(
                     ...record_to_quads(
-                        new Record(
-                            { id: df.namedNode(member), quads: [] },
-                            resultingStream,
-                            buckets[bucket],
-                        ),
-                        resultingStream,
-                        [buckets[bucket]],
+                        record,
+                        this.resultingStream,
+                        record_buckets.map((x) => this.buckets[x]),
                     ),
                 );
             }
 
-            // Register the bucket as included in the output, so we do not have to write it again as requested bucket without relations
-            requestedBuckets.add(bucket);
-        }
+            // Write records for the new members.
+            for (const [bucket, members] of newMembers) {
+                // Check if bucket is not in emptyBuckets, otherwise we optimize by skipping this entry.
+                if (this.buckets[bucket].empty) {
+                    continue;
+                }
+                for (const member of members) {
+                    outputQuads.push(
+                        ...record_to_quads(
+                            new Record(
+                                { id: df.namedNode(member), quads: [] },
+                                this.resultingStream,
+                                this.buckets[bucket],
+                            ),
+                            this.resultingStream,
+                            [this.buckets[bucket]],
+                        ),
+                    );
+                }
 
-        // Only write the requested buckets that are not included in the output yet
-        for (const requestedBucket of requestedBuckets) {
-            outputQuads.push(
-                ...bucket_to_quads(buckets[requestedBucket], resultingStream),
+                // Register the bucket as included in the output, so we do not have to write it again as requested bucket without relations
+                requestedBuckets.add(bucket);
+            }
+
+            // Only write the requested buckets that are not included in the output yet
+            for (const requestedBucket of requestedBuckets) {
+                outputQuads.push(
+                    ...bucket_to_quads(
+                        this.buckets[requestedBucket],
+                        this.resultingStream,
+                    ),
+                );
+            }
+            for (const { origin, relation } of newRelations) {
+                outputQuads.push(...relationToQuads(origin, relation));
+            }
+            for (const { origin, relation } of removeRelations) {
+                outputQuads.push(
+                    ...relationToQuads(
+                        origin,
+                        relation,
+                        this.resultingStream,
+                        true,
+                    ),
+                );
+            }
+
+            await this.channels.dataOutput.string(
+                new N3Writer().quadsToString(outputQuads),
             );
         }
-        for (const { origin, relation } of newRelations) {
-            outputQuads.push(...relationToQuads(origin, relation));
-        }
-        for (const { origin, relation } of removeRelations) {
-            outputQuads.push(
-                ...relationToQuads(origin, relation, resultingStream, true),
-            );
-        }
 
-        // await prettyPrintQuads(outputQuads);
-
-        await channels.dataOutput.push(
-            new N3Writer().quadsToString(outputQuads),
-        );
-    });
-
-    channels.dataInput.on("end", async () => {
-        // Save the state of the orchestrator (if any)
-        await writeState(savePath, orchestrator.save());
+        await writeState(this.savePath, this.orchestrator.save());
         // Close downstream channel
-        await channels.dataOutput.end();
-    });
+        await this.channels.dataOutput.close();
+    }
 }

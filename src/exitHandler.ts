@@ -38,12 +38,12 @@ export function handleExit(callback: () => void | Promise<void>) {
     process.once("SIGINT", async () => await fn("SIGINT", 2));
     process.once("SIGTERM", async () => await fn("SIGTERM", 143));
     process.once("SIGBREAK", async () => await fn("SIGBREAK", 149));
-    process.once(
-        "uncaughtException",
-        async (error: Error) => await fn("uncaughtException", 99, error),
-    );
-    process.once(
-        "unhandledRejection",
-        async (error: Error) => await fn("unhandledRejection", 99, error)
-    );
+    // process.once(
+    //     "uncaughtException",
+    //     async (error: Error) => await fn("uncaughtException", 99, error),
+    // );
+    // process.once(
+    //     "unhandledRejection",
+    //     async (error: Error) => await fn("unhandledRejection", 99, error),
+    // );
 }
