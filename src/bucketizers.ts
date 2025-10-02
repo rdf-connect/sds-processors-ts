@@ -32,8 +32,7 @@ async function writeState(
 function addProcess(
     id: Term | undefined,
     store: RdfStore,
-    strategyId: Term,
-    bucketizeConfig: Quad[],
+    strategies: { id: Term; quads: Quad[] }[],
 ): Term {
     const newId = df.blankNode();
     const time = new Date().toISOString();
@@ -41,10 +40,29 @@ function addProcess(
     store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
     store.addQuad(df.quad(newId, RDF.terms.type, LDES.terms.Bucketization));
 
-    bucketizeConfig.forEach((q) => store.addQuad(q));
+    if (strategies.length === 1) {
+        strategies[0].quads.forEach((q) => store.addQuad(q));
+        store.addQuad(
+            df.quad(newId, PROV.terms.used, <Quad_Object>strategies[0].id),
+        );
+    } else {
+        let lastCollectionId: Term = RDF.terms.nil;
+        for (const s of strategies) {
+            s.quads.forEach((q) => store.addQuad(q));
+            const collectionEntry = df.blankNode();
+
+            store.addQuad(
+                df.quad(collectionEntry, RDF.terms.rest, lastCollectionId),
+            );
+            store.addQuad(
+                df.quad(collectionEntry, RDF.terms.first, <Quad_Object>s.id),
+            );
+            lastCollectionId = collectionEntry;
+        }
+        store.addQuad(df.quad(newId, PROV.terms.used, lastCollectionId));
+    }
 
     store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
-    store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>strategyId));
     if (id) {
         store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>id));
     }
@@ -68,11 +86,6 @@ type Channels = {
     metadataInput: Reader;
     dataOutput: Writer;
     metadataOutput: Writer;
-};
-
-type Config = {
-    quads: { id: Term; quads: Quad[] };
-    strategy: BucketizerConfig[];
 };
 
 export function record_to_quads(
@@ -243,7 +256,7 @@ function read_save(savePath?: string) {
 
 type Args = {
     channels: Channels;
-    config: Config;
+    config: BucketizerConfig[];
     savePath: string | undefined;
     sourceStream: Term | undefined;
     resultingStream: Term;
@@ -257,10 +270,7 @@ export class Bucketizer extends Processor<Args> {
     async init(this: Args & this): Promise<void> {
         this.prefix = this.prefix ?? "root";
         const save = read_save(this.savePath);
-        this.orchestrator = new BucketizerOrchestrator(
-            this.config.strategy,
-            save,
-        );
+        this.orchestrator = new BucketizerOrchestrator(this.config, save);
         this.extractor = new Extractor(
             new CBDShapeExtractor(),
             this.sourceStream,
@@ -290,7 +300,12 @@ export class Bucketizer extends Processor<Args> {
             this.sourceStream,
             "https://w3id.org/sds#Member",
             (x, y) =>
-                addProcess(x, y, this.config.quads.id, this.config.quads.quads),
+                // TODO: fix
+                addProcess(
+                    x,
+                    y,
+                    this.config.map((x) => x.quads),
+                ),
         );
 
         this.logger.info("Accepting metadata");
