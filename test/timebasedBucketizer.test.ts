@@ -4565,35 +4565,31 @@ ex:Fragmentation a tree:TimebasedFragmentation ;
                 q.predicate.value ===
                 "http://www.w3.org/1999/02/22-rdf-syntax-ns#first",
         )?.subject!;
-        const config = {
-            quads: {
-                id: id,
-                quads: quads,
-            },
-            strategy: [
-                {
-                    type: namedNode(
-                        "https://w3id.org/tree#TimebasedFragmentation",
-                    ),
-                    config: {
-                        path: pred(
-                            namedNode(
-                                "https://www.w3.org/ns/activitystreams#published",
-                            ),
+        const config: BucketizerConfig[] = [
+            {
+                type: namedNode("https://w3id.org/tree#TimebasedFragmentation"),
+                config: {
+                    path: pred(
+                        namedNode(
+                            "https://www.w3.org/ns/activitystreams#published",
                         ),
-                        pathQuads: {
-                            id: namedNode(
-                                "https://www.w3.org/ns/activitystreams#published",
-                            ),
-                            quads: [],
-                        },
-                        maxSize: maxSize,
-                        k: k,
-                        minBucketSpan: minBucketSpan,
+                    ),
+                    pathQuads: {
+                        id: namedNode(
+                            "https://www.w3.org/ns/activitystreams#published",
+                        ),
+                        quads: [],
                     },
+                    maxSize: maxSize,
+                    k: k,
+                    minBucketSpan: minBucketSpan,
                 },
-            ],
-        };
+                quads: {
+                    id,
+                    quads,
+                },
+            },
+        ];
 
         const proc = <FullProc<Bucketizer>>new Bucketizer(
             {

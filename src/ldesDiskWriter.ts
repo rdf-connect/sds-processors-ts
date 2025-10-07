@@ -1,4 +1,4 @@
-import { Quad, Quad_Object } from "@rdfjs/types";
+import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { Processor, Reader } from "@rdfc/js-runner";
 import { maybeParse } from "./utils";
 import { Extractor } from "./utils/extractor";
@@ -19,10 +19,16 @@ const INTERNAL_TEMP_BASE_URI =
         .join("/") +
     "/";
 
+type MapEntry = {
+    stream: Term;
+    name: string;
+};
+
 type Args = {
     data: Reader;
     metadata: Reader;
     directory: string;
+    nameMap: MapEntry[];
 };
 
 export class LdesDiskWriter extends Processor<Args> {
@@ -43,6 +49,26 @@ export class LdesDiskWriter extends Processor<Args> {
 
     async produce(this: Args & this): Promise<void> {
         // nothing
+    }
+
+    pathName(
+        this: Args & this,
+        stream: Term | string,
+        alreadyEncoded = false,
+    ): string {
+        const value = typeof stream === "string" ? stream : stream.value;
+
+        const eq =
+            typeof stream === "string"
+                ? (q: MapEntry) => q.stream.value === stream
+                : (q: MapEntry) => q.stream.equals(stream);
+
+        const entry = this.nameMap.find(eq);
+        if (entry === undefined) {
+            return encodePathValue(value, alreadyEncoded);
+        } else {
+            return entry.name;
+        }
     }
 
     async handleMetata(this: Args & this) {
@@ -104,8 +130,12 @@ export class LdesDiskWriter extends Processor<Args> {
 
             // Add information about the different views (defined by the streams) in the LDES.
             for (const stream of streams) {
+                this.logger.debug(
+                    `[metadata] Adding SDS Stream ${stream.value} to LDES`,
+                );
+
                 const viewId = df.namedNode(
-                    path.join(encodePathValue(stream.value), "index.trig"),
+                    path.join(this.pathName(stream), "index.trig"),
                 );
                 metadataQuads.push(
                     df.quad(
@@ -159,7 +189,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 // Create the directory and index file for the view
                 const viewPath = path.join(
                     this.directory,
-                    encodePathValue(stream.value),
+                    this.pathName(stream),
                 );
                 await fs.promises.mkdir(viewPath, { recursive: true });
 
@@ -193,6 +223,10 @@ export class LdesDiskWriter extends Processor<Args> {
                 path.join(this.directory, "index.trig"),
                 metadataString,
             );
+
+            this.logger.debug(
+                `[metadata] LDES entry point written with ${metadataQuads.length} quads`,
+            );
         }
     }
 
@@ -210,7 +244,7 @@ export class LdesDiskWriter extends Processor<Args> {
             for (const bucket of extract.getBuckets()) {
                 const bucketPath = path.join(
                     this.directory,
-                    encodePathValue(bucket.streamId),
+                    this.pathName(bucket.streamId),
                     encodePathValue(bucket.id, true),
                 );
 
@@ -224,7 +258,7 @@ export class LdesDiskWriter extends Processor<Args> {
                         path.join(
                             path.relative(
                                 path.join(
-                                    encodePathValue(bucket.streamId),
+                                    this.pathName(bucket.streamId),
                                     encodePathValue(bucket.id, true),
                                 ),
                                 "",
@@ -312,16 +346,25 @@ export class LdesDiskWriter extends Processor<Args> {
                     // Check if a relation to the viewId from the bucketId already exists
                     const viewIndexPath = path.join(
                         this.directory,
-                        encodePathValue(bucket.streamId),
+                        this.pathName(bucket.streamId),
                         "index.trig",
                     );
-                    const content = await fs.promises.readFile(viewIndexPath);
+                    let content = "";
+                    try {
+                        content = await fs.promises.readFile(viewIndexPath, {
+                            encoding: "utf8",
+                        });
+                    } catch (ex) {
+                        // ignore
+                    }
                     const existingQuads = new Parser({
                         baseIRI: INTERNAL_TEMP_BASE_URI,
-                    }).parse(content.toString());
+                    }).parse(content);
+
                     const absoluteRelativeBucketId = df.namedNode(
                         new URL(
                             path.join(
+                                this.pathName(bucket.streamId, true),
                                 encodePathValue(bucket.id, true),
                                 "index.trig",
                             ),
@@ -389,7 +432,7 @@ export class LdesDiskWriter extends Processor<Args> {
                     // Append the member contents to the file corresponding to the bucket
                     const bucketIndexPath = path.join(
                         this.directory,
-                        encodePathValue(record.stream),
+                        this.pathName(record.stream),
                         encodePathValue(bucket, true),
                         "index.trig",
                     );
@@ -398,7 +441,7 @@ export class LdesDiskWriter extends Processor<Args> {
                         path.join(
                             path.relative(
                                 path.join(
-                                    encodePathValue(record.stream),
+                                    this.pathName(record.stream),
                                     encodePathValue(bucket, true),
                                 ),
                                 "",
@@ -433,7 +476,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 // Remove the relation from the file corresponding to the bucket
                 const bucketIndexPath = path.join(
                     this.directory,
-                    encodePathValue(relation.stream),
+                    this.pathName(relation.stream),
                     encodePathValue(relation.origin, true),
                     "index.trig",
                 );
@@ -502,7 +545,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 // Append the relation to the file corresponding to the bucket
                 const bucketIndexPath = path.join(
                     this.directory,
-                    encodePathValue(relation.stream),
+                    this.pathName(relation.stream),
                     encodePathValue(relation.origin, true),
                     "index.trig",
                 );
