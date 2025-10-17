@@ -35,7 +35,9 @@ export class LdesDiskWriter extends Processor<Args> {
     extractor = new Extractor();
 
     async init(this: Args & this): Promise<void> {
-        // nothing
+        if (this.directory.startsWith("file://")) {
+            this.directory = this.directory.slice("file://".length);
+        }
     }
 
     async transform(this: Args & this): Promise<void> {
@@ -364,13 +366,13 @@ export class LdesDiskWriter extends Processor<Args> {
                     const absoluteRelativeBucketId = df.namedNode(
                         new URL(
                             path.join(
-                                this.pathName(bucket.streamId, true),
                                 encodePathValue(bucket.id, true),
                                 "index.trig",
                             ),
                             INTERNAL_TEMP_BASE_URI,
                         ).href,
                     );
+
                     if (
                         !existingQuads.some(
                             (q) =>

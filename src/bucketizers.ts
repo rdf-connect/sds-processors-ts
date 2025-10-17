@@ -310,7 +310,7 @@ export class Bucketizer extends Processor<Args> {
 
         this.logger.info("Accepting metadata");
         for await (const quads of this.channels.metadataInput.strings()) {
-            this.logger.info("Got metadata input " + quads);
+            this.logger.debug("Got metadata input " + quads);
             await this.channels.metadataOutput.string(
                 serializeQuads(await f(parseQuads(quads))),
             );
