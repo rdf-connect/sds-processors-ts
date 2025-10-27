@@ -41,7 +41,7 @@
         "@rdfc/js-runner": "^2.0.0",
         "@rdfjs/types": "^2.0.1",
         "@types/jsonld": "^1.5.15",
-        "@types/n3": "^1.26.0",
+        "@types/n3": "^1.26.1",
         "@types/node": "^22.18.12",
         "@typescript-eslint/eslint-plugin": "^8.46.2",
         "@typescript-eslint/parser": "^8.46.2",
