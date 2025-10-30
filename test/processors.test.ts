@@ -186,7 +186,7 @@ describe("SDS processors tests", async () => {
         expect(bucketizer.savePath).toBeUndefined();
         expect(bucketizer.sourceStream?.value).toBe("http://testStream");
         expect(bucketizer.resultingStream?.value).toBe("http://newStream");
-        expect(bucketizer.config.strategy.length).toBe(2);
+        expect(bucketizer.config.length).toBe(2);
     });
 
     test("js:Ldesify is properly defined", async () => {
