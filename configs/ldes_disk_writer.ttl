@@ -35,5 +35,25 @@ rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
     sh:name "directory";
     sh:maxCount 1;
     sh:minCount 1;
+  ], [
+    sh:class <MapEntry>;
+    sh:path rdfc:streamName;
+    sh:name "nameMap";
+  ].
+
+[ ] a sh:NodeShape;
+  sh:targetClass <MapEntry>;
+  sh:property [
+    sh:datatype xsd:iri;
+    sh:path rdfc:stream;
+    sh:name "stream";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:datatype xsd:string;
+    sh:path rdfc:name;
+    sh:name "name";
+    sh:maxCount 1;
+    sh:minCount 1;
   ].
 
