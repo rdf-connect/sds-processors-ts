@@ -40,26 +40,41 @@ function addProcess(
     store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
     store.addQuad(df.quad(newId, RDF.terms.type, LDES.terms.Bucketization));
 
+    const valueTerm = PROV.terms.custom("value");
+    const revisionTerm = PROV.terms.custom("wasRevisionOf");
     if (strategies.length === 1) {
         strategies[0].quads.forEach((q) => store.addQuad(q));
         store.addQuad(
             df.quad(newId, PROV.terms.used, <Quad_Object>strategies[0].id),
         );
     } else {
-        let lastCollectionId: Term = RDF.terms.nil;
-        for (const s of strategies) {
-            s.quads.forEach((q) => store.addQuad(q));
+        // Push the first strategy to the end
+        let lastCollectionId = df.blankNode();
+        store.addQuad(
+            df.quad(lastCollectionId, valueTerm, <Quad_Object>strategies[0].id),
+        );
+        strategies[0].quads.forEach((q) => store.addQuad(q));
+
+        // Each strategy is prov:value on the config and a derivation from the previous one
+        for (const s of strategies.slice(1)) {
             const collectionEntry = df.blankNode();
 
             store.addQuad(
-                df.quad(collectionEntry, RDF.terms.rest, lastCollectionId),
+                df.quad(
+                    collectionEntry,
+                    revisionTerm,
+                    <Quad_Object>lastCollectionId,
+                ),
             );
             store.addQuad(
-                df.quad(collectionEntry, RDF.terms.first, <Quad_Object>s.id),
+                df.quad(collectionEntry, valueTerm, <Quad_Object>s.id),
             );
             lastCollectionId = collectionEntry;
         }
-        store.addQuad(df.quad(newId, PROV.terms.used, lastCollectionId));
+
+        store.addQuad(
+            df.quad(newId, PROV.terms.used, <Quad_Object>lastCollectionId),
+        );
     }
 
     store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
