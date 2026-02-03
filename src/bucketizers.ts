@@ -300,7 +300,6 @@ export class Bucketizer extends Processor<Args> {
             this.sourceStream,
             "https://w3id.org/sds#Member",
             (x, y) =>
-                // TODO: fix
                 addProcess(
                     x,
                     y,
