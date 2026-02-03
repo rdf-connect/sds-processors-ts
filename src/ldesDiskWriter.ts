@@ -8,7 +8,7 @@ import { DC, LDES, RDF, SDS, TREE, XSD } from "@treecg/types";
 import { Parser, Writer } from "n3";
 import * as fs from "node:fs";
 
-const df = new DataFactory();
+const df = new DataFactory({ blankNodePrefix: "df_" + new Date().getTime() });
 
 // for an i, add /0/1/2/3/.../i to the base URI
 const INTERNAL_TEMP_BASE_HOST = "http://ldes-disk-writer.internal/";

@@ -1,6 +1,6 @@
 {
     "name": "@rdfc/sds-processors-ts",
-    "version": "2.0.0",
+    "version": "2.0.1",
     "type": "module",
     "scripts": {
         "build": "tspc && tsc-alias",
@@ -16,7 +16,7 @@
     ],
     "repository": {
         "type": "git",
-        "url": "git+https://github.com/rdf-connect/sds-processors.git"
+        "url": "git+https://github.com/rdf-connect/sds-processors-ts.git"
     },
     "author": "Arthur Vercruysse",
     "contributors": [
