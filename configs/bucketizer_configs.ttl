@@ -7,8 +7,30 @@
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 
 [ ] a sh:NodeShape;
+  sh:targetClass <RdfThing>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:any;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:CBD;
+  ].
+
+[ ] a sh:NodeShape;
   sh:targetClass tree:FragmentationStrategy;
   sh:property [
+    sh:name "quads";
+    sh:path ( );
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
     sh:name "type";
     sh:path rdf:type;
     sh:datatype xsd:iri;
@@ -87,26 +109,26 @@
   ].
 
 [ ] a sh:NodeShape;
-    sh:targetClass tree:ReversedPageFragmentation;
-    sh:property [
-        sh:name "pageSize";
-        sh:path tree:pageSize;
-        sh:datatype xsd:integer;
-        sh:maxCount 1;
-        sh:minCount 1;
-      ], [
-        sh:name "path";
-        sh:path tree:timestampPath;
-        sh:class rdfl:PathLens;
-        sh:maxCount 1;
-        sh:minCount 0;
-      ], [
-        sh:name "pathQuads";
-        sh:path tree:timestampPath;
-        sh:class <RdfThing>;
-        sh:maxCount 1;
-        sh:minCount 0;
-      ].
+  sh:targetClass tree:ReversedPageFragmentation;
+  sh:property [
+    sh:name "pageSize";
+    sh:path tree:pageSize;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "path";
+    sh:path tree:timestampPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+    sh:minCount 0;
+  ], [
+    sh:name "pathQuads";
+    sh:path tree:timestampPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 0;
+  ].
 
 [ ] a sh:NodeShape;
   sh:targetClass tree:TimebasedFragmentation;
@@ -236,3 +258,4 @@
     sh:maxCount 1;
     sh:minCount 0;
   ].
+

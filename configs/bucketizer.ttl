@@ -49,37 +49,6 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
   ].
 
 [ ] a sh:NodeShape;
-  sh:targetClass <RdfThing>;
-  sh:property [
-    sh:name "id";
-    sh:path ( );
-    sh:maxCount 1;
-    sh:minCount 1;
-    sh:datatype xsd:any;
-  ], [
-    sh:name "quads";
-    sh:path ( );
-    sh:maxCount 1;
-    sh:minCount 1;
-    sh:class rdfl:CBD;
-  ].
-
-[ ] a sh:NodeShape;
-  sh:targetClass <Config>;
-  sh:property [
-    sh:class tree:FragmentationStrategy;
-    sh:path ( );
-    sh:name "strategy";
-    sh:minCount 1;
-  ], [
-    sh:class <RdfThing>;
-    sh:path ( );
-    sh:name "quads";
-    sh:minCount 1;
-    sh:maxCount 1;
-  ].
-
-[ ] a sh:NodeShape;
   sh:targetClass rdfc:Bucketize;
   sh:property [
     sh:class <Channels>;
@@ -88,11 +57,10 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:class <Config>;
+    sh:class tree:FragmentationStrategy;
     sh:path rdfc:bucketizeStrategy;
     sh:name "config";
     sh:minCount 1;
-    sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;
     sh:path rdfc:inputStreamId;
