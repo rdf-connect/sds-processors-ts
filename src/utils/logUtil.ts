@@ -43,7 +43,6 @@ function createLogger(label: string): Logger {
                     message,
                     label: labelInner,
                     timestamp,
-                    metadata: meta,
                 }): string =>
                     `${timestamp} {${PROCESSOR_NAME}} [${labelInner}] ${levelInner}: ${message}`,
             ),

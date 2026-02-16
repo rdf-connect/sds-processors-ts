@@ -1,6 +1,6 @@
-import { ReaderInstance } from "@rdfc/js-runner";
+import type { Reader } from "@rdfc/js-runner";
 
-export async function strs(reader: ReaderInstance): Promise<string[]> {
+export async function strs(reader: Reader): Promise<string[]> {
     const out: string[] = [];
 
     for await (const st of reader.strings()) {
@@ -9,7 +9,7 @@ export async function strs(reader: ReaderInstance): Promise<string[]> {
 
     return out;
 }
-export async function readStrings(reader: ReaderInstance, strings: string[]) {
+export async function readStrings(reader: Reader, strings: string[]) {
     for await (const st of reader.strings()) {
         strings.push(st);
     }

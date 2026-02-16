@@ -2,7 +2,7 @@ import { NamedNode, Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
 import { Parser, Writer } from "n3";
-import { SDS, XSD } from "@treecg/types";
+import { SDS, XSD, createUriAndTermNamespace } from "@treecg/types";
 import {
     BasicLensM,
     Cont,
@@ -18,6 +18,11 @@ import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import { Logger } from "winston";
 
 const df = new DataFactory();
+
+export const GEO = createUriAndTermNamespace(
+    "http://www.opengis.net/ont/geosparql#",
+    "wktLiteral",
+);
 
 export const SDS_GRAPH: NamedNode = SDS.terms.custom("DataDescription");
 

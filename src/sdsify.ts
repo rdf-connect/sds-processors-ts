@@ -3,7 +3,7 @@ import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { getSubjects, maybeParse } from "./utils/index";
-import { Parser, Writer as NWriter } from "n3";
+import { Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import { createHash } from "crypto";

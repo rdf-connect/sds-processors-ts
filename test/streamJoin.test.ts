@@ -1,15 +1,21 @@
 import { describe, test, expect } from "vitest";
 import { StreamJoin } from "../lib/streamJoin";
-import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { createRunner, channel } from "@rdfc/js-runner/lib/testUtils";
+import { createLogger, transports } from "winston";
 import { strs } from "./utils";
 import { FullProc } from "@rdfc/js-runner";
 
+const logger = createLogger({
+    transports: [new transports.Console()],
+});
+
 describe("Functional tests for streamJoin function", () => {
     test("All data is passed and output is closed properly", async () => {
-        const [w1, i1] = createWriter();
-        const [w2, i2] = createWriter();
-        const [w3, i3] = createWriter();
-        const [w4, out] = createWriter();
+        const runner = createRunner();
+        const [w1, i1] = channel(runner, "w1");
+        const [w2, i2] = channel(runner, "w2");
+        const [w3, i3] = channel(runner, "w3");
+        const [w4, out] = channel(runner, "out");
 
         const prom = strs(out);
 

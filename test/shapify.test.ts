@@ -2,8 +2,11 @@ import { describe, expect, test } from "vitest";
 import { Shapify } from "../lib/shapify.js";
 import { NamedNode, Parser } from "n3";
 import { CBDShapeExtractor, Extractor } from "../lib";
-import { createWriter, logger, one } from "@rdfc/js-runner/lib/testUtils.js";
-import { FullProc } from "@rdfc/js-runner";
+import { channel, createRunner } from "@rdfc/js-runner/lib/testUtils";
+import { createLogger, transports } from "winston";
+import { readStrings } from "./utils";
+
+import type { FullProc } from "@rdfc/js-runner";
 
 describe("Functional tests for the shapify function", () => {
     test("Shapify works as expected for mumo", async () => {
@@ -92,9 +95,17 @@ sds:DataDescription {
 sds:stream <blabla>.
 }
 `;
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
         const shapeQuads = new Parser().parse(shape);
-        const [inputWriter, inputReader] = createWriter();
-        const [outputWriter, outputReader] = createWriter();
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [outputWriter, outputReader] = channel(runner, "output");
+
+        // Set reader for the output stream.
+        const outputData: string[] = [];
+        readStrings(outputReader, outputData);
 
         const proc = <FullProc<Shapify>>new Shapify(
             {
@@ -107,16 +118,22 @@ sds:stream <blabla>.
             },
             logger,
         );
+        // Initialize processor
         await proc.init();
-        proc.transform();
-
-        const prom = one(outputReader.strings());
+        // Call transform method
+        const trans = proc.transform();
+        // Send input data to the input stream
         await inputWriter.string(data);
-        const st = await prom;
-        expect(st).toBeDefined();
+        // Close the input stream
+        await inputWriter.close();
+        // Wait for the transform to complete
+        await trans;
 
+        // Parse the output and check it is correct
         const extractor = new Extractor(new CBDShapeExtractor());
-        const records = await extractor.parse_records(new Parser().parse(st!));
+        const records = await extractor.parse_records(
+            new Parser().parse(outputData[0]),
+        );
 
         expect(records.length, "parsed records is one").toBe(1);
         expect(records[0].data.quads.length).toBe(10);

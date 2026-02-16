@@ -3,8 +3,9 @@ import { LdesDiskWriter } from "../lib/ldesDiskWriter";
 import { fs, vol } from "memfs";
 import { Parser } from "n3";
 import { TREE } from "@treecg/types";
-import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
-import { FullProc } from "@rdfc/js-runner";
+import { createRunner, channel } from "@rdfc/js-runner/lib/testUtils";
+import { createLogger, transports } from "winston";
+import type { FullProc } from "@rdfc/js-runner";
 
 vi.mock("fs", async () => {
     const memfs = await vi.importActual("memfs");
@@ -19,9 +20,13 @@ describe("Functional tests for the ldesDiskWriter function", () => {
     });
 
     test("LdesDiskWriter works", async () => {
-        const [inputWriter, inputReader] = createWriter();
-        const [metaWriter, metaReader] = createWriter();
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [metaWriter, metaReader] = channel(runner, "meta");
         const directory = "tmp/ldes-disk/";
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
 
         const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
             {
@@ -81,8 +86,8 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         <root> <https://w3id.org/sds#stream> <http://example.org/ns#BenchmarkStream> <https://w3id.org/sds#DataDescription> .
         `;
 
-        await metaWriter.string(metadata);
-        await inputWriter.string(data);
+        metaWriter.string(metadata);
+        inputWriter.string(data);
 
         await metaWriter.close();
         await inputWriter.close();

@@ -1,12 +1,21 @@
 import { describe, expect, test } from "vitest";
-import { ReaderInstance, FullProc } from "@rdfc/js-runner";
+import { FullProc, Reader } from "@rdfc/js-runner";
 import { DataFactory } from "rdf-data-factory";
 import { RdfStore } from "rdf-stores";
 import { Parser } from "n3";
 import { getObjects } from "../lib/utils";
 import { Sdsify } from "../lib/sdsify";
 import { LDES, RDF, SDS, XSD } from "@treecg/types";
-import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { createRunner, channel } from "@rdfc/js-runner/lib/testUtils";
+import { createLogger, transports } from "winston";
+
+const logger = createLogger({
+    transports: [new transports.Console()],
+});
+
+function createWriter() {
+    return channel(createRunner(), "test");
+}
 
 const df = new DataFactory();
 
@@ -141,7 +150,7 @@ describe("Functional tests for the sdsify function", () => {
             sh:targetClass ex:SomeOtherClass.
     `;
 
-    async function updateStore(stream: ReaderInstance, store: RdfStore) {
+    async function updateStore(stream: Reader, store: RdfStore) {
         for await (const data of stream.strings()) {
             new Parser().parse(data).forEach((q) => store.addQuad(q));
         }
@@ -442,8 +451,8 @@ describe("Functional tests for the sdsify function", () => {
     });
 
     test("Failure on shape with multiple main node shapes", async () => {
-        const [_inputWriter, inputReader] = createWriter();
-        const [outputWriter, _outputReader] = createWriter();
+        const [, inputReader] = createWriter();
+        const [outputWriter] = createWriter();
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {

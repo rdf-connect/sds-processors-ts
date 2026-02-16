@@ -53,7 +53,7 @@ export default class PagedBucketizer implements Bucketizer {
         record: Record,
         getBucket: (key: string, root?: boolean) => Bucket,
         addRelation: AddRelation,
-        removeRelation: RemoveRelation,
+        _: RemoveRelation,
     ): Bucket[] {
         const index = Math.floor(this.count / this.pageSize);
         this.count += 1;
