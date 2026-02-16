@@ -14,9 +14,13 @@
         "strictPropertyInitialization": false,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "incremental": true,
+        "incremental": false,
         "esModuleInterop": true,
         "removeComments": true,
+        "baseUrl": ".",
+        "paths": {
+            "@rdfjs/types": ["node_modules/@rdfjs/types"]
+        },
         "plugins": [
             {
                 "transform": "@ajuvercr/ts-transformer-inline-file/transformer"

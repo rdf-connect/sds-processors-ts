@@ -4,9 +4,11 @@ import { Parser, Quad_Object, Writer } from "n3";
 import { LdesifySDS } from "../lib/ldesify";
 import { SDS } from "@treecg/types";
 import { Quad, Term } from "@rdfjs/types";
-import { createWriter, logger } from "@rdfc/js-runner/lib/testUtils";
+import { channel, createRunner } from "@rdfc/js-runner/lib/testUtils";
 import { readStrings, strs } from "./utils";
-import { FullProc } from "@rdfc/js-runner";
+import { createLogger, transports } from "winston";
+
+import type { FullProc } from "@rdfc/js-runner";
 
 const df = new DataFactory();
 
@@ -45,13 +47,17 @@ function manQuads(id: Term, age: number): Quad[] {
 
 describe("Functional tests for the ldesify function", () => {
     test("LDESify works", async () => {
-        const [inputWriter, inputReader] = createWriter();
-        const [outputWriter, outputReader] = createWriter();
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [outputWriter, outputReader] = channel(runner, "output");
 
         const outs: string[] = [];
 
         readStrings(outputReader, outs);
         const sts = strs(outputReader);
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
 
         const proc = <FullProc<LdesifySDS>>new LdesifySDS(
             {
@@ -70,20 +76,20 @@ describe("Functional tests for the ldesify function", () => {
 
         const p1 = df.namedNode("Person1");
         const p2 = df.namedNode("Person2");
-        await inputWriter.string(BuildSds(manQuads(p1, 45), p1));
+        inputWriter.string(BuildSds(manQuads(p1, 45), p1));
         await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(1);
-        await inputWriter.string(BuildSds(manQuads(p1, 45), p1));
+        inputWriter.string(BuildSds(manQuads(p1, 45), p1));
         await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(1);
 
-        await inputWriter.string(BuildSds(manQuads(p1, 46), p1));
+        inputWriter.string(BuildSds(manQuads(p1, 46), p1));
         await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(2);
-        await inputWriter.string(BuildSds(manQuads(p2, 46), p2));
+        inputWriter.string(BuildSds(manQuads(p2, 46), p2));
         await new Promise((res) => setTimeout(res, 20));
         expect(outs.length).toBe(3);
-        await inputWriter.string(BuildSds(manQuads(p1, 46), p1));
+        inputWriter.string(BuildSds(manQuads(p1, 46), p1));
         await inputWriter.close();
         const strings = await sts;
         expect(strings.length).toBe(3);

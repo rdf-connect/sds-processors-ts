@@ -3,10 +3,6 @@ import { randomInt } from "crypto";
 import { DataFactory } from "rdf-data-factory";
 import { Writer as N3Writer } from "n3";
 import { Quad_Predicate, Term } from "@rdfjs/types";
-import { getLoggerFor } from "./utils/logUtil";
-import { Logger } from "winston";
-
-const logger = getLoggerFor("Generator");
 
 const df = new DataFactory();
 const NS = "http://time.is/ns#";

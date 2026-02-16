@@ -1,19 +1,5 @@
 import { describe, expect, test } from "vitest";
-import {
-    FullProc,
-    Processor,
-    ReaderInstance,
-    Runner,
-    WriterInstance,
-} from "@rdfc/js-runner";
-import { logger, TestClient } from "@rdfc/js-runner/lib/testUtils";
-import { NamedNode, Parser, Writer } from "n3";
-import { extractShapes } from "rdf-lens";
-import { OrchestratorMessage } from "@rdfc/js-runner/lib/reexports";
-import { Quad, Term } from "@rdfjs/types";
-import { readFile } from "fs/promises";
-import { createTermNamespace } from "@treecg/types";
-
+import { ProcHelper } from "@rdfc/js-runner/lib/testUtils";
 import {
     Bucketizer,
     Generator,
@@ -25,133 +11,30 @@ import {
     Shapify,
     StreamJoin,
 } from "../lib/";
+import {
+    DumpFragmentation,
+    HourFragmentation,
+    PageFragmentation,
+    RTreeFragmentation,
+    SubjectFragmentation,
+    TimeBucketTreeConfig,
+    TimebasedFragmentation,
+} from "../lib/bucketizers/index";
 
-const shapeQuads = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
-@prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
-@prefix sh: <http://www.w3.org/ns/shacl#>.
-[ ] a sh:NodeShape;
-  sh:targetClass <JsProcessorShape>;
-  sh:property [
-    sh:path rdfc:entrypoint;
-    sh:name "location";
-    sh:minCount 1;
-    sh:maxCount 1;
-    sh:datatype xsd:string;
-  ], [
-    sh:path rdfc:file;
-    sh:name "file";
-    sh:minCount 1;
-    sh:maxCount 1;
-    sh:datatype xsd:string;
-  ], [
-    sh:path rdfc:class;
-    sh:name "clazz";
-    sh:maxCount 1;
-    sh:datatype xsd:string;
-  ].
-`;
-const OWL = createTermNamespace("http://www.w3.org/2002/07/owl#", "imports");
-const processorShapes = extractShapes(new Parser().parse(shapeQuads));
-const base = "https://w3id.org/rdf-connect#";
-
-export async function importFile(file: string): Promise<Quad[]> {
-    const done = new Set<string>();
-    const todo = [new URL("file://" + file)];
-    const quads: Quad[] = [];
-
-    let item = todo.pop();
-    while (item !== undefined) {
-        if (done.has(item.toString())) {
-            item = todo.pop();
-            continue;
-        }
-        done.add(item.toString());
-        if (item.protocol !== "file:") {
-            throw "No supported protocol " + item.protocol;
-        }
-
-        const txt = await readFile(item.pathname, { encoding: "utf8" });
-        const extras = new Parser({ baseIRI: item.toString() }).parse(txt);
-
-        for (const o of extras
-            .filter(
-                (x) =>
-                    x.subject.value === item?.toString() &&
-                    x.predicate.equals(OWL.imports),
-            )
-            .map((x) => x.object.value)) {
-            todo.push(new URL(o));
-        }
-        quads.push(...extras);
-
-        item = todo.pop();
-    }
-
-    return quads;
-}
-
-export async function getProc<T extends Processor<unknown>>(
-    config: string,
-    ty: string,
-    configLocation: string,
-    uri = "http://example.com/ns#processor",
-): Promise<FullProc<T>> {
-    const configQuads = await importFile(configLocation);
-    const procConfig = processorShapes.lenses["JsProcessorShape"].execute({
-        id: new NamedNode(base + ty),
-        quads: configQuads,
-    });
-
-    const msgs: OrchestratorMessage[] = [];
-    const write = async (x: OrchestratorMessage) => {
-        msgs.push(x);
-    };
-    const runner = new Runner(
-        new TestClient(),
-        write,
-        "http://example.com/ns#",
-        logger,
-    );
-    configQuads.push(...new Parser().parse(config));
-    await runner.handleOrchMessage({
-        pipeline: new Writer().quadsToString(configQuads),
-    });
-
-    const proc = await runner.addProcessor<T>({
-        config: JSON.stringify(procConfig),
-        arguments: "",
-        uri,
-    });
-
-    return proc;
-}
-
-async function checkProcDefinition(file: string, n: string) {
-    const quads = await importFile(file);
-    const procConfig = <{ file: Term; location: string; clazz: string }>(
-        processorShapes.lenses["JsProcessorShape"].execute({
-            id: new NamedNode(base + n),
-            quads: quads,
-        })
-    );
-    expect(procConfig.file, n + " has file").toBeDefined();
-    expect(procConfig.location, n + " has location").toBeDefined();
-    expect(procConfig.clazz, n + " has clazz").toBeDefined();
-}
+import type { FullProc } from "@rdfc/js-runner";
 
 describe("SDS processors tests", async () => {
-    test("js:Bucketize is properly defined", async () => {
+    test("rdfc:Bucketize with complex Subject and Page fragmentation is properly defined", async () => {
         const processor = `
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
 @prefix tree: <https://w3id.org/tree#>.
 
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
-    rdfc:dataInput <jr>;
-    rdfc:metadataInput <jr>;
-    rdfc:dataOutput <jw>;
-    rdfc:metadataOutput <jw>;
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:SubjectFragmentation;
@@ -160,272 +43,542 @@ describe("SDS processors tests", async () => {
     a tree:PageFragmentation;
     tree:pageSize 2;
   ] );
-      rdfc:inputStreamId <http://testStream>;
-      rdfc:outputStreamId <http://newStream>.
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
-        await checkProcDefinition(configLocation, "Bucketize");
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        // Load processor semantic definition
+        await procHelper.importFile(configLocation);
+        // Load processor instance declaration
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const bucketizer = await getProc<Bucketizer>(
-            processor,
-            "Bucketize",
-            configLocation,
+        // Get processor configuration
+        procHelper.getConfig("Bucketize");
+
+        // Instantiate processor from declared instance
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await bucketizer.init();
 
         expect(bucketizer.prefix).toBe("root"); // default
-        expect(bucketizer.channels.dataInput).toBeInstanceOf(ReaderInstance);
-        expect(bucketizer.channels.metadataInput).toBeInstanceOf(
-            ReaderInstance,
+        expect(bucketizer.channels.dataInput.uri).toContain("dataInput");
+        expect(bucketizer.channels.metadataInput.uri).toContain(
+            "metadataInput",
         );
-        expect(bucketizer.channels.dataOutput).toBeInstanceOf(WriterInstance);
-        expect(bucketizer.channels.metadataOutput).toBeInstanceOf(
-            WriterInstance,
+        expect(bucketizer.channels.dataOutput.uri).toContain("dataOutput");
+        expect(bucketizer.channels.metadataOutput.uri).toContain(
+            "metadataOutput",
         );
         expect(bucketizer.savePath).toBeUndefined();
         expect(bucketizer.sourceStream?.value).toBe("http://testStream");
         expect(bucketizer.resultingStream?.value).toBe("http://newStream");
         expect(bucketizer.config.strategy.length).toBe(2);
+
+        const subjectConfig = <SubjectFragmentation>(
+            bucketizer.config.strategy[0].config
+        );
+        expect(subjectConfig.path).toBeDefined();
+
+        const pageConfig = <PageFragmentation>(
+            bucketizer.config.strategy[1].config
+        );
+        expect(pageConfig.pageSize).toBe(2);
     });
 
-    test("js:Ldesify is properly defined", async () => {
-        const processorConfig = `
+    test("rdfc:Bucketize with RTree strategy is properly defined", async () => {
+        const processor = `
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
 
-    <http://example.com/ns#processor> a rdfc:Ldesify;
-      rdfc:input <jr>;
-      rdfc:path "save.json";
-      rdfc:output <jw>;
-      rdfc:checkProps true;
-      rdfc:timestampPath <http://example.com/ns#time>;
-      rdfc:versionOfPath <http://example.com/ns#ver>;
-      .
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:RTreeFragmentation;
+    tree:latitudePath <latitude>;
+    tree:longitudePath <longitude>;
+    tree:pageSize 2;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+
+        procHelper.getConfig("Bucketize");
+
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy.length).toBe(1);
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#RTreeFragmentation",
+        );
+        const rtreeConfig = <RTreeFragmentation>(
+            bucketizer.config.strategy[0].config
+        );
+        expect(rtreeConfig.latitudePath).toBeDefined();
+        expect(rtreeConfig.longitudePath).toBeDefined();
+        expect(rtreeConfig.pageSize).toBe(2);
+    });
+
+    test("rdfc:Bucketize with ReversedPage strategy is properly defined", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:ReversedPageFragmentation;
+    tree:pageSize 2;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#ReversedPageFragmentation",
+        );
+        const config = <PageFragmentation>bucketizer.config.strategy[0].config;
+        expect(config.pageSize).toBe(2);
+    });
+
+    test("rdfc:Bucketize with Timebased strategy is properly defined", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:TimebasedFragmentation;
+    tree:timestampPath <time>;
+    tree:maxSize 100;
+    tree:k 2;
+    tree:minBucketSpan 3600;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#TimebasedFragmentation",
+        );
+        const config = <TimebasedFragmentation>(
+            bucketizer.config.strategy[0].config
+        );
+        expect(config.maxSize).toBe(100);
+        expect(config.k).toBe(2);
+        expect(config.minBucketSpan).toBe(3600);
+        expect(config.path).toBeDefined();
+    });
+
+    test("rdfc:Bucketize with TimeBucket strategy is properly defined", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:TimeBucketFragmentation;
+    tree:timestampPath <time>;
+    tree:level [
+        tree:range "year";
+        tree:maxSize 10;
+    ];
+    tree:buffer 500;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#TimeBucketFragmentation",
+        );
+        const config = <TimeBucketTreeConfig>(
+            bucketizer.config.strategy[0].config
+        );
+        expect(config.path).toBeDefined();
+        expect(config.levels.length).toBe(1);
+        expect(config.levels[0].ranges).toContain("year");
+        expect(config.levels[0].amount).toBe(10);
+        expect(config.timeBufferMs).toBe(500);
+    });
+
+    test("rdfc:Bucketize with Hour strategy is properly defined", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:HourFragmentation;
+    tree:timestampPath <time>;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#HourFragmentation",
+        );
+        const config = <HourFragmentation>bucketizer.config.strategy[0].config;
+        expect(config.path).toBeDefined();
+    });
+
+    test("rdfc:Bucketize with Dump strategy is properly defined", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:DumpFragmentation;
+  ] );
+    rdfc:inputStreamId <http://testStream>;
+    rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.config.strategy[0].type.value).toBe(
+            "https://w3id.org/tree#DumpFragmentation",
+        );
+        const config = <DumpFragmentation>bucketizer.config.strategy[0].config;
+        expect(config).toBeDefined();
+    });
+
+    test("rdfc:Ldesify is properly defined", async () => {
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+        <http://example.com/ns#processor> a rdfc:Ldesify;
+          rdfc:input <jr>;
+          rdfc:path "save.json";
+          rdfc:output <jw>;
+          rdfc:checkProps true;
+          rdfc:timestampPath <http://example.com/ns#time>;
+          rdfc:versionOfPath <http://example.com/ns#ver>;
+          .
+        `;
+
         const configLocation = process.cwd() + "/configs/ldesify.ttl";
-        await checkProcDefinition(configLocation, "Ldesify");
+        const procHelper = new ProcHelper<FullProc<Ldesify>>();
+        // Load processor semantic definition
+        await procHelper.importFile(configLocation);
+        // Load processor instance declaration
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<Ldesify>(
-            processorConfig,
-            "Ldesify",
-            configLocation,
-        );
-        await processor.init();
+        // Get processor configuration
+        procHelper.getConfig("Ldesify");
 
-        expect(processor.reader).toBeInstanceOf(ReaderInstance);
-        expect(processor.writer).toBeInstanceOf(WriterInstance);
-        expect(processor.statePath).toBe("save.json");
-        expect(processor.modifiedPath?.value).toBe(
-            "http://example.com/ns#time",
+        // Instantiate processor from declared instance
+        const ldesify: FullProc<Ldesify> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        expect(processor.isVersionOfPath?.value).toBe(
+
+        expect(ldesify.reader.uri).toContain("jr");
+        expect(ldesify.writer.uri).toContain("jw");
+        expect(ldesify.statePath).toBe("save.json");
+        expect(ldesify.modifiedPath?.value).toBe("http://example.com/ns#time");
+        expect(ldesify.isVersionOfPath?.value).toBe(
             "http://example.com/ns#ver",
         );
-        expect(processor.check_properties).toBe(true);
+        expect(ldesify.checkProps).toBe(true);
     });
 
     test("js:LdesifySDS is properly defined", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-    <http://example.com/ns#processor> a rdfc:LdesifySDS;
-      rdfc:input <jr>;
-      rdfc:statePath "save.json";
-      rdfc:output <jw>;
-      rdfc:checkProps true;
-      rdfc:timestampPath <http://example.com/ns#time>;
-      rdfc:versionOfPath <http://example.com/ns#ver>;
-      rdfc:targetStream <http://example.com/ns#target>;
-      rdfc:sourceStream <http://example.com/ns#source>;
-      .
-    `;
+        <http://example.com/ns#processor> a rdfc:LdesifySDS;
+          rdfc:input <jr>;
+          rdfc:statePath "save.json";
+          rdfc:output <jw>;
+          rdfc:checkProps true;
+          rdfc:timestampPath <http://example.com/ns#time>;
+          rdfc:versionOfPath <http://example.com/ns#ver>;
+          rdfc:targetStream <http://example.com/ns#target>;
+          rdfc:sourceStream <http://example.com/ns#source>;
+          .
+        `;
 
         const configLocation = process.cwd() + "/configs/ldesify.ttl";
-        await checkProcDefinition(configLocation, "LdesifySDS");
+        const procHelper = new ProcHelper<FullProc<LdesifySDS>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<LdesifySDS>(
-            processorConfig,
-            "LdesifySDS",
-            configLocation,
+        procHelper.getConfig("LdesifySDS");
+
+        const ldesifySds: FullProc<LdesifySDS> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await processor.init();
 
-        expect(processor.reader).toBeInstanceOf(ReaderInstance);
-        expect(processor.writer).toBeInstanceOf(WriterInstance);
-        expect(processor.statePath).toBe("save.json");
-        expect(processor.modifiedPathM?.value).toBe(
+        expect(ldesifySds.reader.uri).toContain("jr");
+        expect(ldesifySds.writer.uri).toContain("jw");
+        expect(ldesifySds.statePath).toBe("save.json");
+        expect(ldesifySds.modifiedPathM?.value).toBe(
             "http://example.com/ns#time",
         );
-        expect(processor.isVersionOfPathM?.value).toBe(
+        expect(ldesifySds.isVersionOfPathM?.value).toBe(
             "http://example.com/ns#ver",
         );
-        expect(processor.targetStream.value).toBe(
+        expect(ldesifySds.targetStream.value).toBe(
             "http://example.com/ns#target",
         );
-        expect(processor.sourceStream?.value).toBe(
+        expect(ldesifySds.sourceStream?.value).toBe(
             "http://example.com/ns#source",
         );
     });
 
     test("generator", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-    <http://example.com/ns#processor>  a rdfc:Generate;
-      rdfc:count 5;
-      rdfc:waitMS 500;
-      rdfc:timestampPath <http://out.com#out>;
-      rdfc:output <jw>.
-    `;
+        <http://example.com/ns#processor>  a rdfc:Generate;
+          rdfc:count 5;
+          rdfc:waitMS 500;
+          rdfc:timestampPath <http://out.com#out>;
+          rdfc:output <jw>.
+        `;
 
         const configLocation = process.cwd() + "/configs/generator.ttl";
-        await checkProcDefinition(configLocation, "Generate");
+        const procHelper = new ProcHelper<FullProc<Generator>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<Generator>(
-            processorConfig,
-            "Generate",
-            configLocation,
+        procHelper.getConfig("Generate");
+
+        const generator: FullProc<Generator> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await processor.init();
 
-        expect(processor.writer).toBeInstanceOf(WriterInstance);
-        expect(processor.wait).toBe(500);
-        expect(processor.timestampPath?.value).toBe("http://out.com#out");
-        expect(processor.count).toBe(5);
+        expect(generator.writer.uri).toContain("jw");
+        expect(generator.wait).toBe(500);
+        expect(generator.timestampPath?.value).toBe("http://out.com#out");
+        expect(generator.count).toBe(5);
     });
 
     test("sdsify", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-    <http://example.com/ns#processor> a rdfc:Sdsify;
-        rdfc:input <jr>;
-        rdfc:output <jw>;
-        rdfc:stream <http://me.com/stream>;
-        rdfc:typeFilter <http://ex.org/Type>, <http://ex.org/AnotherType>;
-        rdfc:timestampPath <http://ex.org/timestamp>;
-        rdfc:shape """
-          @prefix sh: <http://www.w3.org/ns/shacl#>.
-          @prefix ex: <http://ex.org/>.
+        <http://example.com/ns#processor> a rdfc:Sdsify;
+            rdfc:input <jr>;
+            rdfc:output <jw>;
+            rdfc:stream <http://me.com/stream>;
+            rdfc:typeFilter <http://ex.org/Type>, <http://ex.org/AnotherType>;
+            rdfc:timestampPath <http://ex.org/timestamp>;
+            rdfc:shape """
+              @prefix sh: <http://www.w3.org/ns/shacl#>.
+              @prefix ex: <http://ex.org/>.
 
-          [ ] a sh:NodeShape;
-            sh:targetClass ex:SomeClass.
-        """.
-      `;
+              [ ] a sh:NodeShape;
+                sh:targetClass ex:SomeClass.
+            """.
+          `;
 
         const configLocation = process.cwd() + "/configs/sdsify.ttl";
-        await checkProcDefinition(configLocation, "Sdsify");
+        const procHelper = new ProcHelper<FullProc<Sdsify>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<Sdsify>(
-            processorConfig,
-            "Sdsify",
-            configLocation,
+        procHelper.getConfig("Sdsify");
+
+        const sdsify: FullProc<Sdsify> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await processor.init();
 
-        expect(processor.input).toBeInstanceOf(ReaderInstance);
-        expect(processor.output).toBeInstanceOf(WriterInstance);
-        expect(processor.streamNode.value).toBe("http://me.com/stream");
-        expect(processor.timestampPath?.value).toBe("http://ex.org/timestamp");
-        expect(processor.types?.map((x) => x.value)).toEqual([
+        expect(sdsify.input.uri).toContain("jr");
+        expect(sdsify.output.uri).toContain("jw");
+        expect(sdsify.streamNode.value).toBe("http://me.com/stream");
+        expect(sdsify.timestampPath?.value).toBe("http://ex.org/timestamp");
+        expect(sdsify.types?.map((x) => x.value)).toEqual([
             "http://ex.org/Type",
             "http://ex.org/AnotherType",
         ]);
     });
 
     test("streamJoin", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
-      <http://example.com/ns#processor> a rdfc:StreamJoin;
-        rdfc:input <jr>, <jr2>;
-        rdfc:output <jw>.
-      `;
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+          <http://example.com/ns#processor> a rdfc:StreamJoin;
+            rdfc:input <jr>, <jr2>;
+            rdfc:output <jw>.
+          `;
 
         const configLocation = process.cwd() + "/configs/stream_join.ttl";
-        await checkProcDefinition(configLocation, "StreamJoin");
+        const procHelper = new ProcHelper<FullProc<StreamJoin>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<StreamJoin>(
-            processorConfig,
-            "StreamJoin",
-            configLocation,
+        procHelper.getConfig("StreamJoin");
+
+        const streamJoin: FullProc<StreamJoin> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await processor.init();
 
-        expect(processor.inputs.length).toBe(2);
-        for (const i of processor.inputs) {
-            expect(i).toBeInstanceOf(ReaderInstance);
+        expect(streamJoin.inputs.length).toBe(2);
+        for (const i of streamJoin.inputs) {
+            expect(i.uri).toBeDefined();
         }
-        expect(processor.output).toBeInstanceOf(WriterInstance);
+        expect(streamJoin.output.uri).toContain("jw");
     });
 
     test("memberAsNamedGraph", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
-      <http://example.com/ns#processor> a rdfc:MemberAsNamedGraph;
-        rdfc:input <jr>;
-        rdfc:output <jw>.
-      `;
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+          <http://example.com/ns#processor> a rdfc:MemberAsNamedGraph;
+            rdfc:input <jr>;
+            rdfc:output <jw>.
+          `;
 
         const configLocation = process.cwd() + "/configs/member_as_graph.ttl";
-        await checkProcDefinition(configLocation, "MemberAsNamedGraph");
+        const procHelper = new ProcHelper<FullProc<MemberAsNamedGraph>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<MemberAsNamedGraph>(
-            processorConfig,
-            "MemberAsNamedGraph",
-            configLocation,
-        );
-        await processor.init();
+        procHelper.getConfig("MemberAsNamedGraph");
 
-        expect(processor.input).toBeInstanceOf(ReaderInstance);
-        expect(processor.output).toBeInstanceOf(WriterInstance);
+        const memberAsNamedGraph: FullProc<MemberAsNamedGraph> =
+            await procHelper.getProcessor("http://example.com/ns#processor");
+
+        expect(memberAsNamedGraph.input.uri).toContain("jr");
+        expect(memberAsNamedGraph.output.uri).toContain("jw");
     });
 
     test("js:LdesDiskWriter is properly defined", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
-        <http://example.com/ns#processor> a rdfc:LdesDiskWriter;
-            rdfc:dataInput <jr>;
-            rdfc:metadataInput <jr>;
-            rdfc:directory "/tmp/ldes-disk/".
-        `;
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+            <http://example.com/ns#processor> a rdfc:LdesDiskWriter;
+                rdfc:dataInput <jr1>;
+                rdfc:metadataInput <jr2>;
+                rdfc:directory "/tmp/ldes-disk/".
+            `;
 
         const configLocation = process.cwd() + "/configs/ldes_disk_writer.ttl";
-        await checkProcDefinition(configLocation, "LdesDiskWriter");
+        const procHelper = new ProcHelper<FullProc<LdesDiskWriter>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<LdesDiskWriter>(
-            processorConfig,
-            "LdesDiskWriter",
-            configLocation,
-        );
-        await processor.init();
-        expect(processor.data).toBeInstanceOf(ReaderInstance);
-        expect(processor.metadata).toBeInstanceOf(ReaderInstance);
-        expect(processor.directory).toBe("/tmp/ldes-disk/");
+        procHelper.getConfig("LdesDiskWriter");
+
+        const ldesDiskWriter: FullProc<LdesDiskWriter> =
+            await procHelper.getProcessor("http://example.com/ns#processor");
+
+        expect(ldesDiskWriter.data.uri).toContain("jr1");
+        expect(ldesDiskWriter.metadata.uri).toContain("jr2");
+        expect(ldesDiskWriter.directory).toBe("/tmp/ldes-disk/");
     });
 
     test("rdfc:Shapify is properly defined", async () => {
-        const processorConfig = `
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
 
-        <http://example.com/ns#processor> a rdfc:Shapify;
-            rdfc:input <jr>;
-            rdfc:output <jr>;
-            rdfc:shape <MyShape>.
-        `;
+            <http://example.com/ns#processor> a rdfc:Shapify;
+                rdfc:input <jr>;
+                rdfc:output <jw>;
+                rdfc:shape <MyShape>.
+            `;
 
         const configLocation = process.cwd() + "/configs/shapify.ttl";
-        await checkProcDefinition(configLocation, "Shapify");
+        const procHelper = new ProcHelper<FullProc<Shapify>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
 
-        const processor = await getProc<Shapify>(
-            processorConfig,
-            "Shapify",
-            configLocation,
+        procHelper.getConfig("Shapify");
+
+        const shapify: FullProc<Shapify> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
         );
-        await processor.init();
-        expect(processor.reader).toBeInstanceOf(ReaderInstance);
-        expect(processor.writer).toBeInstanceOf(WriterInstance);
-        expect(processor.shape).toBeDefined();
-        expect(processor.shape.id.value).toBe("MyShape");
+
+        expect(shapify.reader.uri).toContain("jr");
+        expect(shapify.writer.uri).toContain("jw");
+        expect(shapify.shape).toBeDefined();
+        expect(shapify.shape.id.value).toContain("MyShape");
     });
 });

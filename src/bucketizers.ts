@@ -8,7 +8,7 @@ import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
-import { handleExit } from "./exitHandler";
+import { cleanUpHandlers, handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
 
 const df = new DataFactory();
@@ -22,7 +22,7 @@ async function writeState(
         try {
             const url = new URL(path);
             p = url.pathname;
-        } catch (_ex: unknown) {
+        } catch {
             // this is fine, the path was already a file path, not a uri
         }
         writeFileSync(p, content, { encoding: "utf-8" });
@@ -236,7 +236,7 @@ function read_save(savePath?: string) {
         if (savePath) {
             return readFileSync(savePath, { encoding: "utf8" });
         }
-    } catch (ex) {
+    } catch {
         return;
     }
 }
@@ -270,6 +270,7 @@ export class Bucketizer extends Processor<Args> {
             const state = this.orchestrator.save();
             await writeState(this.savePath, state);
         });
+        this.logger.info("Bucketizer processor initialized");
     }
 
     async transform(this: Args & this): Promise<void> {
@@ -293,9 +294,9 @@ export class Bucketizer extends Processor<Args> {
                 addProcess(x, y, this.config.quads.id, this.config.quads.quads),
         );
 
-        this.logger.info("Accepting metadata");
+        this.logger.info("[set_metadata] Accepting metadata");
         for await (const quads of this.channels.metadataInput.strings()) {
-            this.logger.info("Got metadata input " + quads);
+            this.logger.verbose("[set_metadata] Got metadata input " + quads);
             await this.channels.metadataOutput.string(
                 serializeQuads(await f(parseQuads(quads))),
             );
@@ -328,6 +329,7 @@ export class Bucketizer extends Processor<Args> {
 
     async transformData(this: Args & this) {
         for await (const x of this.channels.dataInput.strings()) {
+            this.logger.debug("[transformData] Processing data input item");
             const outputQuads: Quad[] = [];
             const quads = new Parser().parse(x);
 
@@ -422,5 +424,7 @@ export class Bucketizer extends Processor<Args> {
         await writeState(this.savePath, this.orchestrator.save());
         // Close downstream channel
         await this.channels.dataOutput.close();
+        // Clean up exit handlers
+        cleanUpHandlers();
     }
 }

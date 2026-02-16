@@ -20,7 +20,7 @@ type StateCache = { [identify: string]: string };
 function getPrevState(path: string): StateCache {
     try {
         return JSON.parse(readFileSync(path).toString());
-    } catch (ex: unknown) {
+    } catch {
         return {};
     }
 }
@@ -172,14 +172,14 @@ type Args = {
     reader: Reader;
     writer: Writer;
     statePath?: string;
-    check_properties: boolean;
+    checkProps: boolean;
     modifiedPath?: Term;
     isVersionOfPath?: Term;
 };
 export class Ldesify extends Processor<Args> {
     transformer: Transformer;
     constructor(args: Args, logger: Logger) {
-        super(Object.assign({ check_properties: true }, args), logger);
+        super(Object.assign({ checkProps: true }, args), logger);
     }
     async init(this: Args & this): Promise<void> {
         let cache = {};
@@ -200,7 +200,7 @@ export class Ldesify extends Processor<Args> {
     }
     async transform(this: Args & this): Promise<void> {
         for await (const x of this.reader.strings()) {
-            const st = this.check_properties
+            const st = this.checkProps
                 ? this.transformer.transformCheckState(x)
                 : this.transformer.simpleTransform(x);
             await this.writer.string(st);

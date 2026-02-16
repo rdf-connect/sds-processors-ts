@@ -17,6 +17,7 @@ import TimeBucketBucketizer, { TimeBucketTreeConfig } from "./timeBucketTree";
 import HourBucketizer from "./hourBucketizer";
 import ReversedPagedBucketizer from "./reversedPagedBucketizer";
 import DumpBucketizer from "./dumpBucketizer";
+import RTreeBucketizer from "./rTreeBucketizer";
 
 export { TimeBucketTreeConfig } from "./timeBucketTree";
 
@@ -30,7 +31,8 @@ export type BucketizerConfig = {
         | PageFragmentation
         | TimebasedFragmentation
         | TimeBucketTreeConfig
-        | HourFragmentation;
+        | HourFragmentation
+        | RTreeFragmentation;
 };
 
 export type SubjectFragmentation = {
@@ -63,6 +65,17 @@ export type HourFragmentation = {
 export type DumpFragmentation = {
     path?: BasicLensM<Cont, Cont>;
     pathQuads?: Cont;
+};
+
+export type RTreeFragmentation = {
+    wktPath?: BasicLensM<Cont, Cont>;
+    wktPathQuads?: Cont;
+    latitudePath?: BasicLensM<Cont, Cont>;
+    latitudePathQuads?: Cont;
+    longitudePath?: BasicLensM<Cont, Cont>;
+    longitudePathQuads?: Cont;
+    pageSize: number;
+    minSize?: number;
 };
 
 export type AddRelation = (
@@ -122,6 +135,8 @@ function createBucketizer(config: BucketizerConfig, save?: string): Bucketizer {
             return new HourBucketizer(<HourFragmentation>config.config, save);
         case TREE.custom("DumpFragmentation"):
             return new DumpBucketizer(<DumpFragmentation>config.config, save);
+        case TREE.custom("RTreeFragmentation"):
+            return new RTreeBucketizer(<RTreeFragmentation>config.config, save);
     }
     throw "Unknown bucketizer " + config.type.value;
 }
