@@ -240,5 +240,12 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 [ ] a rdfc:LdesDiskWriter;
     rdfc:dataInput <data/reader>;
     rdfc:metadataInput <metadata/reader>;
-    rdfc:directory </tmp/ldes-disk/>.
+    rdfc:directory </tmp/ldes-disk/>;
+    rdfc:streamName [
+        rdfc:stream <http://example.com/ns/by-location>;
+        rdfc:name "by-location";
+    ], [
+        rdfc:stream <http://example.com/ns/by-name>;
+        rdfc:name "by-name";
+    ].
 ```

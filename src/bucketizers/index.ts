@@ -1,4 +1,4 @@
-import { Term } from "@rdfjs/types";
+import { Quad, Term } from "@rdfjs/types";
 import { BasicLensM, Cont } from "rdf-lens";
 import {
     Bucket,
@@ -26,6 +26,7 @@ export const SHAPES_TEXT = $INLINE_FILE("../../configs/bucketizer_configs.ttl");
 
 export type BucketizerConfig = {
     type: Term;
+    quads: { id: Term; quads: Quad[] };
     config:
         | SubjectFragmentation
         | PageFragmentation

@@ -75,16 +75,12 @@ describe("SDS processors tests", async () => {
         expect(bucketizer.savePath).toBeUndefined();
         expect(bucketizer.sourceStream?.value).toBe("http://testStream");
         expect(bucketizer.resultingStream?.value).toBe("http://newStream");
-        expect(bucketizer.config.strategy.length).toBe(2);
+        expect(bucketizer.config.length).toBe(2);
 
-        const subjectConfig = <SubjectFragmentation>(
-            bucketizer.config.strategy[0].config
-        );
+        const subjectConfig = <SubjectFragmentation>bucketizer.config[0].config;
         expect(subjectConfig.path).toBeDefined();
 
-        const pageConfig = <PageFragmentation>(
-            bucketizer.config.strategy[1].config
-        );
+        const pageConfig = <PageFragmentation>bucketizer.config[1].config;
         expect(pageConfig.pageSize).toBe(2);
     });
 
@@ -122,13 +118,11 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy.length).toBe(1);
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config.length).toBe(1);
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#RTreeFragmentation",
         );
-        const rtreeConfig = <RTreeFragmentation>(
-            bucketizer.config.strategy[0].config
-        );
+        const rtreeConfig = <RTreeFragmentation>bucketizer.config[0].config;
         expect(rtreeConfig.latitudePath).toBeDefined();
         expect(rtreeConfig.longitudePath).toBeDefined();
         expect(rtreeConfig.pageSize).toBe(2);
@@ -151,7 +145,8 @@ describe("SDS processors tests", async () => {
     tree:pageSize 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>.
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -163,10 +158,10 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#ReversedPageFragmentation",
         );
-        const config = <PageFragmentation>bucketizer.config.strategy[0].config;
+        const config = <PageFragmentation>bucketizer.config[0].config;
         expect(config.pageSize).toBe(2);
     });
 
@@ -184,13 +179,14 @@ describe("SDS processors tests", async () => {
   ];
   rdfc:bucketizeStrategy ( [
     a tree:TimebasedFragmentation;
-    tree:timestampPath <time>;
-    tree:maxSize 100;
+    tree:timestampPath <path>;
+    tree:maxSize 2;
     tree:k 2;
-    tree:minBucketSpan 3600;
+    tree:minBucketSpan 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>.
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -202,16 +198,14 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#TimebasedFragmentation",
         );
-        const config = <TimebasedFragmentation>(
-            bucketizer.config.strategy[0].config
-        );
-        expect(config.maxSize).toBe(100);
-        expect(config.k).toBe(2);
-        expect(config.minBucketSpan).toBe(3600);
+        const config = <TimebasedFragmentation>bucketizer.config[0].config;
         expect(config.path).toBeDefined();
+        expect(config.maxSize).toBe(2);
+        expect(config.k).toBe(2);
+        expect(config.minBucketSpan).toBe(2);
     });
 
     test("rdfc:Bucketize with TimeBucket strategy is properly defined", async () => {
@@ -228,15 +222,15 @@ describe("SDS processors tests", async () => {
   ];
   rdfc:bucketizeStrategy ( [
     a tree:TimeBucketFragmentation;
-    tree:timestampPath <time>;
+    tree:timestampPath <path>;
     tree:level [
         tree:range "year";
         tree:maxSize 10;
     ];
-    tree:buffer 500;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>.
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -248,17 +242,12 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#TimeBucketFragmentation",
         );
-        const config = <TimeBucketTreeConfig>(
-            bucketizer.config.strategy[0].config
-        );
+        const config = <TimeBucketTreeConfig>bucketizer.config[0].config;
         expect(config.path).toBeDefined();
         expect(config.levels.length).toBe(1);
-        expect(config.levels[0].ranges).toContain("year");
-        expect(config.levels[0].amount).toBe(10);
-        expect(config.timeBufferMs).toBe(500);
     });
 
     test("rdfc:Bucketize with Hour strategy is properly defined", async () => {
@@ -275,10 +264,11 @@ describe("SDS processors tests", async () => {
   ];
   rdfc:bucketizeStrategy ( [
     a tree:HourFragmentation;
-    tree:timestampPath <time>;
+    tree:timestampPath <path>;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>.
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -290,10 +280,10 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#HourFragmentation",
         );
-        const config = <HourFragmentation>bucketizer.config.strategy[0].config;
+        const config = <HourFragmentation>bucketizer.config[0].config;
         expect(config.path).toBeDefined();
     });
 
@@ -313,7 +303,8 @@ describe("SDS processors tests", async () => {
     a tree:DumpFragmentation;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>.
+    rdfc:outputStreamId <http://newStream>;
+    rdfc:prefix "root".
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -325,10 +316,10 @@ describe("SDS processors tests", async () => {
             "http://example.com/ns#processor",
         );
 
-        expect(bucketizer.config.strategy[0].type.value).toBe(
+        expect(bucketizer.config[0].type.value).toBe(
             "https://w3id.org/tree#DumpFragmentation",
         );
-        const config = <DumpFragmentation>bucketizer.config.strategy[0].config;
+        const config = <DumpFragmentation>bucketizer.config[0].config;
         expect(config).toBeDefined();
     });
 

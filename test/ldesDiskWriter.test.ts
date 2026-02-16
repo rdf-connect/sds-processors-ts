@@ -33,6 +33,7 @@ describe("Functional tests for the ldesDiskWriter function", () => {
                 directory,
                 metadata: metaReader,
                 data: inputReader,
+                nameMap: [],
             },
             logger,
         );

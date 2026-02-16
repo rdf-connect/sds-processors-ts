@@ -7,8 +7,30 @@
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 
 [ ] a sh:NodeShape;
+  sh:targetClass <RdfThing>;
+  sh:property [
+    sh:name "id";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:datatype xsd:any;
+  ], [
+    sh:name "quads";
+    sh:path ( );
+    sh:maxCount 1;
+    sh:minCount 1;
+    sh:class rdfl:CBD;
+  ].
+
+[ ] a sh:NodeShape;
   sh:targetClass tree:FragmentationStrategy;
   sh:property [
+    sh:name "quads";
+    sh:path ( );
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
     sh:name "type";
     sh:path rdf:type;
     sh:datatype xsd:iri;
