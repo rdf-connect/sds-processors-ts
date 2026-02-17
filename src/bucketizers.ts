@@ -281,6 +281,7 @@ export class Bucketizer extends Processor<Args> {
     orchestrator: BucketizerOrchestrator;
     extractor: Extractor;
     buckets: { [id: string]: Bucket } = {};
+    recordCount: number = 0;
 
     async init(this: Args & this): Promise<void> {
         this.prefix = this.prefix ?? "root";
@@ -295,7 +296,7 @@ export class Bucketizer extends Processor<Args> {
             const state = this.orchestrator.save();
             await writeState(this.savePath, state);
         });
-        this.logger.info("Bucketizer processor initialized");
+        this.logger.info("[init] Bucketizer processor initialized");
     }
 
     async transform(this: Args & this): Promise<void> {
@@ -325,7 +326,7 @@ export class Bucketizer extends Processor<Args> {
 
         this.logger.info("[set_metadata] Accepting metadata");
         for await (const quads of this.channels.metadataInput.strings()) {
-            this.logger.verbose("[set_metadata] Got metadata input " + quads);
+            this.logger.verbose("[set_metadata] Got metadata input:\n" + quads);
             await this.channels.metadataOutput.string(
                 serializeQuads(await f(parseQuads(quads))),
             );
@@ -358,7 +359,6 @@ export class Bucketizer extends Processor<Args> {
 
     async transformData(this: Args & this) {
         for await (const x of this.channels.dataInput.strings()) {
-            this.logger.debug("[transformData] Processing data input item");
             const outputQuads: Quad[] = [];
             const quads = new Parser().parse(x);
 
@@ -376,6 +376,9 @@ export class Bucketizer extends Processor<Args> {
             }[] = [];
 
             for (const record of records) {
+                this.logger.debug(
+                    `[transformData] Processing data record <${record.data.id.value}>`,
+                );
                 const record_buckets = this.orchestrator.bucketize(
                     record,
                     this.buckets,
@@ -396,6 +399,7 @@ export class Bucketizer extends Processor<Args> {
                         record_buckets.map((x) => this.buckets[x]),
                     ),
                 );
+                this.recordCount++;
             }
 
             // Write records for the new members.
@@ -433,6 +437,18 @@ export class Bucketizer extends Processor<Args> {
             }
             for (const { origin, relation } of newRelations) {
                 outputQuads.push(...relationToQuads(origin, relation));
+                this.logger.debug(
+                    "[transformData] Adding new relation from Bucket '" +
+                        origin.id.value +
+                        "' to Bucket '" +
+                        relation.target.value +
+                        "'of type <" +
+                        relation.type.value +
+                        ">, over property <" +
+                        relation.path?.id.value +
+                        "> and value " +
+                        relation.value?.value,
+                );
             }
             for (const { origin, relation } of removeRelations) {
                 outputQuads.push(
@@ -443,6 +459,18 @@ export class Bucketizer extends Processor<Args> {
                         true,
                     ),
                 );
+                this.logger.debug(
+                    "[transformData] Removing relation from Bucket '" +
+                        origin.id.value +
+                        "' to Bucket '" +
+                        relation.target.value +
+                        "'of type <" +
+                        relation.type.value +
+                        ">, over property <" +
+                        relation.path?.id.value +
+                        "> and value " +
+                        relation.value?.value,
+                );
             }
 
             await this.channels.dataOutput.string(
@@ -450,6 +478,13 @@ export class Bucketizer extends Processor<Args> {
             );
         }
 
+        this.logger.info(
+            "[transformData] Bucketized " +
+                this.recordCount +
+                " records into " +
+                Object.keys(this.buckets).length +
+                " buckets",
+        );
         await writeState(this.savePath, this.orchestrator.save());
         // Close downstream channel
         await this.channels.dataOutput.close();
