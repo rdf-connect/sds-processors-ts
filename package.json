@@ -45,7 +45,7 @@
         "@types/geojson": "^7946.0.16",
         "@types/jsonld": "^1.5.15",
         "@types/n3": "^1.26.1",
-        "@types/node": "^25.3.0",
+        "@types/node": "^25.3.1",
         "@types/terraformer__spatial": "^2.0.4",
         "@types/terraformer__wkt": "^2.0.3",
         "@typescript-eslint/eslint-plugin": "^8.56.1",
