@@ -1,7 +1,7 @@
 import { NamedNode, Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
 import { NBNode } from "../core";
-import { Parser, Writer } from "n3";
+import { Parser, StreamParser, Writer } from "n3";
 import { SDS, XSD, createUriAndTermNamespace } from "@treecg/types";
 import {
     BasicLensM,
@@ -16,6 +16,7 @@ import { RdfStore } from "rdf-stores";
 
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import { Logger } from "winston";
+import { Readable } from "stream";
 
 const df = new DataFactory();
 
@@ -327,6 +328,24 @@ export function maybeParse(data: Quad[] | string): Quad[] {
         return parse.parse(<string>data);
     } else {
         return data;
+    }
+}
+
+export async function loadIntoStore(
+    data: string | Readable,
+    store: RdfStore,
+): Promise<void> {
+    if (typeof data === "string" || data instanceof String) {
+        const parse = new Parser();
+        parse.parse(<string>data).forEach((quad) => store.addQuad(quad));
+    } else if (data instanceof Readable) {
+        const parse = new StreamParser();
+        await new Promise((resolve, reject) => {
+            store
+                .import(data.pipe(parse))
+                .on("end", resolve)
+                .on("error", reject);
+        });
     }
 }
 

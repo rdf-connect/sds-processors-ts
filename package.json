@@ -40,6 +40,8 @@
     },
     "devDependencies": {
         "@ajuvercr/ts-transformer-inline-file": "^0.2.0",
+        "@eslint/eslintrc": "^3.3.4",
+        "@eslint/js": "^10.0.1",
         "@rdfc/js-runner": "^3.0.3",
         "@rdfjs/types": "^2.0.1",
         "@types/geojson": "^7946.0.16",
@@ -54,6 +56,7 @@
         "dotenv": "^17.3.1",
         "eslint": "^10.0.2",
         "eslint-config-prettier": "^10.1.8",
+        "globals": "^17.4.0",
         "husky": "^9.1.7",
         "lint-staged": "^16.3.1",
         "memfs": "^4.56.10",

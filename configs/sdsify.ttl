@@ -54,5 +54,11 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:name "shape";
     sh:minCount 0;
     sh:maxCount 1;
+  ], [
+    sh:datatype xsd:boolean;
+    sh:path rdfc:readAsStream;
+    sh:name "readAsStream";
+    sh:minCount 0;
+    sh:maxCount 1;
   ].
 
