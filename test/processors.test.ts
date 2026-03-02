@@ -450,7 +450,8 @@ describe("SDS processors tests", async () => {
 
               [ ] a sh:NodeShape;
                 sh:targetClass ex:SomeClass.
-            """.
+            """;
+            rdfc:readAsStream true.
           `;
 
         const configLocation = process.cwd() + "/configs/sdsify.ttl";
@@ -472,6 +473,7 @@ describe("SDS processors tests", async () => {
             "http://ex.org/Type",
             "http://ex.org/AnotherType",
         ]);
+        expect(sdsify.readAsStream).toBe(true);
     });
 
     test("streamJoin", async () => {
