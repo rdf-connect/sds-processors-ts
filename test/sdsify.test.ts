@@ -159,15 +159,19 @@ describe("Functional tests for the sdsify function", () => {
     test("Default extraction without a given shape", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
-
+        const data = updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
             },
             logger,
         );
@@ -179,6 +183,9 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.close();
         await done;
 
+        // read data and metadata
+        await metadata;
+        await data;
         expect(
             (await getObjects(store, undefined, SDS.terms.payload)).length,
         ).toBe(2);
@@ -224,20 +231,30 @@ describe("Functional tests for the sdsify function", () => {
                 null,
             ).length,
         ).toBe(1);
+
+        // Check metadata is emitted
+        expect(store.getQuads(null, SDS.terms.dataset, null, null).length).toBe(
+            1,
+        );
     });
 
     test("Extraction of particular entity type based on a SHACL shape", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
+        const data = updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
                 types: [df.namedNode("http://ex.org/SomeOtherClass")],
                 shape: SHAPE_1,
             },
@@ -251,6 +268,8 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.string(INPUT_1);
         await inputWriter.close();
         await done;
+        await data;
+        await metadata;
 
         // Check there number of members
         expect(
@@ -279,15 +298,20 @@ describe("Functional tests for the sdsify function", () => {
     test("Partial extraction of particular entity type based on a SHACL shape", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
+        const data = updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
                 types: [df.namedNode("http://ex.org/SomeClass")],
                 shape: SHAPE_2,
             },
@@ -301,6 +325,8 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.string(INPUT_1);
         await inputWriter.close();
         await done;
+        await data;
+        await metadata;
 
         // Check there number of members
         expect(
@@ -331,15 +357,20 @@ describe("Functional tests for the sdsify function", () => {
     test("Partial extraction of particular entity type with a nested SHACL shape", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
+        const data = updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
                 types: [df.namedNode("http://ex.org/SomeClass")],
                 shape: SHAPE_3,
             },
@@ -353,6 +384,8 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.string(INPUT_2);
         await inputWriter.close();
         await done;
+        await data;
+        await metadata;
 
         // Check there number of members
         expect(
@@ -397,15 +430,20 @@ describe("Functional tests for the sdsify function", () => {
     test("(Partial) extraction of multiples entity types based on SHACL shapes", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
+        const data = updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
                 shape: MULTI_SHAPE,
             },
             logger,
@@ -418,6 +456,8 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.string(INPUT_1);
         await inputWriter.close();
         await done;
+        await data;
+        await metadata;
         // Check there number of members
         expect(
             (await getObjects(store, undefined, SDS.terms.payload)).length,
@@ -453,12 +493,16 @@ describe("Functional tests for the sdsify function", () => {
     test("Failure on shape with multiple main node shapes", async () => {
         const [, inputReader] = createWriter();
         const [outputWriter] = createWriter();
+        const [metadataWriter] = createWriter();
 
         const proc = <FullProc<Sdsify>>new Sdsify(
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                },
                 shape: BAD_SHAPE_1,
             },
             logger,
@@ -474,14 +518,16 @@ describe("Functional tests for the sdsify function", () => {
     test("Time stamp-based ordering of SHACL-based extraction", async () => {
         const [inputWriter, inputReader] = createWriter();
         const [outputWriter, outputReader] = createWriter();
+        const [metadataWriter, metadataReader] = createWriter();
 
         const store = RdfStore.createDefault();
-        updateStore(outputReader, store);
+        const metadata = updateStore(metadataReader, store);
 
         const timestamps: string[] = [];
-        (async () => {
+        const data = (async () => {
             for await (const st of outputReader.strings()) {
                 const quads = new Parser().parse(st);
+                quads.forEach((q) => store.addQuad(q));
                 const subj = quads[0].subject;
                 timestamps.push(
                     (
@@ -499,8 +545,11 @@ describe("Functional tests for the sdsify function", () => {
             {
                 input: inputReader,
                 output: outputWriter,
-                streamNode: STREAM_ID,
-                timestampPath: df.namedNode("http://ex.org/timestamp"),
+                metadataOutput: metadataWriter,
+                metadataConfig: {
+                    streamId: STREAM_ID,
+                    timestampPath: df.namedNode("http://ex.org/timestamp"),
+                },
                 shape: SHAPE_4,
             },
             logger,
@@ -513,6 +562,8 @@ describe("Functional tests for the sdsify function", () => {
         await inputWriter.string(INPUT_3);
         await inputWriter.close();
         await done;
+        await data;
+        await metadata;
 
         expect(
             (await getObjects(store, undefined, SDS.terms.payload)).length,
@@ -551,6 +602,14 @@ describe("Functional tests for the sdsify function", () => {
                 null,
             ).length,
         ).toBe(3);
+        expect(
+            store.getQuads(
+                null,
+                df.namedNode("https://w3id.org/ldes#timestampPath"),
+                df.namedNode("http://ex.org/timestamp"),
+                null,
+            ).length,
+        ).toBe(1);
 
         // Check all members belong to the same transaction and last one is marked as such
         const tIds = await getObjects(
