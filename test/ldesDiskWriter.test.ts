@@ -8,10 +8,17 @@ import { createLogger, transports } from "winston";
 import type { FullProc } from "@rdfc/js-runner";
 
 vi.mock("fs", async () => {
-    const memfs = await vi.importActual("memfs");
+    const { fs } = await import("memfs");
 
-    // Support both `import fs from "fs"` and "import { readFileSync } from "fs"`
-    return { default: memfs.fs, ...(memfs.fs as object) };
+    // Support both `import fs from "fs"` and named imports.
+    return { default: fs, ...(fs as object) };
+});
+
+vi.mock("node:fs", async () => {
+    const { fs } = await import("memfs");
+
+    // Support both `import * as fs from "node:fs"` and named imports.
+    return { default: fs, ...(fs as object) };
 });
 
 describe("Functional tests for the ldesDiskWriter function", () => {
