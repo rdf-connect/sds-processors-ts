@@ -169,14 +169,14 @@ export class LdesDiskWriter extends Processor<Args> {
                 metadataQuads.push(
                     df.quad(
                         viewDescriptionId,
-                        DC.terms.custom("endpointURL"),
+                        df.namedNode("http://www.w3.org/ns/dcat#endpointURL"),
                         viewId,
                     ),
                 );
                 metadataQuads.push(
                     df.quad(
                         viewDescriptionId,
-                        DC.terms.custom("servesDataset"),
+                        df.namedNode("http://www.w3.org/ns/dcat#servesDataset"),
                         df.namedNode("index.trig"),
                     ),
                 );

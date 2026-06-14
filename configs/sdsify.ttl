@@ -12,7 +12,7 @@
 rdfc:Sdsify a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Sdsify processor";
-  rdfs:description "Ingest non sds members and wrap them inside SDS records. Optionally, a type can be specified to indicate the correct subject.";
+  rdfs:description "Ingest a stream of RDF dumps and produce a stream of SDS records, based on the provided configuration.";
   rdfc:file <../lib/sdsify.js>;
   rdfc:class "Sdsify";
   rdfc:entrypoint <../>.
@@ -32,9 +32,15 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:iri;
-    sh:path rdfc:stream;
-    sh:name "streamNode";
+    sh:class rdfc:Writer;
+    sh:path rdfc:metadataOutput;
+    sh:name "metadataOutput";
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:class rdfc:MetadataConfig;
+    sh:path rdfc:metadataConfig;
+    sh:name "metadataConfig";
     sh:maxCount 1;
     sh:minCount 1;
   ], [
@@ -42,12 +48,6 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:path rdfc:typeFilter;
     sh:name "types";
     sh:minCount 0;
-  ], [
-    sh:datatype xsd:iri;
-    sh:path rdfc:timestampPath;
-    sh:name "timestampPath";
-    sh:minCount 0;
-    sh:maxCount 1;
   ], [
     sh:datatype xsd:string;
     sh:path rdfc:shape;
@@ -62,3 +62,37 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:maxCount 1;
   ].
 
+[ ] a sh:NodeShape;
+  sh:targetClass rdfc:MetadataConfig;
+  sh:property [
+    sh:datatype xsd:iri;
+    sh:path rdfc:streamId;
+    sh:name "streamId";
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:string;
+    sh:path rdfc:description;
+    sh:name "description";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path rdfc:timestampPath;
+    sh:name "timestampPath";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path rdfc:versionOfPath;
+    sh:name "versionOfPath";
+    sh:maxCount 1;
+  ], [
+    sh:datatype xsd:iri;
+    sh:path rdfc:shapeIri;
+    sh:name "shapeIri";
+    sh:maxCount 1;
+  ],[
+    sh:datatype xsd:string;
+    sh:path rdfc:shape;
+    sh:name "shape";
+    sh:maxCount 1;
+  ].

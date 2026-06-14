@@ -73,12 +73,21 @@ function getExtractor(shapeStore: RdfStore | null): CBDShapeExtractor {
     }
 }
 
+type MetadataConfig = {
+    streamId: Term;
+    description?: string;
+    timestampPath?: Term;
+    versionOfPath?: Term;
+    shapeIri?: Term;
+    shape?: string;
+};
+
 type Args = {
     input: Reader;
     output: Writer;
-    streamNode: Term;
+    metadataOutput: Writer;
+    metadataConfig: MetadataConfig;
     types?: Term[];
-    timestampPath?: Term;
     shape?: string;
     readAsStream?: boolean;
 };
@@ -101,6 +110,54 @@ export class Sdsify extends Processor<Args> {
             : undefined;
     }
     async transform(this: Args & this): Promise<void> {
+        const promises = [];
+        promises.push(this.emitMetadata());
+        promises.push(this.setupInput());
+
+        await Promise.all(promises);
+    }
+    async produce(this: Args & this): Promise<void> {
+        // nothing
+    }
+
+    private async emitMetadata(this: Args & this): Promise<void> {
+        const metadata: string = `
+        @prefix sds: <https://w3id.org/sds#> .
+        @prefix p-plan: <http://purl.org/net/p-plan#>.
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+        @prefix dcat: <http://www.w3.org/ns/dcat#>.
+        @prefix ldes: <https://w3id.org/ldes#>.
+        @prefix tree: <https://w3id.org/tree#>.
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
+
+        <${this.metadataConfig.streamId.value}> a sds:Stream ;
+            p-plan:wasGeneratedBy [
+                a p-plan:Activity ;
+                ${this.metadataConfig.description ? `rdfs:comment "${this.metadataConfig.description}" ;` : ""}
+            ] ;
+            sds:carries [ a sds:Member] ;
+            sds:dataset [
+                a dcat:Dataset ;
+                ${this.metadataConfig.timestampPath ? `ldes:timestampPath <${this.metadataConfig.timestampPath.value}> ;` : ""}
+                ${this.metadataConfig.versionOfPath ? `ldes:versionOfPath <${this.metadataConfig.versionOfPath.value}> ;` : ""}
+                ${this.metadataConfig.shapeIri ? `tree:shape <${this.metadataConfig.shapeIri.value}> ; ` : ""}
+            ] .
+        `;
+
+        if (this.metadataConfig.shape) {
+            const store = RdfStore.createDefault();
+            await loadIntoStore(this.metadataConfig.shape, store);
+            await loadIntoStore(metadata, store);
+            const quads = store.getQuads(null, null, null, null);
+            const writer = new NWriter({ format: "Turtle" });
+            this.metadataOutput.string(writer.quadsToString(quads));
+        } else {
+            await this.metadataOutput.string(metadata);
+        }
+        await this.metadataOutput.close();
+    }
+
+    private async setupInput(this: Args & this): Promise<void> {
         if (this.readAsStream) {
             for await (const input of this.input.streams()) {
                 this.dataStore = RdfStore.createDefault();
@@ -111,6 +168,9 @@ export class Sdsify extends Processor<Args> {
         } else {
             for await (const input of this.input.strings()) {
                 this.dataStore = RdfStore.createDefault();
+                this.logger.info(
+                    "Input received, starting to process it" + input,
+                );
                 await loadIntoStore(input, this.dataStore);
                 await this.processInput();
             }
@@ -118,9 +178,6 @@ export class Sdsify extends Processor<Args> {
 
         this.logger.info("Input channel was closed down");
         await this.output.close();
-    }
-    async produce(this: Args & this): Promise<void> {
-        // nothing
     }
 
     private async processInput(this: Args & this): Promise<void> {
@@ -157,10 +214,10 @@ export class Sdsify extends Processor<Args> {
                     );
                     members[subject.value] = {
                         quads: membQuads,
-                        timestamp: this.timestampPath
+                        timestamp: this.metadataConfig.timestampPath
                             ? this.dataStore.getQuads(
                                   subject,
-                                  this.timestampPath,
+                                  this.metadataConfig.timestampPath,
                               )[0].object
                             : undefined,
                     };
@@ -174,7 +231,7 @@ export class Sdsify extends Processor<Args> {
 
         // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
         const orderedMembersIds = Object.keys(members);
-        if (this.timestampPath) {
+        if (this.metadataConfig.timestampPath) {
             orderedMembersIds.sort((a, b) => {
                 const ta = new Date(members[a].timestamp!.value).getTime();
                 const tb = new Date(members[b].timestamp!.value).getTime();
@@ -206,7 +263,7 @@ export class Sdsify extends Processor<Args> {
                 df.quad(
                     blank,
                     SDS.terms.stream,
-                    <Quad_Object>this.streamNode,
+                    <Quad_Object>this.metadataConfig.streamId,
                     SDS.terms.custom("DataDescription"),
                 ),
                 // This is not standardized (yet)
