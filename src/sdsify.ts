@@ -128,6 +128,7 @@ export class Sdsify extends Processor<Args> {
         @prefix dcat: <http://www.w3.org/ns/dcat#>.
         @prefix ldes: <https://w3id.org/ldes#>.
         @prefix tree: <https://w3id.org/tree#>.
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
 
         <${this.metadataConfig.streamId.value}> a sds:Stream ;
             p-plan:wasGeneratedBy [
@@ -139,16 +140,20 @@ export class Sdsify extends Processor<Args> {
                 a dcat:Dataset ;
                 ${this.metadataConfig.timestampPath ? `ldes:timestampPath <${this.metadataConfig.timestampPath.value}> ;` : ""}
                 ${this.metadataConfig.versionOfPath ? `ldes:versionOfPath <${this.metadataConfig.versionOfPath.value}> ;` : ""}
-                ${
-                    this.metadataConfig.shapeIri
-                        ? `tree:shape <${this.metadataConfig.shapeIri.value}> ;`
-                        : this.metadataConfig.shape
-                          ? `tree:shape [${this.metadataConfig.shape}] ;`
-                          : ""
-                }
+                ${this.metadataConfig.shapeIri ? `tree:shape <${this.metadataConfig.shapeIri.value}> ; ` : ""}
             ] .
         `;
-        await this.metadataOutput.string(metadata);
+
+        if (this.metadataConfig.shape) {
+            const store = RdfStore.createDefault();
+            await loadIntoStore(this.metadataConfig.shape, store);
+            await loadIntoStore(metadata, store);
+            const quads = store.getQuads(null, null, null, null);
+            const writer = new NWriter({ format: "Turtle" });
+            this.metadataOutput.string(writer.quadsToString(quads));
+        } else {
+            await this.metadataOutput.string(metadata);
+        }
         await this.metadataOutput.close();
     }
 

@@ -441,7 +441,25 @@ describe("SDS processors tests", async () => {
         <http://example.com/ns#processor> a rdfc:Sdsify;
             rdfc:input <jr>;
             rdfc:output <jw>;
-            rdfc:stream <http://me.com/stream>;
+            rdfc:metadataOutput <jw2>;
+            rdfc:metadataConfig [
+                rdfc:streamId <http://me.com/stream>;
+                rdfc:description "My description";
+                rdfc:timestampPath <http://ex.org/timestamp>;
+                rdfc:versionOfPath <http://ex.org/version>;
+                rdfc:shapeIri <http://ex.org/shape>;
+                rdfc:shape """
+                    @prefix sh: <http://www.w3.org/ns/shacl#>.
+                    @prefix ex: <http://ex.org/>.
+                    
+                    [] a sh:NodeShape;
+                        sh:targetClass ex:SomeClass;
+                        sh:property [
+                            sh:path ex:somePath;
+                            sh:name "someProperty";
+                        ].
+                """
+            ];
             rdfc:typeFilter <http://ex.org/Type>, <http://ex.org/AnotherType>;
             rdfc:timestampPath <http://ex.org/timestamp>;
             rdfc:shape """
@@ -467,8 +485,20 @@ describe("SDS processors tests", async () => {
 
         expect(sdsify.input.uri).toContain("jr");
         expect(sdsify.output.uri).toContain("jw");
-        expect(sdsify.streamNode.value).toBe("http://me.com/stream");
-        expect(sdsify.timestampPath?.value).toBe("http://ex.org/timestamp");
+        expect(sdsify.metadataOutput?.uri).toContain("jw2");
+        expect(sdsify.metadataConfig.streamId.value).toBe(
+            "http://me.com/stream",
+        );
+        expect(sdsify.metadataConfig.timestampPath?.value).toBe(
+            "http://ex.org/timestamp",
+        );
+        expect(sdsify.metadataConfig.versionOfPath?.value).toBe(
+            "http://ex.org/version",
+        );
+        expect(sdsify.metadataConfig.shapeIri?.value).toBe(
+            "http://ex.org/shape",
+        );
+        expect(sdsify.metadataConfig.shape).toBeDefined();
         expect(sdsify.types?.map((x) => x.value)).toEqual([
             "http://ex.org/Type",
             "http://ex.org/AnotherType",
