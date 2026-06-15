@@ -135,7 +135,16 @@ export class Sdsify extends Processor<Args> {
                 a p-plan:Activity ;
                 ${this.metadataConfig.description ? `rdfs:comment "${this.metadataConfig.description}" ;` : ""}
             ] ;
-            sds:carries [ a sds:Member] ;
+            ${
+                this.metadataConfig.shapeIri
+                    ? `
+            sds:carries [
+                a sds:Member ;
+                sds:shape <${this.metadataConfig.shapeIri.value}> ;
+            ];
+            `
+                    : ""
+            }
             sds:dataset [
                 a dcat:Dataset ;
                 ${this.metadataConfig.timestampPath ? `ldes:timestampPath <${this.metadataConfig.timestampPath.value}> ;` : ""}
