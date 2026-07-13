@@ -40,7 +40,7 @@
     },
     "devDependencies": {
         "@ajuvercr/ts-transformer-inline-file": "^0.2.0",
-        "@eslint/eslintrc": "^3.3.5",
+        "@eslint/eslintrc": "^3.3.6",
         "@eslint/js": "^10.0.1",
         "@rdfc/js-runner": "^3.2.0",
         "@rdfjs/types": "^2.0.1",
@@ -60,7 +60,7 @@
         "husky": "^9.1.7",
         "lint-staged": "^17.0.8",
         "memfs": "^4.64.0",
-        "prettier": "^3.9.4",
+        "prettier": "^3.9.5",
         "ts-node": "^10.9.2",
         "ts-patch": "^4.0.1",
         "tsc-alias": "^1.9.0",
