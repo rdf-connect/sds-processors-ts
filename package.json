@@ -28,7 +28,7 @@
         "@terraformer/spatial": "^2.2.2",
         "@terraformer/wkt": "^2.2.2",
         "@treecg/types": "^0.4.6",
-        "csv-parse": "^6.2.1",
+        "csv-parse": "^7.0.2",
         "extract-cbd-shape": "^0.3.0",
         "jsonld": "^9.0.0",
         "n3": "^2.1.2",
