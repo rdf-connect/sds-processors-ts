@@ -64,7 +64,7 @@
         "ts-node": "^10.9.2",
         "ts-patch": "^4.0.1",
         "tsc-alias": "^1.9.1",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "vitest": "^4.1.10"
     },
     "optionalDependencies": {
