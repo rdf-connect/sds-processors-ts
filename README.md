@@ -2,7 +2,11 @@
 
 [![Node CI](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors-ts)
 
-Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 9 functions:
+Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations.
+
+Arguments that hold an IRI, like stream ids (`rdfc:stream`, `rdfc:sourceStream`, `rdfc:targetStream`, `rdfc:inputStreamId`, `rdfc:outputStreamId`), property paths (`rdfc:timestampPath`, `rdfc:versionOfPath`), `rdfc:typeFilter` and `rdfc:shapeIri`, must be written as an IRI, like `<http://ex.org/myStream>` or `ex:myStream`: a string is not turned into an IRI.
+
+It currently exposes 9 functions:
 
 ### [`rdfc:Sdsify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/sdsify.ttl#L10)
 

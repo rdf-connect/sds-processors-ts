@@ -57,12 +57,12 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:name "config";
     sh:minCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:inputStreamId;
     sh:name "sourceStream";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:outputStreamId;
     sh:name "resultingStream";
     sh:minCount 1;

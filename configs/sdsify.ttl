@@ -44,7 +44,7 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:typeFilter;
     sh:name "types";
     sh:minCount 0;
@@ -65,7 +65,7 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
 [ ] a sh:NodeShape;
   sh:targetClass rdfc:MetadataConfig;
   sh:property [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:streamId;
     sh:name "streamId";
     sh:minCount 1;
@@ -76,17 +76,17 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:name "description";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "timestampPath";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:versionOfPath;
     sh:name "versionOfPath";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:shapeIri;
     sh:name "shapeIri";
     sh:maxCount 1;
