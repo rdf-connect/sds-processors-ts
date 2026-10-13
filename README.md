@@ -74,7 +74,7 @@ You can define bucketizers as follows:
   ] );
   rdfc:savePath <./buckets_save.json>;
   rdfc:outputStreamId <MyEpicStream>;
-  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
+  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to 'root'
 ```
 
 #### Example of a time-based fragmentation
@@ -96,7 +96,7 @@ You can define bucketizers as follows:
   ]);
   rdfc:savePath <./buckets_save.json>;
   rdfc:outputStreamId <MyEpicStream>;
-  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to ''
+  rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to 'root'
 ```
 
 This will create buckets based on a time-based fragmentation.
@@ -115,7 +115,7 @@ When a member arrives, all buckets that hold members with a timestamp older than
 ```turtle
 <timebucket-fragmentation> a tree:TimeBucketFragmentation;
   tree:timestampPath <http://def.isotc211.org/iso19156/2011/Observation#OM_Observation.resultTime>;
-  tree:buffer 5000;   # members can arrive 5 seconds out of sync ()
+  tree:buffer 5000;   # members can arrive 5 seconds out of sync (defaults to 0)
   tree:level ( [      # Create 5 levels, resulting uri's <year>/<month>/<day>/<hour>/<minute>
     tree:range "year", "month";
     tree:maxSize 0;   # place no members at this level
@@ -190,7 +190,7 @@ Specify:
 
 - `rdfc:input` input channel
 - `rdfc:output` output channel
-- `rdfc:statePath` path for state file
+- optional `rdfc:statePath` (`string` or IRI) path for state file
 - optional `rdfc:sourceStream`
 - `rdfc:targetStream` newly created sds stream id
 - optional `rdfc:timestampPath`, defaults to `http://purl.org/dc/terms/modified`

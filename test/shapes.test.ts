@@ -181,4 +181,47 @@ _:data <x> 42; <y> 45.
         expect(rec.bucket!.parent!.parent).toBeDefined();
         expect(rec.bucket!.parent!.parent!.id.value).toBe("bucket");
     });
+    test("keeps blank node payloads, buckets and paths as blank nodes", async () => {
+        const extractor = new Extractor(new CBDShapeExtractor());
+        const quadsStr = `
+@prefix tree: <https://w3id.org/tree#>.
+@prefix ex: <http://example.org/>.
+@prefix sds: <https://w3id.org/sds#>.
+
+sds:DataDescription {
+  <record> a sds:Record;
+    sds:stream <#stream>;
+    sds:bucket _:bucket;
+    sds:payload _:data.
+
+  _:bucket sds:relation _:rel.
+  _:rel
+    sds:relationType tree:GreaterThanRelation ;
+    sds:relationBucket _:bucket2 ;
+    sds:relationValue 1;
+    sds:relationPath ( ex:x ex:y ).
+}
+
+_:data <x> 42; <y> 45.
+`;
+        const quads = new Parser({ baseIRI: "" }).parse(quadsStr);
+
+        const out = await extractor.parse_records(quads);
+        expect(out.length).toBe(1);
+        const rec = out[0];
+        expect(rec.stream.termType).toBe("NamedNode");
+        expect(rec.data.id.termType).toBe("BlankNode");
+        expect(
+            rec.data.quads.filter((q) => q.subject.equals(rec.data.id)).length,
+        ).toBe(2);
+        expect(rec.bucket!.id.termType).toBe("BlankNode");
+
+        const rel = rec.bucket!.links[0];
+        expect(rel.type.termType).toBe("NamedNode");
+        expect(rel.target.termType).toBe("BlankNode");
+        expect(rel.path!.id.termType).toBe("BlankNode");
+        expect(
+            rel.path!.quads.some((q) => q.subject.equals(rel.path!.id)),
+        ).toBe(true);
+    });
 });

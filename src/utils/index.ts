@@ -17,8 +17,17 @@ import { RdfStore } from "rdf-stores";
 import { $INLINE_FILE } from "@ajuvercr/ts-transformer-inline-file";
 import { Logger } from "winston";
 import { Readable } from "stream";
+import { fileURLToPath } from "url";
 
 const df = new DataFactory();
+
+/**
+ * A location can be written as an IRI in the pipeline, which reaches the
+ * processor as a `file:` URL: turn that into a path, keep anything else.
+ */
+export function toPath(location: string): string {
+    return location.startsWith("file:") ? fileURLToPath(location) : location;
+}
 
 export const GEO = createUriAndTermNamespace(
     "http://www.opengis.net/ont/geosparql#",
