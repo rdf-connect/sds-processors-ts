@@ -604,4 +604,124 @@ describe("SDS processors tests", async () => {
         expect(shapify.shape).toBeDefined();
         expect(shapify.shape.id.value).toContain("MyShape");
     });
+
+    test("rdfc:Bucketize falls back to its default values", async () => {
+        const processor = `
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix tree: <https://w3id.org/tree#>.
+
+<http://example.com/ns#processor> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:HourFragmentation;
+    tree:timestampPath <path>;
+  ] [
+    a tree:TimeBucketFragmentation;
+    tree:timestampPath <path>;
+    tree:level [
+        tree:range "year";
+        tree:maxSize 10;
+    ];
+  ] );
+  rdfc:outputStreamId <http://newStream>.
+    `;
+
+        const configLocation = process.cwd() + "/configs/bucketizer.ttl";
+        const procHelper = new ProcHelper<FullProc<Bucketizer>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Bucketize");
+        const bucketizer: FullProc<Bucketizer> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(bucketizer.prefix).toBe("root");
+        expect(bucketizer.config.length).toBe(2);
+        const hour = <HourFragmentation>bucketizer.config[0].config;
+        expect(hour.unorderedRelations).toBe(false);
+        const timeBucket = <TimeBucketTreeConfig>bucketizer.config[1].config;
+        expect(timeBucket.timeBufferMs).toBe(0);
+    });
+
+    test("rdfc:Ldesify falls back to its default values", async () => {
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+        <http://example.com/ns#processor> a rdfc:Ldesify;
+          rdfc:input <jr>;
+          rdfc:output <jw>.
+        `;
+
+        const configLocation = process.cwd() + "/configs/ldesify.ttl";
+        const procHelper = new ProcHelper<FullProc<Ldesify>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Ldesify");
+        const ldesify: FullProc<Ldesify> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(ldesify.statePath).toBeUndefined();
+        expect(ldesify.checkProps).toBe(true);
+        expect(ldesify.modifiedPath.value).toBe(
+            "http://purl.org/dc/terms/modified",
+        );
+        expect(ldesify.isVersionOfPath.value).toBe(
+            "http://purl.org/dc/terms/isVersionOf",
+        );
+    });
+
+    test("js:LdesifySDS falls back to its default values", async () => {
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+        <http://example.com/ns#processor> a rdfc:LdesifySDS;
+          rdfc:input <jr>;
+          rdfc:output <jw>;
+          rdfc:targetStream <http://example.com/ns#target>.
+        `;
+
+        const configLocation = process.cwd() + "/configs/ldesify.ttl";
+        const procHelper = new ProcHelper<FullProc<LdesifySDS>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("LdesifySDS");
+        const ldesifySds: FullProc<LdesifySDS> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(ldesifySds.modifiedPathM.value).toBe(
+            "http://purl.org/dc/terms/modified",
+        );
+        expect(ldesifySds.isVersionOfPathM.value).toBe(
+            "http://purl.org/dc/terms/isVersionOf",
+        );
+    });
+
+    test("generator falls back to its default values", async () => {
+        const processor = `
+    @prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+        <http://example.com/ns#processor>  a rdfc:Generate;
+          rdfc:output <jw>.
+        `;
+
+        const configLocation = process.cwd() + "/configs/generator.ttl";
+        const procHelper = new ProcHelper<FullProc<Generator>>();
+        await procHelper.importFile(configLocation);
+        await procHelper.importInline("pipeline.ttl", processor);
+        procHelper.getConfig("Generate");
+        const generator: FullProc<Generator> = await procHelper.getProcessor(
+            "http://example.com/ns#processor",
+        );
+
+        expect(generator.count).toBe(100000);
+        expect(generator.wait).toBe(50);
+        expect(generator.timestampPath).toBeUndefined();
+    });
 });

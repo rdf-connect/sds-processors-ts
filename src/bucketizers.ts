@@ -284,7 +284,6 @@ export class Bucketizer extends Processor<Args> {
     recordCount: number = 0;
 
     async init(this: Args & this): Promise<void> {
-        this.prefix = this.prefix ?? "root";
         const save = read_save(this.savePath);
         this.orchestrator = new BucketizerOrchestrator(this.config, save);
         this.extractor = new Extractor(

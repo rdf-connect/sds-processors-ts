@@ -24,7 +24,7 @@ export default class HourBucketizer implements Bucketizer {
             literal: x.id,
         }));
         this.pathQuads = config.pathQuads;
-        this.unorderedRelations = config.unorderedRelations ?? false;
+        this.unorderedRelations = config.unorderedRelations;
 
         if (save) {
             const parsed = JSON.parse(save);

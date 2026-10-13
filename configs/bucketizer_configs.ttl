@@ -218,6 +218,7 @@
     sh:name "timeBufferMs";
     sh:path tree:buffer;
     sh:datatype xsd:integer;
+    sh:defaultValue 0;
     sh:maxCount 1;
   ].
 
@@ -239,6 +240,7 @@
     sh:name "unorderedRelations";
     sh:path tree:unorderedRelations;
     sh:datatype xsd:boolean;
+    sh:defaultValue false;
     sh:maxCount 1;
     sh:minCount 0;
   ].

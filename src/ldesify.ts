@@ -10,7 +10,6 @@ import { CBDShapeExtractor } from "extract-cbd-shape";
 import { canonize } from "rdf-canonize";
 import { SDS, XSD } from "@treecg/types";
 import { handleExit } from "./exitHandler";
-import { Logger } from "winston";
 
 const df = new DataFactory();
 
@@ -40,8 +39,6 @@ function createCache(quads: Quad[], keys: string[]): string {
     return out.slice(0, -1);
 }
 
-const IS_VERSION_OF = df.namedNode("http://purl.org/dc/terms/isVersionOf");
-const MODIFIED = df.namedNode("http://purl.org/dc/terms/modified");
 const TIMESTAMP = df.namedNode("http://www.w3.org/2001/XMLSchema#dateTime");
 
 class Transformer {
@@ -173,20 +170,17 @@ type Args = {
     writer: Writer;
     statePath?: string;
     checkProps: boolean;
-    modifiedPath?: Term;
-    isVersionOfPath?: Term;
+    modifiedPath: Term;
+    isVersionOfPath: Term;
 };
 export class Ldesify extends Processor<Args> {
     transformer: Transformer;
-    constructor(args: Args, logger: Logger) {
-        super(Object.assign({ checkProps: true }, args), logger);
-    }
     async init(this: Args & this): Promise<void> {
         let cache = {};
         if (this.statePath) cache = getPrevState(this.statePath);
         this.transformer = new Transformer(
-            this.modifiedPath || MODIFIED,
-            this.isVersionOfPath || IS_VERSION_OF,
+            this.modifiedPath,
+            this.isVersionOfPath,
             cache,
         );
 
@@ -223,8 +217,8 @@ type SDSArgs = {
     statePath: string | undefined;
     sourceStream: Term | undefined;
     targetStream: Term;
-    modifiedPathM?: Term; // This are the things that are added to the new entities, not necessarily related to the real objects
-    isVersionOfPathM?: Term;
+    modifiedPathM: Term; // This are the things that are added to the new entities, not necessarily related to the real objects
+    isVersionOfPathM: Term;
 };
 export class LdesifySDS extends Processor<SDSArgs> {
     cache: { [key: string]: string } = {};
@@ -241,8 +235,8 @@ export class LdesifySDS extends Processor<SDSArgs> {
         });
     }
     async transform(this: SDSArgs & this): Promise<void> {
-        const modifiedPath: Term = this.modifiedPathM || MODIFIED;
-        const versionPath: Term = this.isVersionOfPathM || IS_VERSION_OF;
+        const modifiedPath: Term = this.modifiedPathM;
+        const versionPath: Term = this.isVersionOfPathM;
         const extractor = new Extractor(
             new CBDShapeExtractor(),
             this.sourceStream,
