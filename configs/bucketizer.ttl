@@ -68,7 +68,8 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:nodeKind sh:IRIOrLiteral;
+    sh:codeType xsd:string;
     sh:path rdfc:savePath;
     sh:name "savePath";
     sh:maxCount 1;

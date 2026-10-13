@@ -190,7 +190,7 @@ Specify:
 
 - `rdfc:input` input channel
 - `rdfc:output` output channel
-- `rdfc:statePath` path for state file
+- optional `rdfc:statePath` (`string` or IRI) path for state file
 - optional `rdfc:sourceStream`
 - `rdfc:targetStream` newly created sds stream id
 - optional `rdfc:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
