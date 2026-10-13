@@ -38,13 +38,13 @@ rdfc:Ldesify a owl:Class, rdfs:Class;
     sh:defaultValue true;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "modifiedPath";
     sh:defaultValue <http://purl.org/dc/terms/modified>;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:versionOfPath;
     sh:name "isVersionOfPath";
     sh:defaultValue <http://purl.org/dc/terms/isVersionOf>;
@@ -85,24 +85,24 @@ rdfc:LdesifySDS a owl:Class, rdfs:Class;
     sh:name "statePath";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:sourceStream;
     sh:name "sourceStream";
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:targetStream;
     sh:name "targetStream";
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "modifiedPathM";
     sh:defaultValue <http://purl.org/dc/terms/modified>;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:versionOfPath;
     sh:name "isVersionOfPathM";
     sh:defaultValue <http://purl.org/dc/terms/isVersionOf>;

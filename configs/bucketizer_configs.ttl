@@ -33,7 +33,7 @@
   ], [
     sh:name "type";
     sh:path rdf:type;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:maxCount 1;
     sh:minCount 1;
   ], [

@@ -38,7 +38,7 @@ rdfc:Generate a owl:Class, rdfs:Class;
     sh:defaultValue 50;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "timestampPath";
     sh:maxCount 1;

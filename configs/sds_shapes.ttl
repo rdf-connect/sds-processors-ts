@@ -14,7 +14,7 @@
     sh:path ( );
     sh:maxCount 1;
     sh:minCount 1;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:BlankNodeOrIRI;
   ], [
     sh:name "quads";
     sh:path ( );
@@ -32,7 +32,7 @@
   ], [
     sh:name "id";
     sh:path ( );
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:BlankNodeOrIRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
@@ -57,13 +57,13 @@
   sh:property [
     sh:name "type";
     sh:path sds:relationType;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:name "target";
     sh:path sds:relationBucket;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:BlankNodeOrIRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
@@ -83,13 +83,13 @@
   sh:property [
     sh:name "stream";
     sh:path sds:stream;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:name "data";
     sh:path sds:payload;
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:BlankNodeOrIRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
