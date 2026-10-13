@@ -76,6 +76,7 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:datatype xsd:string;
     sh:path rdfc:prefix;
     sh:name "prefix";
+    sh:defaultValue "root";
     sh:maxCount 1;
   ].
 
