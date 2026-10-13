@@ -3,7 +3,7 @@ import { Quad, Quad_Predicate, Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import { DataFactory } from "rdf-data-factory";
 import { NamedNode, Parser, Quad_Object, Writer as N3Writer } from "n3";
-import { Extractor } from "./utils";
+import { Extractor, toPath } from "./utils";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
 // @ts-expect-error no declaration file found
@@ -177,7 +177,10 @@ export class Ldesify extends Processor<Args> {
     transformer: Transformer;
     async init(this: Args & this): Promise<void> {
         let cache = {};
-        if (this.statePath) cache = getPrevState(this.statePath);
+        if (this.statePath) {
+            this.statePath = toPath(this.statePath);
+            cache = getPrevState(this.statePath);
+        }
         this.transformer = new Transformer(
             this.modifiedPath,
             this.isVersionOfPath,
@@ -224,7 +227,10 @@ export class LdesifySDS extends Processor<SDSArgs> {
     cache: { [key: string]: string } = {};
 
     async init(this: SDSArgs & this): Promise<void> {
-        if (this.statePath) this.cache = getPrevState(this.statePath);
+        if (this.statePath) {
+            this.statePath = toPath(this.statePath);
+            this.cache = getPrevState(this.statePath);
+        }
 
         handleExit(() => {
             if (this.statePath) {

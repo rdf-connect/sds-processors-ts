@@ -1,6 +1,6 @@
 import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { Processor, Reader } from "@rdfc/js-runner";
-import { maybeParse } from "./utils";
+import { maybeParse, toPath } from "./utils";
 import { Extractor } from "./utils/extractor";
 import path from "node:path";
 import { DataFactory } from "rdf-data-factory";
@@ -35,9 +35,7 @@ export class LdesDiskWriter extends Processor<Args> {
     extractor = new Extractor();
 
     async init(this: Args & this): Promise<void> {
-        if (this.directory.startsWith("file://")) {
-            this.directory = this.directory.slice("file://".length);
-        }
+        this.directory = toPath(this.directory);
     }
 
     async transform(this: Args & this): Promise<void> {

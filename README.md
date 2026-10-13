@@ -6,6 +6,8 @@ Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Types
 
 Arguments that hold an IRI, like stream ids (`rdfc:stream`, `rdfc:sourceStream`, `rdfc:targetStream`, `rdfc:inputStreamId`, `rdfc:outputStreamId`), property paths (`rdfc:timestampPath`, `rdfc:versionOfPath`), `rdfc:typeFilter` and `rdfc:shapeIri`, must be written as an IRI, like `<http://ex.org/myStream>` or `ex:myStream`: a string is not turned into an IRI.
 
+Locations (`rdfc:savePath`, `rdfc:directory`, `rdfc:path` and `rdfc:statePath`) can be written as a string or as an IRI: an IRI, like `<./state.json>`, is resolved against the pipeline file.
+
 It currently exposes 9 functions:
 
 ### [`rdfc:Sdsify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/sdsify.ttl#L10)
@@ -76,7 +78,7 @@ You can define bucketizers as follows:
     a tree:PageFragmentation;         # Create a new bucket when the previous bucket has 2 members
     tree:pageSize 2;
   ] );
-  rdfc:savePath <./buckets_save.json>;
+  rdfc:savePath <./buckets_save.json>;  # A string or an IRI
   rdfc:outputStreamId <MyEpicStream>;
   rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to 'root'
 ```
@@ -183,7 +185,7 @@ In this case, instead of a single spatial relation, the bucketizer generates 4 i
 
 ### [`rdfc:Ldesify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldesify.ttl#L10)
 
-This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
+This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered, in the file at the optional `rdfc:path` (`string` or IRI).
 
 ### [`rdfc:LdesifySDS`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldesify.ttl#L82)
 
@@ -194,7 +196,7 @@ Specify:
 
 - `rdfc:input` input channel
 - `rdfc:output` output channel
-- `rdfc:statePath` path for state file
+- optional `rdfc:statePath` (`string` or IRI) path for state file
 - optional `rdfc:sourceStream`
 - `rdfc:targetStream` newly created sds stream id
 - optional `rdfc:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
@@ -244,7 +246,7 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 [ ] a rdfc:LdesDiskWriter;
     rdfc:dataInput <data/reader>;
     rdfc:metadataInput <metadata/reader>;
-    rdfc:directory </tmp/ldes-disk/>;
+    rdfc:directory </tmp/ldes-disk/>;  # A string or an IRI
     rdfc:streamName [
         rdfc:stream <http://example.com/ns/by-location>;
         rdfc:name "by-location";

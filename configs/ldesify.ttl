@@ -50,7 +50,8 @@ rdfc:Ldesify a owl:Class, rdfs:Class;
     sh:defaultValue <http://purl.org/dc/terms/isVersionOf>;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:nodeKind sh:IRIOrLiteral;
+    sh:codeType xsd:string;
     sh:path rdfc:path;
     sh:name "statePath";
     sh:maxCount 1;
@@ -80,7 +81,8 @@ rdfc:LdesifySDS a owl:Class, rdfs:Class;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:datatype xsd:string;
+    sh:nodeKind sh:IRIOrLiteral;
+    sh:codeType xsd:string;
     sh:path rdfc:statePath;
     sh:name "statePath";
     sh:maxCount 1;
