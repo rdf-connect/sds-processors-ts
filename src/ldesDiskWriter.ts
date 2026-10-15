@@ -115,9 +115,18 @@ export class LdesDiskWriter extends Processor<Args> {
                         ),
                     );
             }
+            // The shape is attached to the carried member type (stream sds:carries/sds:shape),
+            // but also accept it directly on the stream.
+            const carried = metadataQuads
+                .filter(
+                    (q) =>
+                        streams.some((s) => s.equals(q.subject)) &&
+                        q.predicate.equals(SDS.terms.carries),
+                )
+                .map((q) => q.object);
             const shapeId = metadataQuads.find(
                 (q) =>
-                    streams.map((q) => q.value).includes(q.subject.value) &&
+                    [...streams, ...carried].some((s) => s.equals(q.subject)) &&
                     q.predicate.equals(SDS.terms.shape),
             )?.object;
             if (shapeId) {
