@@ -34,7 +34,7 @@ rdfc:Ldesify a owl:Class, rdfs:Class;
   ], [
     sh:datatype xsd:boolean;
     sh:path rdfc:checkProps;
-    sh:name "check_properties";
+    sh:name "checkProps";
     sh:maxCount 1;
   ], [
     sh:datatype xsd:iri;

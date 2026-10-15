@@ -259,3 +259,49 @@
     sh:minCount 0;
   ].
 
+[ ] a sh:NodeShape;
+  sh:targetClass tree:RTreeFragmentation;
+  sh:property [
+    sh:name "wktPath";
+    sh:path tree:wktPath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+  ], [
+    sh:name "wktPathQuads";
+    sh:path tree:wktPath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+  ], [
+    sh:name "latitudePath";
+    sh:path tree:latitudePath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+  ], [
+    sh:name "latitudePathQuads";
+    sh:path tree:latitudePath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+  ], [
+    sh:name "longitudePath";
+    sh:path tree:longitudePath;
+    sh:class rdfl:PathLens;
+    sh:maxCount 1;
+  ], [
+    sh:name "longitudePathQuads";
+    sh:path tree:longitudePath;
+    sh:class <RdfThing>;
+    sh:maxCount 1;
+  ], [
+    sh:name "pageSize";
+    sh:path tree:pageSize;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 1;
+  ], [
+    sh:name "minSize";
+    sh:path tree:minSize;
+    sh:datatype xsd:integer;
+    sh:maxCount 1;
+    sh:minCount 0;
+  ].
+

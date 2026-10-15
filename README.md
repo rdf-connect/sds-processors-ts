@@ -1,22 +1,21 @@
 # sds-processors
 
-[![Node CI](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors-ts)
+[![Node CI](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors-ts)
 
-Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 5 functions:
+Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 9 functions:
 
-### [`js:Sdsify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/sdsify.ttl#L10)
+### [`rdfc:Sdsify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/sdsify.ttl#L10)
 
 This processor takes as input a stream of (batched) RDF data entities and wraps them as individual SDS records to be further processed downstream. By default, it will extract individual entities by taking every single named node subject and extracting a [Concise Bounded Description](https://www.w3.org/Submission/CBD/) (CBD) of that entity with respect to the input RDF graph.
 
-Alternatively, a set of types may be specified (`js:typeFilter`) to target concrete entities. A SHACL shape can be given to concretely define the bounds target entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
+Alternatively, a set of types may be specified (`rdfc:typeFilter`) to target concrete entities. A SHACL shape can be given to concretely define the bounds target entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
 
-If the `js:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
+If the `rdfc:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
 
 An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
 
 ```turtle
-@prefix : <https://w3id.org/conn#>.
-@prefix rdfc: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 
 [ ] a rdfc:Sdsify;
@@ -50,9 +49,9 @@ An example of how to use this processor within a RDF-Connect pipeline definition
     """.
 ```
 
-### [`js:Bucketize`](https://github.com/rdf-connect/sds-processors/blob/master/configs/bucketizer.ttl#L10)
+### [`rdfc:Bucketize`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/bucketizer.ttl#L10)
 
-This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/rdf-connect/sds-processors/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
+This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/rdf-connect/sds-processors-ts/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
 
 You can define bucketizers as follows:
 
@@ -134,55 +133,99 @@ When a member arrives, all buckets that hold members with a timestamp older than
 
 This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute}` after ingesting 2001 members in the same hour (filling day and hour).
 
-### [`js:Ldesify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L10)
+#### Example of a spatial (R-Tree) fragmentation
+
+```turtle
+<bucketize> a rdfc:Bucketize;
+  rdfc:channels [
+    rdfc:dataInput <dataInput>;
+    rdfc:metadataInput <metadataInput>;
+    rdfc:dataOutput <dataOutput>;
+    rdfc:metadataOutput <metadataOutput>;
+  ];
+  rdfc:bucketizeStrategy ( [
+    a tree:RTreeFragmentation;
+    tree:wktPath <http://www.w3.org/2003/01/geo/wgs84_pos#asWKT>;
+    tree:pageSize 100;
+    tree:minSize 40;        # Optional, defaults to 40% of pageSize
+  ]);
+  rdfc:savePath <./buckets_save.json>;
+  rdfc:outputStreamId <MyEpicStream>;
+  rdfc:prefix "root/".
+```
+
+This will create a spatial index using an R-Tree structure.
+The `tree:wktPath` specifies the path to the geospatial property, which must be a WKT string in the SDS records.
+The `tree:pageSize` specifies the maximum number of entries (members or child nodes) per bucket.
+When a bucket exceeds `tree:pageSize`, it is split using the classic [Guttman's Quadratic Split algorithm](https://dl.acm.org/doi/10.1145/971697.602266) to maintain a balanced tree.
+The `tree:minSize` specifies the minimum number of entries per bucket to ensure efficient space utilization.
+The tree grows dynamically, and buckets are connected using the `tree:GeospatiallyContainsRelation` with their MBR (Minimum Bounding Rectangle) described as a WKT polygon.
+
+Alternatively, you can configure individual latitude and longitude paths:
+
+```turtle
+  rdfc:bucketizeStrategy ( [
+    a tree:RTreeFragmentation;
+    tree:latitudePath <http://example.org/latitude>;
+    tree:longitudePath <http://example.org/longitude>;
+    tree:pageSize 100;
+  ]);
+```
+
+In this case, instead of a single spatial relation, the bucketizer generates 4 individual range relations per link to describe the MBR:
+
+- Two `tree:GreaterThanOrEqualToRelation` for the minimum longitude and minimum latitude.
+- Two `tree:LessThanOrEqualToRelation` for the maximum longitude and maximum latitude.
+
+### [`rdfc:Ldesify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldesify.ttl#L10)
 
 This processor takes a stream of raw entities (e.g., out from a RML transformation process) and creates versioned entities appending the current timestamp to the entity IRI to make it unique. It is capable of keeping a state so that unmodified entities are filtered.
 
-### [`js:LdesifySDS`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldesify.ttl#L82)
+### [`rdfc:LdesifySDS`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldesify.ttl#L82)
 
 Transform SDS-records in SDS-members, creating versioned objects.
 The resulting objects are encapsulated in a graph (overriding other graphs).
 
 Specify:
 
-- `js:input` input channel
-- `js:output` output channel
-- `js:statePath` path for state file
-- optional `js:sourceStream`
-- `js:targetStream` newly created sds stream id
-- optional `js:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
-- optional `js:versionOfPath`, defaults to `http://purl.org/dc/terms/isVersionOf`
+- `rdfc:input` input channel
+- `rdfc:output` output channel
+- `rdfc:statePath` path for state file
+- optional `rdfc:sourceStream`
+- `rdfc:targetStream` newly created sds stream id
+- optional `rdfc:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
+- optional `rdfc:versionOfPath`, defaults to `http://purl.org/dc/terms/isVersionOf`
 
-### [`js:Shapify`](https://github.com/rdf-connect/sds-processors/blob/master/configs/shapify.ttl#L14)
+### [`rdfc:Shapify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/shapify.ttl#L14)
 
 Execute [Extract CBD Shape algorithm](https://github.com/TREEcg/extract-cbd-shape) on all sds records.
 **Note:** this processor does not create a new sds stream.
 
 Specify:
 
-- `js:input` input channel
-- `js:output` output channel
-- `js:shape` used `sh:NodeShape`
+- `rdfc:input` input channel
+- `rdfc:output` output channel
+- `rdfc:shape` used `sh:NodeShape`
 
-### [`js:MemberAsNamedGraph`](https://github.com/rdf-connect/sds-processors/blob/master/configs/member_as_graph.ttl#L10)
+### [`rdfc:MemberAsNamedGraph`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/member_as_graph.ttl#L10)
 
 Transform all sds records payload members into named graph-based members.
 **Note:** this processor does not create a new sds stream.
 
 Specify:
 
-- `js:input` input channel
-- `js:output` output channel
+- `rdfc:input` input channel
+- `rdfc:output` output channel
 
-### [`js:StreamJoin`](https://github.com/rdf-connect/sds-processors/blob/master/configs/stream_join.ttl#L10)
+### [`rdfc:StreamJoin`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/stream_join.ttl#L10)
 
-This processor can be used to join multiple input streams or Reader Channels (`js:input`) and pipe their data flow into a single output stream or Writer Channel (`js:output`). The processor will guarantee that all data elements are delivered downstream and will close the output if all inputs are closed.
+This processor can be used to join multiple input streams or Reader Channels (`rdfc:input`) and pipe their data flow into a single output stream or Writer Channel (`rdfc:output`). The processor will guarantee that all data elements are delivered downstream and will close the output if all inputs are closed.
 
-### [`js:Generate`](https://github.com/rdf-connect/sds-processors/blob/master/configs/generator.ttl#L19)
+### [`rdfc:Generate`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/generator.ttl#L19)
 
 This a simple RDF data generator function used for testing. This processor will periodically generate RDF objects with 3 to 4 predicates.
 
-### [`js:LdesDiskWriter`](https://github.com/rdf-connect/sds-processors/blob/master/configs/ldes_disk_writer.ttl#L8)
+### [`rdfc:LdesDiskWriter`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldes_disk_writer.ttl#L8)
 
 This processor can be used to transform an [SDS stream](https://w3id.org/sds/specification) and its correspondent stream of members into a LDES.
 It will persist the LDES as a set of files on disk.
@@ -192,7 +235,7 @@ Alternative more advanced implementation: [sds-storage-writer-ts](https://github
 An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
 
 ```turtle
-@prefix rdfc: <https://w3id.org/conn/js#>.
+@prefix rdfc: <https://w3id.org/rdf-connect#>.
 
 [ ] a rdfc:LdesDiskWriter;
     rdfc:dataInput <data/reader>;

@@ -2,8 +2,11 @@ import { describe, expect, test } from "vitest";
 import { Parser } from "n3";
 import { canonize } from "rdf-canonize";
 import { MemberAsNamedGraph } from "../lib/memberAsNamedGraph";
-import { createWriter, logger, one } from "@rdfc/js-runner/lib/testUtils";
-import { FullProc } from "@rdfc/js-runner";
+import { createRunner, channel } from "@rdfc/js-runner/lib/testUtils";
+import { createLogger, transports } from "winston";
+import { readStrings } from "./utils";
+
+import type { FullProc } from "@rdfc/js-runner";
 
 describe("Functional tests for the memberAsNamedGraph function", () => {
     const INPUT = `
@@ -50,10 +53,18 @@ _:df_8_6 <https://w3id.org/sds#payload> <http://ex.org/18953?t=1723532383> <http
 `;
 
     test("A regular member in a SDS records is transformed into a named graph member", async () => {
-        const [inputWriter, inputReader] = createWriter();
-        const [outputWriter, outputReader] = createWriter();
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [outputWriter, outputReader] = channel(runner, "output");
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
 
-        const prom = one(outputReader.strings());
+        // Set reader for the output stream.
+        const outputData: string[] = [];
+        readStrings(outputReader, outputData);
+
+        // Define the processor to test.
         const proc = <FullProc<MemberAsNamedGraph>>new MemberAsNamedGraph(
             {
                 input: inputReader,
@@ -61,15 +72,20 @@ _:df_8_6 <https://w3id.org/sds#payload> <http://ex.org/18953?t=1723532383> <http
             },
             logger,
         );
-        await proc.init();
-        const done = proc.transform();
-        await inputWriter.string(INPUT);
-        await inputWriter.close();
-        await done;
 
-        const st = await prom;
+        // Initialize processor
+        await proc.init();
+        // Call transform method
+        const tfp = proc.transform();
+        // Send input data to the input stream
+        await inputWriter.string(INPUT);
+        // Close the input stream
+        await inputWriter.close();
+        // Wait for the transform to complete
+        await tfp;
+
         const parser = new Parser();
-        const hash = canonize(parser.parse(st!), {
+        const hash = canonize(parser.parse(outputData[0]), {
             algorithm: "RDFC-1.0",
         });
         expect(hash).toEqual(

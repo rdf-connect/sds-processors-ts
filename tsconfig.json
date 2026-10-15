@@ -1,22 +1,25 @@
 {
     "compilerOptions": {
         "declaration": true,
+        "rootDir": "./src",
         "outDir": "lib/",
         "lib": ["ES2022"],
         "target": "ES2022",
-        "module": "ES2022",
-        "moduleResolution": "node",
+        "module": "esnext",
+        "moduleResolution": "bundler",
         "preserveConstEnums": true,
-        "downlevelIteration": true,
         "skipLibCheck": true,
         "strict": true,
         "strictFunctionTypes": false,
         "strictPropertyInitialization": false,
         "experimentalDecorators": true,
         "allowSyntheticDefaultImports": true,
-        "incremental": true,
+        "incremental": false,
         "esModuleInterop": true,
         "removeComments": true,
+        "paths": {
+            "@rdfjs/types": ["./node_modules/@rdfjs/types"]
+        },
         "plugins": [
             {
                 "transform": "@ajuvercr/ts-transformer-inline-file/transformer"

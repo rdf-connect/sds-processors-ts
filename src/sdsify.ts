@@ -2,11 +2,12 @@ import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
-import { getSubjects, maybeParse } from "./utils/index";
-import { Parser, Writer as NWriter } from "n3";
+import { getSubjects, loadIntoStore, maybeParse } from "./utils/index";
+import { Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
 import { createHash } from "crypto";
+import { Readable } from "stream";
 
 const df = new DataFactory();
 
@@ -72,26 +73,36 @@ function getExtractor(shapeStore: RdfStore | null): CBDShapeExtractor {
     }
 }
 
+type MetadataConfig = {
+    streamId: Term;
+    description?: string;
+    timestampPath?: Term;
+    versionOfPath?: Term;
+    shapeIri?: Term;
+    shape?: string;
+};
+
 type Args = {
     input: Reader;
     output: Writer;
-    streamNode: Term;
+    metadataOutput: Writer;
+    metadataConfig: MetadataConfig;
     types?: Term[];
-    timestampPath?: Term;
     shape?: string;
+    readAsStream?: boolean;
 };
 export class Sdsify extends Processor<Args> {
     extractor: CBDShapeExtractor;
     shapeId: Term | undefined;
+    private dataStore: RdfStore;
+
     async init(this: Args & this): Promise<void> {
         this.logger.info("Found fields " + JSON.stringify(Object.keys(this)));
 
         // Setup member extractor
         const shapeStore = this.shape ? RdfStore.createDefault() : null;
         if (this.shape) {
-            maybeParse(this.shape).forEach((x) => {
-                if (shapeStore) shapeStore.addQuad(x);
-            });
+            await loadIntoStore(this.shape, shapeStore!);
         }
         this.extractor = getExtractor(shapeStore);
         this.shapeId = this.shape
@@ -99,131 +110,201 @@ export class Sdsify extends Processor<Args> {
             : undefined;
     }
     async transform(this: Args & this): Promise<void> {
-        for await (const input of this.input.strings()) {
-            const dataStore = RdfStore.createDefault();
-            maybeParse(input).forEach((x) => dataStore.addQuad(x));
-            this.logger.debug(`Got input with ${dataStore.size} quads`);
+        const promises = [];
+        promises.push(this.emitMetadata());
+        promises.push(this.setupInput());
 
-            const members: { [id: string]: SDSMember } = {};
-            const t0 = new Date();
-            // Get shape Id (if any)
+        await Promise.all(promises);
+    }
+    async produce(this: Args & this): Promise<void> {
+        // nothing
+    }
 
-            const subjects = [];
+    private async emitMetadata(this: Args & this): Promise<void> {
+        const metadata: string = `
+        @prefix sds: <https://w3id.org/sds#> .
+        @prefix p-plan: <http://purl.org/net/p-plan#>.
+        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
+        @prefix dcat: <http://www.w3.org/ns/dcat#>.
+        @prefix ldes: <https://w3id.org/ldes#>.
+        @prefix tree: <https://w3id.org/tree#>.
+        @prefix sh: <http://www.w3.org/ns/shacl#>.
 
-            if (this.types?.length) {
-                for (const t of this.types) {
-                    // Group quads based on given member type
-                    subjects.push(
-                        ...(await getSubjects(dataStore, RDF.terms.type, t)),
-                    );
-                }
-            } else {
-                subjects.push(...(await getSubjects(dataStore)));
+        <${this.metadataConfig.streamId.value}> a sds:Stream ;
+            p-plan:wasGeneratedBy [
+                a p-plan:Activity ;
+                ${this.metadataConfig.description ? `rdfs:comment "${this.metadataConfig.description}" ;` : ""}
+            ] ;
+            ${
+                this.metadataConfig.shapeIri
+                    ? `
+            sds:carries [
+                a sds:Member ;
+                sds:shape <${this.metadataConfig.shapeIri.value}> ;
+            ];
+            `
+                    : ""
             }
+            sds:dataset [
+                a dcat:Dataset ;
+                ${this.metadataConfig.timestampPath ? `ldes:timestampPath <${this.metadataConfig.timestampPath.value}> ;` : ""}
+                ${this.metadataConfig.versionOfPath ? `ldes:versionOfPath <${this.metadataConfig.versionOfPath.value}> ;` : ""}
+                ${this.metadataConfig.shapeIri ? `tree:shape <${this.metadataConfig.shapeIri.value}> ; ` : ""}
+            ] .
+        `;
 
-            // Extract members from received quads
-            await Promise.all(
-                subjects.map(async (subject) => {
-                    if (
-                        subject.termType === "NamedNode" &&
-                        !members[subject.value]
-                    ) {
-                        const membQuads = await this.extractor.extract(
-                            dataStore,
-                            subject,
-                            this.shapeId,
-                        );
-                        members[subject.value] = {
-                            quads: membQuads,
-                            timestamp: this.timestampPath
-                                ? dataStore.getQuads(
-                                      subject,
-                                      this.timestampPath,
-                                  )[0].object
-                                : undefined,
-                        };
-                    }
-                }),
-            );
+        if (this.metadataConfig.shape) {
+            const store = RdfStore.createDefault();
+            await loadIntoStore(this.metadataConfig.shape, store);
+            await loadIntoStore(metadata, store);
+            const quads = store.getQuads(null, null, null, null);
+            const writer = new NWriter({ format: "Turtle" });
+            this.metadataOutput.string(writer.quadsToString(quads));
+        } else {
+            await this.metadataOutput.string(metadata);
+        }
+        await this.metadataOutput.close();
+    }
 
-            this.logger.debug(
-                `Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
-            );
-
-            // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
-            const orderedMembersIds = Object.keys(members);
-            if (this.timestampPath) {
-                orderedMembersIds.sort((a, b) => {
-                    const ta = new Date(members[a].timestamp!.value).getTime();
-                    const tb = new Date(members[b].timestamp!.value).getTime();
-                    return ta - tb;
-                });
+    private async setupInput(this: Args & this): Promise<void> {
+        if (this.readAsStream) {
+            for await (const input of this.input.streams()) {
+                this.dataStore = RdfStore.createDefault();
+                const readable = Readable.from(input);
+                await loadIntoStore(readable, this.dataStore);
+                await this.processInput();
             }
-            let membersCount = 0;
-
-            // Create a unique transaction ID based on the data content and the current system time
-            const hash = createHash("md5");
-            const TRANSACTION_ID =
-                hash
-                    .update(new NWriter().quadsToString(dataStore.getQuads()))
-                    .digest("hex") +
-                "_" +
-                new Date().toISOString();
-
-            for (const sub of orderedMembersIds) {
-                const quads = members[sub].quads;
-                const blank = df.blankNode();
-
-                quads.push(
-                    df.quad(
-                        blank,
-                        SDS.terms.payload,
-                        <Quad_Object>df.namedNode(sub),
-                        SDS.terms.custom("DataDescription"),
-                    ),
-                    df.quad(
-                        blank,
-                        SDS.terms.stream,
-                        <Quad_Object>this.streamNode,
-                        SDS.terms.custom("DataDescription"),
-                    ),
-                    // This is not standardized (yet)
-                    df.quad(
-                        blank,
-                        LDES.terms.custom("transactionId"),
-                        df.literal(TRANSACTION_ID),
-                        SDS.terms.custom("DataDescription"),
-                    ),
+        } else {
+            for await (const input of this.input.strings()) {
+                this.dataStore = RdfStore.createDefault();
+                this.logger.info(
+                    "Input received, starting to process it" + input,
                 );
-
-                if (membersCount === Object.keys(members).length - 1) {
-                    // Annotate last member of a transaction
-                    quads.push(
-                        // This is not standardized (yet)
-                        df.quad(
-                            blank,
-                            LDES.terms.custom("isLastOfTransaction"),
-                            df.literal("true", XSD.terms.custom("boolean")),
-                            SDS.terms.custom("DataDescription"),
-                        ),
-                    );
-                }
-
-                await this.output.string(new NWriter().quadsToString(quads));
-                membersCount += 1;
+                await loadIntoStore(input, this.dataStore);
+                await this.processInput();
             }
-
-            this.logger.debug(
-                `Successfully pushed ${membersCount} members in ${
-                    new Date().getTime() - t0.getTime()
-                } ms`,
-            );
         }
 
         this.logger.info("Input channel was closed down");
         await this.output.close();
     }
-    async produce(this: Args & this): Promise<void> {
-        // nothing
+
+    private async processInput(this: Args & this): Promise<void> {
+        this.logger.debug(`Got input with ${this.dataStore.size} quads`);
+
+        const members: { [id: string]: SDSMember } = {};
+        const t0 = new Date();
+        // Get shape Id (if any)
+
+        const subjects = [];
+
+        if (this.types?.length) {
+            for (const t of this.types) {
+                // Group quads based on given member type
+                subjects.push(
+                    ...(await getSubjects(this.dataStore, RDF.terms.type, t)),
+                );
+            }
+        } else {
+            subjects.push(...(await getSubjects(this.dataStore)));
+        }
+
+        // Extract members from received quads
+        await Promise.all(
+            subjects.map(async (subject) => {
+                if (
+                    subject.termType === "NamedNode" &&
+                    !members[subject.value]
+                ) {
+                    const membQuads = await this.extractor.extract(
+                        this.dataStore,
+                        subject,
+                        this.shapeId,
+                    );
+                    members[subject.value] = {
+                        quads: membQuads,
+                        timestamp: this.metadataConfig.timestampPath
+                            ? this.dataStore.getQuads(
+                                  subject,
+                                  this.metadataConfig.timestampPath,
+                              )[0].object
+                            : undefined,
+                    };
+                }
+            }),
+        );
+
+        this.logger.debug(
+            `Members extracted in ${new Date().getTime() - t0.getTime()} ms`,
+        );
+
+        // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
+        const orderedMembersIds = Object.keys(members);
+        if (this.metadataConfig.timestampPath) {
+            orderedMembersIds.sort((a, b) => {
+                const ta = new Date(members[a].timestamp!.value).getTime();
+                const tb = new Date(members[b].timestamp!.value).getTime();
+                return ta - tb;
+            });
+        }
+        let membersCount = 0;
+
+        // Create a unique transaction ID based on the data content and the current system time
+        const hash = createHash("md5");
+        const TRANSACTION_ID =
+            hash
+                .update(new NWriter().quadsToString(this.dataStore.getQuads()))
+                .digest("hex") +
+            "_" +
+            new Date().toISOString();
+
+        for (const sub of orderedMembersIds) {
+            const quads = members[sub].quads;
+            const blank = df.blankNode();
+
+            quads.push(
+                df.quad(
+                    blank,
+                    SDS.terms.payload,
+                    <Quad_Object>df.namedNode(sub),
+                    SDS.terms.custom("DataDescription"),
+                ),
+                df.quad(
+                    blank,
+                    SDS.terms.stream,
+                    <Quad_Object>this.metadataConfig.streamId,
+                    SDS.terms.custom("DataDescription"),
+                ),
+                // This is not standardized (yet)
+                df.quad(
+                    blank,
+                    LDES.terms.custom("transactionId"),
+                    df.literal(TRANSACTION_ID),
+                    SDS.terms.custom("DataDescription"),
+                ),
+            );
+
+            if (membersCount === Object.keys(members).length - 1) {
+                // Annotate last member of a transaction
+                quads.push(
+                    // This is not standardized (yet)
+                    df.quad(
+                        blank,
+                        LDES.terms.custom("isLastOfTransaction"),
+                        df.literal("true", XSD.terms.custom("boolean")),
+                        SDS.terms.custom("DataDescription"),
+                    ),
+                );
+            }
+
+            await this.output.string(new NWriter().quadsToString(quads));
+            membersCount += 1;
+        }
+
+        this.logger.debug(
+            `Successfully pushed ${membersCount} members in ${
+                new Date().getTime() - t0.getTime()
+            } ms`,
+        );
     }
 }

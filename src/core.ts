@@ -1,4 +1,7 @@
-import type { Reader, Writer } from "@rdfc/js-runner";
+import { DataFactory } from "rdf-data-factory";
+import { RdfStore } from "rdf-stores";
+import { PROV, RDF, SDS, SHACL } from "@treecg/types";
+import { getObjects, getSubjects } from "./utils";
 import type {
     BlankNode,
     NamedNode,
@@ -7,10 +10,6 @@ import type {
     Quad_Subject,
     Term,
 } from "@rdfjs/types";
-import { DataFactory } from "rdf-data-factory";
-import { RdfStore } from "rdf-stores";
-import { PROV, RDF, SDS, SHACL } from "@treecg/types";
-import { getObjects, getSubjects } from "./utils";
 
 const df = new DataFactory();
 
