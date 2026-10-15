@@ -145,9 +145,13 @@ describe("Functional tests for the ldesDiskWriter function", () => {
     });
 
     test("LdesDiskWriter copies the shape into the LDES metadata", async () => {
-        const [inputWriter, inputReader] = createWriter();
-        const [metaWriter, metaReader] = createWriter();
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [metaWriter, metaReader] = channel(runner, "meta");
         const directory = "tmp/ldes-disk/";
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
 
         const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
             {
@@ -175,7 +179,7 @@ describe("Functional tests for the ldesDiskWriter function", () => {
                                       sh:property [ sh:path ex:name ] ] ] .
         `;
 
-        await metaWriter.string(metadata);
+        metaWriter.string(metadata);
         await metaWriter.close();
         await inputWriter.close();
         await prom;
