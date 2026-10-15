@@ -143,4 +143,78 @@ describe("Functional tests for the ldesDiskWriter function", () => {
             ).length,
         ).toBe(11);
     });
+
+    test("LdesDiskWriter copies the shape into the LDES metadata", async () => {
+        const [inputWriter, inputReader] = createWriter();
+        const [metaWriter, metaReader] = createWriter();
+        const directory = "tmp/ldes-disk/";
+
+        const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
+            {
+                directory,
+                metadata: metaReader,
+                data: inputReader,
+                nameMap: [],
+            },
+            logger,
+        );
+        await proc.init();
+        const prom = proc.transform();
+
+        // sds:shape is attached to the sds:carries node, as done by transformMetadata
+        const metadata = `
+        @prefix ex: <http://example.org/ns#> .
+        @prefix sds: <https://w3id.org/sds#> .
+        @prefix sh: <http://www.w3.org/ns/shacl#> .
+
+        ex:Stream
+            a           sds:Stream ;
+            sds:carries [ a sds:Member ;
+                          sds:shape [ a sh:NodeShape ;
+                                      sh:targetClass ex:Thing ;
+                                      sh:property [ sh:path ex:name ] ] ] .
+        `;
+
+        await metaWriter.string(metadata);
+        await metaWriter.close();
+        await inputWriter.close();
+        await prom;
+
+        const index = fs.readFileSync(`${directory}index.trig`);
+        const quads = new Parser({
+            baseIRI: "http://localhost/index.trig",
+        }).parse(index.toString());
+
+        const shapeId = quads.find(
+            (q) =>
+                q.subject.value === "http://localhost/index.trig" &&
+                q.predicate.value === TREE.shape,
+        )?.object;
+        expect(shapeId).toBeDefined();
+
+        // The shape description itself must be present as well
+        expect(
+            quads.some(
+                (q) =>
+                    q.subject.equals(shapeId!) &&
+                    q.predicate.value ===
+                        "http://www.w3.org/ns/shacl#targetClass" &&
+                    q.object.value === "http://example.org/ns#Thing",
+            ),
+        ).toBeTruthy();
+        const propertyId = quads.find(
+            (q) =>
+                q.subject.equals(shapeId!) &&
+                q.predicate.value === "http://www.w3.org/ns/shacl#property",
+        )?.object;
+        expect(propertyId).toBeDefined();
+        expect(
+            quads.some(
+                (q) =>
+                    q.subject.equals(propertyId!) &&
+                    q.predicate.value === "http://www.w3.org/ns/shacl#path" &&
+                    q.object.value === "http://example.org/ns#name",
+            ),
+        ).toBeTruthy();
+    });
 });
