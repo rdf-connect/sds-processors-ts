@@ -52,7 +52,7 @@
         "@types/terraformer__wkt": "^2.0.3",
         "@typescript-eslint/eslint-plugin": "^8.71.2",
         "@typescript-eslint/parser": "^8.71.2",
-        "@vitest/coverage-v8": "^4.1.11",
+        "@vitest/coverage-v8": "^4.1.12",
         "dotenv": "^17.4.2",
         "eslint": "^10.5.0",
         "eslint-config-prettier": "^10.1.8",
@@ -63,12 +63,12 @@
         "prettier": "^3.9.10",
         "ts-node": "^10.9.2",
         "ts-patch": "^4.0.1",
-        "tsc-alias": "^1.9.7",
+        "tsc-alias": "^1.9.8",
         "typescript": "^6.0.3",
-        "vitest": "^4.1.11"
+        "vitest": "^4.1.12"
     },
     "optionalDependencies": {
         "@esbuild/darwin-arm64": "^0.28.2",
-        "@rollup/rollup-linux-x64-gnu": "^4.64.6"
+        "@rollup/rollup-linux-x64-gnu": "^4.64.9"
     }
 }
