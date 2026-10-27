@@ -6,11 +6,12 @@
 @prefix : <https://w3id.org/conn#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix rdfc: <https://w3id.org/rdf-connect#>.
+@prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
 
 rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Ldes Disk Writer";
-  rdfs:comment "Writes a LDES to local files";
+  rdfs:comment "Writes a LDES to local files, with a view for every SDS stream on its input. The views and how their streams were derived are read from the pipeline description.";
   rdfc:file <../lib/ldesDiskWriter.js>;
   rdfc:class "LdesDiskWriter";
   rdfc:entrypoint <../>.
@@ -24,12 +25,6 @@ rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class rdfc:Reader;
-    sh:path rdfc:metadataInput;
-    sh:name "metadata";
-    sh:maxCount 1;
-    sh:minCount 1;
-  ], [
     sh:nodeKind sh:IRIOrLiteral;
     sh:codeType xsd:string;
     sh:path rdfc:directory;
@@ -40,6 +35,13 @@ rdfc:LdesDiskWriter a owl:Class, rdfs:Class;
     sh:class <MapEntry>;
     sh:path rdfc:streamName;
     sh:name "nameMap";
+  ], [
+    # The whole pipeline description, from which the streams are described.
+    sh:class rdfl:Context;
+    sh:path ( );
+    sh:name "pipeline";
+    sh:minCount 1;
+    sh:maxCount 1;
   ].
 
 [ ] a sh:NodeShape;

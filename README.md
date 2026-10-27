@@ -2,13 +2,35 @@
 
 [![Node CI](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml/badge.svg)](https://github.com/rdf-connect/sds-processors-ts/actions/workflows/build-test.yml) [![npm](https://img.shields.io/npm/v/@rdfc/sds-processors-ts.svg?style=popout)](https://npmjs.com/package/@rdfc/sds-processors-ts)
 
-Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations.
+Collection of [RDF-Connect](https://rdf-connect.github.io/rdfc.github.io/) Typescript processors for handling [SDS (Smart Data Streams)](https://treecg.github.io/SmartDataStreams-Spec/)-related operations. It currently exposes 9 functions.
 
-Arguments that hold an IRI, like stream ids (`rdfc:stream`, `rdfc:sourceStream`, `rdfc:targetStream`, `rdfc:inputStreamId`, `rdfc:outputStreamId`), property paths (`rdfc:timestampPath`, `rdfc:versionOfPath`), `rdfc:typeFilter` and `rdfc:shapeIri`, must be written as an IRI, like `<http://ex.org/myStream>` or `ex:myStream`: a string is not turned into an IRI.
+## Streams and their descriptions
+
+A stream is identified by the channel it is first written to, and the activity that derived it is the processor that wrote that channel.
+`Sdsify`, `Bucketize` and `LdesifySDS` set `sds:stream` on their records to their output channel; processors from other packages that only pass records on (a fan-out, a merge) leave it as it is.
+No processor sends stream metadata: the processors that publish streams, such as `LdesDiskWriter`, read how each stream was derived from the pipeline description, which every processor can obtain with `rdfl:Context`.
+
+So name channels and processors with IRIs that mean something outside the machine that runs the pipeline, with a prefix of your deployment:
+
+```turtle
+@prefix stream: <http://example.org/my-deployment/>.
+
+stream:observations a rdfc:Reader, rdfc:Writer.   # a stream
+stream:by-time a rdfc:Reader, rdfc:Writer.        # a stream derived from it
+stream:bucketize-by-time a rdfc:Bucketize;        # the activity that derived it
+  rdfc:channels [ rdfc:dataInput stream:observations; rdfc:dataOutput stream:by-time ];
+  rdfc:bucketizeStrategy ( ... ).
+```
+
+The published description then reads `stream:by-time prov:wasGeneratedBy stream:bucketize-by-time. stream:bucketize-by-time prov:used stream:observations`, with the strategies as configured (`rdfc:bucketizeStrategy`), outermost first, and the shape and dataset of `stream:observations`.
+
+## IRIs and locations
+
+Arguments that hold an IRI, like stream ids (`rdfc:sourceStream`, `rdfc:inputStreamId` and the `rdfc:stream` of a `rdfc:streamName`), property paths (`rdfc:timestampPath`, `rdfc:versionOfPath`), `rdfc:typeFilter`, `rdfc:shapeIri` and `rdfc:dataset`, must be written as an IRI, like `<http://ex.org/myStream>` or `ex:myStream`: a string is not turned into an IRI.
 
 Locations (`rdfc:savePath`, `rdfc:directory`, `rdfc:path` and `rdfc:statePath`) can be written as a string or as an IRI: an IRI, like `<./state.json>`, is resolved against the pipeline file.
 
-It currently exposes 9 functions:
+## Processors
 
 ### [`rdfc:Sdsify`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/sdsify.ttl#L10)
 
@@ -17,6 +39,8 @@ This processor takes as input a stream of (batched) RDF data entities and wraps 
 Alternatively, a set of types may be specified (`rdfc:typeFilter`) to target concrete entities. A SHACL shape can be given to concretely define the bounds target entities and their properties, that want to be extracted and packaged as SDS records. This processor relies on the [member extraction algorithm](https://github.com/TREEcg/extract-cbd-shape) implemented by the [W3C TREE Hypermedia community group](https://www.w3.org/community/treecg/).
 
 If the `rdfc:timestampPath` is specified, the set of SDS records will be streamed out in temporal order to avoid out of order writing issues downstream.
+
+The records belong to the stream of the output channel. The optional `rdfc:metadataConfig` describes that stream to the processors that publish it: a `rdfc:description`, the `rdfc:timestampPath` and `rdfc:versionOfPath` of its dataset, a `rdfc:shapeIri` with its `rdfc:shape`, and a `rdfc:dataset` described elsewhere in the pipeline (for instance with `dcat:title`). Without a shape there, the shape given with `rdfc:shape` is used.
 
 An example of how to use this processor within a RDF-Connect pipeline definition is shown next:
 
@@ -27,7 +51,7 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 [ ] a rdfc:Sdsify;
     rdfc:input <inputChannelReader>;
     rdfc:output <outputChannerWriter>;
-    rdfc:stream <http://ex.org/myStream>;
+    rdfc:metadataConfig [ rdfc:timestampPath <http://ex.org/timestamp> ];
     rdfc:typeFilter ex:SomeClass, ex:SomeOtherClass;
     rdfc:timestampPath <http://ex.org/timestamp>;
     rdfc:shape """
@@ -57,7 +81,7 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 
 ### [`rdfc:Bucketize`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/bucketizer.ttl#L10)
 
-This processor takes as input a stream of SDS records and SDS metadata and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/rdf-connect/sds-processors-ts/blob/master/bucketizeStrategy.ttl)). The SDS metadata will be also transformed to reflect this transformation. Multiple SDS streams can be present on the incoming data channel.
+This processor takes as input a stream of SDS records and proceeds to _bucketize_ them according to a predefined strategy ([see example](https://github.com/rdf-connect/sds-processors-ts/blob/master/bucketizeStrategy.ttl)). The bucketized records belong to the stream of the data output channel. Multiple SDS streams can be present on the incoming data channel; `rdfc:inputStreamId` selects one.
 
 You can define bucketizers as follows:
 
@@ -67,9 +91,7 @@ You can define bucketizers as follows:
 <bucketize> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <...data input>;
-    rdfc:metadataInput <... metadata input>;
     rdfc:dataOutput <... data output>;
-    rdfc:metadataOutput <... metadata output>;
   ];
   rdfc:bucketizeStrategy ( [            # One or more bucketize strategies
     a tree:SubjectFragmentation;      # Create a bucket based on this path
@@ -79,7 +101,6 @@ You can define bucketizers as follows:
     tree:pageSize 2;
   ] );
   rdfc:savePath <./buckets_save.json>;  # A string or an IRI
-  rdfc:outputStreamId <MyEpicStream>;
   rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to 'root'
 ```
 
@@ -89,9 +110,7 @@ You can define bucketizers as follows:
 <bucketize> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <...data input>;
-    rdfc:metadataInput <... metadata input>;
     rdfc:dataOutput <... data output>;
-    rdfc:metadataOutput <... metadata output>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:TimebasedFragmentation;
@@ -101,7 +120,6 @@ You can define bucketizers as follows:
     tree:minBucketSpan 3600;        # In seconds
   ]);
   rdfc:savePath <./buckets_save.json>;
-  rdfc:outputStreamId <MyEpicStream>;
   rdfc:prefix "root/".                  # The root fragment is located at '/root/' this defaults to 'root'
 ```
 
@@ -145,9 +163,7 @@ This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute
 <bucketize> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:RTreeFragmentation;
@@ -156,7 +172,6 @@ This fragmentation will look like this `${year}-${month}/${day}/${hour}/${minute
     tree:minSize 40;        # Optional, defaults to 40% of pageSize
   ]);
   rdfc:savePath <./buckets_save.json>;
-  rdfc:outputStreamId <MyEpicStream>;
   rdfc:prefix "root/".
 ```
 
@@ -198,7 +213,6 @@ Specify:
 - `rdfc:output` output channel
 - optional `rdfc:statePath` (`string` or IRI) path for state file
 - optional `rdfc:sourceStream`
-- `rdfc:targetStream` newly created sds stream id
 - optional `rdfc:timestampPath`, defaults to `http://purl.org/dc/terms/modified`
 - optional `rdfc:versionOfPath`, defaults to `http://purl.org/dc/terms/isVersionOf`
 
@@ -234,7 +248,8 @@ This a simple RDF data generator function used for testing. This processor will 
 ### [`rdfc:LdesDiskWriter`](https://github.com/rdf-connect/sds-processors-ts/blob/master/configs/ldes_disk_writer.ttl#L8)
 
 This processor can be used to transform an [SDS stream](https://w3id.org/sds/specification) and its correspondent stream of members into a LDES.
-It will persist the LDES as a set of files on disk.
+It will persist the LDES as a set of files on disk, with a view for every stream on its input.
+It finds those streams in the pipeline description, before any data arrives, and publishes how each was derived; a stream it did not find there gets a view when its first record arrives.
 
 Alternative more advanced implementation: [sds-storage-writer-ts](https://github.com/rdf-connect/sds-storage-writer-ts) together with [LDES-Solid-Server](https://github.com/rdf-connect/LDES-Solid-Server).
 
@@ -245,7 +260,6 @@ An example of how to use this processor within a RDF-Connect pipeline definition
 
 [ ] a rdfc:LdesDiskWriter;
     rdfc:dataInput <data/reader>;
-    rdfc:metadataInput <metadata/reader>;
     rdfc:directory </tmp/ldes-disk/>;  # A string or an IRI
     rdfc:streamName [
         rdfc:stream <http://example.com/ns/by-location>;

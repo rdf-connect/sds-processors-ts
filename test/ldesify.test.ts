@@ -63,7 +63,6 @@ describe("Functional tests for the ldesify function", () => {
             {
                 reader: inputReader,
                 writer: outputWriter,
-                targetStream: stream,
                 statePath: undefined,
                 sourceStream: undefined,
                 isVersionOfPathM: df.namedNode(

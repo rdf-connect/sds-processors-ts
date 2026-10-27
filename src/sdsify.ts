@@ -2,7 +2,7 @@ import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { LDES, RDF, SDS, SHACL, XSD } from "@treecg/types";
 import type { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
-import { getSubjects, loadIntoStore, maybeParse } from "./utils/index";
+import { getSubjects, loadIntoStore } from "./utils/index";
 import { Writer as NWriter } from "n3";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { RdfStore } from "rdf-stores";
@@ -73,20 +73,21 @@ function getExtractor(shapeStore: RdfStore | null): CBDShapeExtractor {
     }
 }
 
+// Describes the stream; it is read from the pipeline description by the processors
+// that publish the stream (see Pipeline), so Sdsify itself only needs timestampPath.
 type MetadataConfig = {
-    streamId: Term;
     description?: string;
     timestampPath?: Term;
     versionOfPath?: Term;
     shapeIri?: Term;
     shape?: string;
+    dataset?: Term;
 };
 
 type Args = {
     input: Reader;
     output: Writer;
-    metadataOutput: Writer;
-    metadataConfig: MetadataConfig;
+    metadataConfig?: MetadataConfig;
     types?: Term[];
     shape?: string;
     readAsStream?: boolean;
@@ -110,60 +111,10 @@ export class Sdsify extends Processor<Args> {
             : undefined;
     }
     async transform(this: Args & this): Promise<void> {
-        const promises = [];
-        promises.push(this.emitMetadata());
-        promises.push(this.setupInput());
-
-        await Promise.all(promises);
+        await this.setupInput();
     }
     async produce(this: Args & this): Promise<void> {
         // nothing
-    }
-
-    private async emitMetadata(this: Args & this): Promise<void> {
-        const metadata: string = `
-        @prefix sds: <https://w3id.org/sds#> .
-        @prefix p-plan: <http://purl.org/net/p-plan#>.
-        @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
-        @prefix dcat: <http://www.w3.org/ns/dcat#>.
-        @prefix ldes: <https://w3id.org/ldes#>.
-        @prefix tree: <https://w3id.org/tree#>.
-        @prefix sh: <http://www.w3.org/ns/shacl#>.
-
-        <${this.metadataConfig.streamId.value}> a sds:Stream ;
-            p-plan:wasGeneratedBy [
-                a p-plan:Activity ;
-                ${this.metadataConfig.description ? `rdfs:comment "${this.metadataConfig.description}" ;` : ""}
-            ] ;
-            ${
-                this.metadataConfig.shapeIri
-                    ? `
-            sds:carries [
-                a sds:Member ;
-                sds:shape <${this.metadataConfig.shapeIri.value}> ;
-            ];
-            `
-                    : ""
-            }
-            sds:dataset [
-                a dcat:Dataset ;
-                ${this.metadataConfig.timestampPath ? `ldes:timestampPath <${this.metadataConfig.timestampPath.value}> ;` : ""}
-                ${this.metadataConfig.versionOfPath ? `ldes:versionOfPath <${this.metadataConfig.versionOfPath.value}> ;` : ""}
-                ${this.metadataConfig.shapeIri ? `tree:shape <${this.metadataConfig.shapeIri.value}> ; ` : ""}
-            ] .
-        `;
-
-        if (this.metadataConfig.shape) {
-            const store = RdfStore.createDefault();
-            await loadIntoStore(this.metadataConfig.shape, store);
-            await loadIntoStore(metadata, store);
-            const quads = store.getQuads(null, null, null, null);
-            const writer = new NWriter({ format: "Turtle" });
-            this.metadataOutput.string(writer.quadsToString(quads));
-        } else {
-            await this.metadataOutput.string(metadata);
-        }
-        await this.metadataOutput.close();
     }
 
     private async setupInput(this: Args & this): Promise<void> {
@@ -223,10 +174,10 @@ export class Sdsify extends Processor<Args> {
                     );
                     members[subject.value] = {
                         quads: membQuads,
-                        timestamp: this.metadataConfig.timestampPath
+                        timestamp: this.metadataConfig?.timestampPath
                             ? this.dataStore.getQuads(
                                   subject,
-                                  this.metadataConfig.timestampPath,
+                                  this.metadataConfig!.timestampPath,
                               )[0].object
                             : undefined,
                     };
@@ -240,7 +191,7 @@ export class Sdsify extends Processor<Args> {
 
         // Sort members based on the given timestamp value (if any) to avoid out of order writing issues downstream
         const orderedMembersIds = Object.keys(members);
-        if (this.metadataConfig.timestampPath) {
+        if (this.metadataConfig?.timestampPath) {
             orderedMembersIds.sort((a, b) => {
                 const ta = new Date(members[a].timestamp!.value).getTime();
                 const tb = new Date(members[b].timestamp!.value).getTime();
@@ -272,7 +223,8 @@ export class Sdsify extends Processor<Args> {
                 df.quad(
                     blank,
                     SDS.terms.stream,
-                    <Quad_Object>this.metadataConfig.streamId,
+                    // The stream is the channel it is written to.
+                    <Quad_Object>df.namedNode(this.output.uri),
                     SDS.terms.custom("DataDescription"),
                 ),
                 // This is not standardized (yet)
