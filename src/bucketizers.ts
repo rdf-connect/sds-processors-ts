@@ -6,16 +6,11 @@ import { getLatestShape, getLatestStream, transformMetadata } from "./core";
 import { LDES, PPLAN, PROV, RDF, SDS, XSD } from "@treecg/types";
 import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
-import {
-    Bucket,
-    BucketRelation,
-    Extractor,
-    Record,
-    toPath,
-} from "./utils/index";
+import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { cleanUpHandlers, handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
+import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory();
 

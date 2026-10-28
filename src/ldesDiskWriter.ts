@@ -1,12 +1,13 @@
 import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { Processor, Reader } from "@rdfc/js-runner";
-import { maybeParse, toPath } from "./utils";
+import { maybeParse } from "./utils";
 import { Extractor } from "./utils/extractor";
 import path from "node:path";
 import { DataFactory } from "rdf-data-factory";
 import { DC, LDES, RDF, SDS, TREE, XSD } from "@treecg/types";
 import { Parser, Writer } from "n3";
 import * as fs from "node:fs";
+import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory({ blankNodePrefix: "df_" + new Date().getTime() });
 

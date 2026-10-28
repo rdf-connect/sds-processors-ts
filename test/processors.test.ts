@@ -21,13 +21,12 @@ import {
     TimebasedFragmentation,
 } from "../lib/bucketizers/index";
 
-import { toPath } from "../lib/utils/index";
 import { mkdirSync, mkdtempSync, writeFileSync } from "fs";
 import { tmpdir } from "os";
 import { join, resolve } from "path";
-import { pathToFileURL } from "url";
 
 import type { FullProc } from "@rdfc/js-runner";
+import { fromPath } from "@rdfc/utils-js";
 
 async function getProc<T>(
     config: string,
@@ -752,7 +751,7 @@ describe("SDS processors tests", async () => {
         // processors write their state there on exit
         const dir = join(mkdtempSync(join(tmpdir(), "sds-")), "my state");
         mkdirSync(dir);
-        const iri = (name: string) => `<${pathToFileURL(join(dir, name))}>`;
+        const iri = (name: string) => `<${fromPath(join(dir, name))}>`;
 
         const bucketizer = await getProc<Bucketizer>(
             "bucketizer.ttl",
@@ -811,13 +810,5 @@ describe("SDS processors tests", async () => {
         await ldesifySds.init();
         expect(ldesifySds.statePath).toBe(join(dir, "sds.json"));
         expect(ldesifySds.cache).toEqual({ "http://ex.org/a": "key" });
-    });
-
-    test("toPath keeps paths and turns file: URLs into paths", () => {
-        expect(toPath("./save.json")).toBe("./save.json");
-        expect(toPath("/tmp/ldes-disk/")).toBe("/tmp/ldes-disk/");
-        expect(toPath("file:///tmp/my%20data/save.json")).toBe(
-            "/tmp/my data/save.json",
-        );
     });
 });

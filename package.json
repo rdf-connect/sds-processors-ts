@@ -25,6 +25,7 @@
     ],
     "license": "MIT",
     "dependencies": {
+        "@rdfc/utils-js": "^1.0.1",
         "@terraformer/spatial": "^2.2.2",
         "@terraformer/wkt": "^2.2.2",
         "@treecg/types": "^0.4.6",

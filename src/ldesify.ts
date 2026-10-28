@@ -3,13 +3,14 @@ import { Quad, Quad_Predicate, Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import { DataFactory } from "rdf-data-factory";
 import { NamedNode, Parser, Quad_Object, Writer as N3Writer } from "n3";
-import { Extractor, toPath } from "./utils";
+import { Extractor } from "./utils";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 
 // @ts-expect-error no declaration file found
 import { canonize } from "rdf-canonize";
 import { SDS, XSD } from "@treecg/types";
 import { handleExit } from "./exitHandler";
+import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory();
 
