@@ -1,7 +1,7 @@
 import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { Processor, Reader } from "@rdfc/js-runner";
 import { maybeParse } from "./utils";
-import { Extractor } from "./utils/extractor";
+import { Extractor } from "./utils/description";
 import path from "node:path";
 import { DataFactory } from "rdf-data-factory";
 import { DC, LDES, RDF, SDS, TREE, XSD } from "@treecg/types";
@@ -238,6 +238,15 @@ export class LdesDiskWriter extends Processor<Args> {
 
             this.logger.debug(`[data] Got input with ${data.length} quads`);
 
+            // A member is written with its IRI: a blank node payload has none.
+            const records = extract.getRecords().filter((record) => {
+                if (record.payload.termType === "NamedNode") return true;
+                this.logger.warn(
+                    `[data] Skipping a record of stream <${record.stream.value}> with a blank node payload`,
+                );
+                return false;
+            });
+
             const members: Map<string, Quad[]> = new Map<string, Quad[]>(); // member id -> quads
 
             // For each bucket, make sure it's directory and index file containing the metadata exists
@@ -245,8 +254,8 @@ export class LdesDiskWriter extends Processor<Args> {
             for (const bucket of extract.getBuckets()) {
                 const bucketPath = path.join(
                     this.directory,
-                    this.pathName(bucket.streamId),
-                    encodePathValue(bucket.id, true),
+                    this.pathName(bucket.stream),
+                    encodePathValue(bucket.id.value, true),
                 );
 
                 // Make sure bucket directory exists
@@ -259,8 +268,8 @@ export class LdesDiskWriter extends Processor<Args> {
                         path.join(
                             path.relative(
                                 path.join(
-                                    this.pathName(bucket.streamId),
-                                    encodePathValue(bucket.id, true),
+                                    this.pathName(bucket.stream),
+                                    encodePathValue(bucket.id.value, true),
                                 ),
                                 "",
                             ),
@@ -289,7 +298,9 @@ export class LdesDiskWriter extends Processor<Args> {
                 }
 
                 if (bucket.empty) {
-                    this.logger.debug(`[data] Emptying bucket ${bucket.id}`);
+                    this.logger.debug(
+                        `[data] Emptying bucket ${bucket.id.value}`,
+                    );
                     // Go over quads, group them by metadata, members, and relations.
                     const content = await fs.promises.readFile(bucketIndexPath);
                     const quads = new Parser({
@@ -347,7 +358,7 @@ export class LdesDiskWriter extends Processor<Args> {
                     // Check if a relation to the viewId from the bucketId already exists
                     const viewIndexPath = path.join(
                         this.directory,
-                        this.pathName(bucket.streamId),
+                        this.pathName(bucket.stream),
                         "index.trig",
                     );
                     let content = "";
@@ -365,7 +376,7 @@ export class LdesDiskWriter extends Processor<Args> {
                     const absoluteRelativeBucketId = df.namedNode(
                         new URL(
                             path.join(
-                                encodePathValue(bucket.id, true),
+                                encodePathValue(bucket.id.value, true),
                                 "index.trig",
                             ),
                             INTERNAL_TEMP_BASE_URI,
@@ -428,13 +439,13 @@ export class LdesDiskWriter extends Processor<Args> {
             }
 
             // For each record, append the member contents to the file corresponding to the bucket
-            for (const record of extract.getRecords()) {
+            for (const record of records) {
                 for (const bucket of record.buckets) {
                     // Append the member contents to the file corresponding to the bucket
                     const bucketIndexPath = path.join(
                         this.directory,
                         this.pathName(record.stream),
-                        encodePathValue(bucket, true),
+                        encodePathValue(bucket.value, true),
                         "index.trig",
                     );
 
@@ -443,7 +454,7 @@ export class LdesDiskWriter extends Processor<Args> {
                             path.relative(
                                 path.join(
                                     this.pathName(record.stream),
-                                    encodePathValue(bucket, true),
+                                    encodePathValue(bucket.value, true),
                                 ),
                                 "",
                             ),
@@ -454,7 +465,9 @@ export class LdesDiskWriter extends Processor<Args> {
                         df.quad(
                             relativeLdesId,
                             TREE.terms.member,
-                            df.namedNode(encodePathValue(record.payload, true)),
+                            df.namedNode(
+                                encodePathValue(record.payload.value, true),
+                            ),
                         ),
                     ];
                     if (!record.dataless) {
@@ -462,8 +475,10 @@ export class LdesDiskWriter extends Processor<Args> {
                     } else {
                         quads.push(
                             ...(members.get(
-                                new URL(record.payload, INTERNAL_TEMP_BASE_URI)
-                                    .href,
+                                new URL(
+                                    record.payload.value,
+                                    INTERNAL_TEMP_BASE_URI,
+                                ).href,
                             ) || []),
                         );
                     }
@@ -478,7 +493,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 const bucketIndexPath = path.join(
                     this.directory,
                     this.pathName(relation.stream),
-                    encodePathValue(relation.origin, true),
+                    encodePathValue(relation.origin.value, true),
                     "index.trig",
                 );
 
@@ -489,7 +504,10 @@ export class LdesDiskWriter extends Processor<Args> {
                 // Find blankNode subject of the relation and remove all related quads
                 const relationTargetIndexPath = path.join(
                     encodePathValue(
-                        path.relative(relation.origin, relation.bucket),
+                        path.relative(
+                            relation.origin.value,
+                            relation.bucket.value,
+                        ),
                         true,
                     ),
                     "index.trig",
@@ -497,7 +515,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 const blankNode = quads.find(
                     (bnQ) =>
                         bnQ.predicate.equals(RDF.terms.type) &&
-                        bnQ.object.value === relation.type &&
+                        bnQ.object.value === relation.type.value &&
                         quads.some(
                             (q) =>
                                 q.subject.equals(bnQ.subject) &&
@@ -528,7 +546,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 )?.subject;
                 if (!blankNode) {
                     this.logger.error(
-                        `Could not find blankNode to remove relation ${relation.type} from ${relation.origin} to ${relation.bucket}`,
+                        `Could not find blankNode to remove relation ${relation.type.value} from ${relation.origin.value} to ${relation.bucket.value}`,
                     );
                     continue;
                 }
@@ -547,7 +565,7 @@ export class LdesDiskWriter extends Processor<Args> {
                 const bucketIndexPath = path.join(
                     this.directory,
                     this.pathName(relation.stream),
-                    encodePathValue(relation.origin, true),
+                    encodePathValue(relation.origin.value, true),
                     "index.trig",
                 );
 
@@ -558,7 +576,11 @@ export class LdesDiskWriter extends Processor<Args> {
                         TREE.terms.relation,
                         bn,
                     ),
-                    df.quad(bn, RDF.terms.type, df.namedNode(relation.type)),
+                    df.quad(
+                        bn,
+                        RDF.terms.type,
+                        df.namedNode(relation.type.value),
+                    ),
                     df.quad(
                         bn,
                         TREE.terms.node,
@@ -566,8 +588,8 @@ export class LdesDiskWriter extends Processor<Args> {
                             path.join(
                                 encodePathValue(
                                     path.relative(
-                                        relation.origin,
-                                        relation.bucket,
+                                        relation.origin.value,
+                                        relation.bucket.value,
                                     ),
                                     true,
                                 ),

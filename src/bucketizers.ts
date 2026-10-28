@@ -1,13 +1,18 @@
 import { readFileSync, writeFileSync } from "fs";
 import { Parser, Writer as N3Writer } from "n3";
-import { Quad, Quad_Object, Quad_Subject, Term } from "@rdfjs/types";
+import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
-import { getLatestShape, getLatestStream, transformMetadata } from "./core";
-import { LDES, PPLAN, PROV, RDF, SDS, XSD } from "@treecg/types";
+import { transformMetadata } from "./core";
+import { LDES, PPLAN, PROV, RDF } from "@treecg/types";
 import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
-import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
-import { CBDShapeExtractor } from "extract-cbd-shape";
+import { Bucket, BucketRelation, Record } from "./utils/index";
+import {
+    bucket_to_quads,
+    Extractor,
+    record_to_quads,
+    relationToQuads,
+} from "./utils/description";
 import { cleanUpHandlers, handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
 import { toPath } from "@rdfc/utils-js";
@@ -97,162 +102,6 @@ type Channels = {
     metadataOutput: Writer;
 };
 
-export function record_to_quads(
-    record: Record,
-    resultingStream: Term,
-    buckets: Bucket[],
-): Quad[] {
-    const id = df.blankNode();
-    const out: Quad[] = [
-        df.quad(
-            id,
-            SDS.terms.payload,
-            <Quad_Object>record.data.id,
-            SDS.terms.custom("DataDescription"),
-        ),
-        df.quad(
-            id,
-            SDS.terms.stream,
-            <Quad_Object>resultingStream,
-            SDS.terms.custom("DataDescription"),
-        ),
-        ...buckets
-            .map((bucket) => bucket.id)
-            .map((bucket) =>
-                df.quad(
-                    id,
-                    SDS.terms.bucket,
-                    <Quad_Object>bucket,
-                    SDS.terms.custom("DataDescription"),
-                ),
-            ),
-        ...(record.data.quads.length
-            ? record.data.quads
-            : [
-                  df.quad(
-                      id,
-                      SDS.terms.custom("dataless"),
-                      df.literal("true", XSD.terms.custom("boolean")),
-                      SDS.terms.custom("DataDescription"),
-                  ),
-              ]),
-    ];
-    return out;
-}
-
-function bucket_to_quads(bucket: Bucket, stream?: Term): Quad[] {
-    const out: Quad[] = [
-        df.quad(
-            <Quad_Subject>bucket.id,
-            RDF.terms.type,
-            SDS.terms.custom("Bucket"),
-            SDS.terms.custom("DataDescription"),
-        ),
-    ];
-    out.push(
-        df.quad(
-            <Quad_Subject>bucket.id,
-            SDS.terms.custom("immutable"),
-            df.literal((bucket.immutable || false) + ""),
-            SDS.terms.custom("DataDescription"),
-        ),
-    );
-
-    if (bucket.root) {
-        out.push(
-            df.quad(
-                <Quad_Subject>bucket.id,
-                SDS.terms.custom("isRoot"),
-                df.literal("true"),
-                SDS.terms.custom("DataDescription"),
-            ),
-        );
-    }
-
-    // Send empty triples for the bucket if it is set as true.
-    if (bucket.empty) {
-        out.push(
-            df.quad(
-                <Quad_Subject>bucket.id,
-                SDS.terms.custom("empty"),
-                df.literal("true"),
-                SDS.terms.custom("DataDescription"),
-            ),
-        );
-        bucket.empty = false;
-    }
-
-    if (stream) {
-        out.push(
-            df.quad(
-                <Quad_Subject>bucket.id,
-                SDS.terms.stream,
-                <Quad_Object>stream,
-                SDS.terms.custom("DataDescription"),
-            ),
-        );
-    }
-
-    return out;
-}
-
-function relationToQuads(
-    bucket: Bucket,
-    rel: BucketRelation,
-    stream?: Term,
-    remove?: boolean,
-): Quad[] {
-    const graph = remove
-        ? SDS.terms.custom("RemoveDataDescription")
-        : SDS.terms.custom("DataDescription");
-    const out: Quad[] = [];
-    const id = df.blankNode();
-    out.push(
-        df.quad(<Quad_Subject>bucket.id, SDS.terms.relation, id, graph),
-        df.quad(
-            id,
-            RDF.terms.type,
-            <Quad_Object>SDS.terms.custom("Relation"),
-            graph,
-        ),
-        df.quad(id, SDS.terms.relationType, <Quad_Object>rel.type, graph),
-        df.quad(id, SDS.terms.relationBucket, <Quad_Object>rel.target, graph),
-    );
-
-    if (rel.path) {
-        out.push(
-            df.quad(
-                id,
-                SDS.terms.relationPath,
-                <Quad_Object>rel.path.id,
-                graph,
-            ),
-            ...rel.path.quads.map((x) =>
-                df.quad(x.subject, x.predicate, x.object, graph),
-            ),
-        );
-    }
-
-    if (rel.value) {
-        out.push(
-            df.quad(id, SDS.terms.relationValue, <Quad_Object>rel.value, graph),
-        );
-    }
-
-    if (stream) {
-        out.push(
-            df.quad(
-                <Quad_Subject>bucket.id,
-                SDS.terms.stream,
-                <Quad_Object>stream,
-                graph,
-            ),
-        );
-    }
-
-    return out;
-}
-
 function read_save(savePath?: string) {
     try {
         if (savePath) {
@@ -281,10 +130,7 @@ export class Bucketizer extends Processor<Args> {
         if (this.savePath) this.savePath = toPath(this.savePath);
         const save = read_save(this.savePath);
         this.orchestrator = new BucketizerOrchestrator(this.config, save);
-        this.extractor = new Extractor(
-            new CBDShapeExtractor(),
-            this.sourceStream,
-        );
+        this.extractor = new Extractor(this.sourceStream);
 
         handleExit(async () => {
             const state = this.orchestrator.save();
@@ -296,7 +142,6 @@ export class Bucketizer extends Processor<Args> {
     async transform(this: Args & this): Promise<void> {
         const promises: Promise<unknown>[] = [];
         promises.push(this.set_metadata());
-        promises.push(this.extractShape());
         promises.push(this.transformData());
 
         await Promise.all(promises);
@@ -326,29 +171,6 @@ export class Bucketizer extends Processor<Args> {
             );
         }
         await this.channels.metadataOutput.close();
-    }
-
-    async extractShape(this: Args & this) {
-        for await (const x of this.channels.metadataInput.strings()) {
-            const quads = new Parser().parse(x);
-
-            const store = RdfStore.createDefault();
-            quads.forEach((q) => store.addQuad(q));
-
-            const latest = this.sourceStream || (await getLatestStream(store));
-            const latestShape = latest
-                ? await getLatestShape(latest, store)
-                : undefined;
-
-            if (latestShape) {
-                const rdfStore = RdfStore.createDefault();
-                quads.forEach((x) => rdfStore.addQuad(x));
-                const cbd_extract = new CBDShapeExtractor(rdfStore);
-
-                this.extractor.extractor = cbd_extract;
-                this.extractor.shape = latestShape;
-            }
-        }
     }
 
     async transformData(this: Args & this) {

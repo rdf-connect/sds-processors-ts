@@ -1,8 +1,16 @@
-import { Bucket, Extractor, Record } from "./utils";
+import { Bucket, Record } from "./utils";
 import { CBDShapeExtractor } from "extract-cbd-shape";
-import type { BucketDTO, RelationDTO } from "./utils";
-export { Bucket, CBDShapeExtractor, Extractor, Record };
-export type { BucketDTO, RelationDTO };
+import { Extract, Extractor, record_to_quads } from "./utils/description";
+import type { SdsBucket, SdsRecord, SdsRelation } from "./utils/description";
+export {
+    Bucket,
+    CBDShapeExtractor,
+    Extract,
+    Extractor,
+    Record,
+    record_to_quads,
+};
+export type { SdsBucket, SdsRecord, SdsRelation };
 
 export * from "./bucketizers";
 export * from "./ldesify";
