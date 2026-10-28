@@ -1,6 +1,7 @@
 import { Quad, Quad_Object, Term } from "@rdfjs/types";
 import { Processor, Reader } from "@rdfc/js-runner";
 import { maybeParse } from "./utils";
+import { dedupQuads, Pipeline } from "./pipeline";
 import { Extractor } from "./utils/description";
 import path from "node:path";
 import { DataFactory } from "rdf-data-factory";
@@ -27,21 +28,28 @@ type MapEntry = {
 
 type Args = {
     data: Reader;
-    metadata: Reader;
     directory: string;
     nameMap: MapEntry[];
+    // The whole pipeline description (rdfl:Context), to describe the streams that reach this writer.
+    pipeline: Quad[];
 };
 
 export class LdesDiskWriter extends Processor<Args> {
     extractor = new Extractor();
+    pipelineGraph: Pipeline;
+    // The streams published as views.
+    streams: Term[] = [];
 
     async init(this: Args & this): Promise<void> {
         this.directory = toPath(this.directory);
+        this.pipelineGraph = new Pipeline(this.pipeline || []);
+        this.streams = this.pipelineGraph.streamsOn(this.data.uri);
     }
 
     async transform(this: Args & this): Promise<void> {
         try {
-            await Promise.all([this.handleData(), this.handleMetata()]);
+            await this.writeRoot();
+            await this.handleData();
         } catch (ex: unknown) {
             console.error(ex);
             throw ex;
@@ -72,163 +80,136 @@ export class LdesDiskWriter extends Processor<Args> {
         }
     }
 
-    async handleMetata(this: Args & this) {
-        for await (const input of this.metadata.strings()) {
-            const metadataQuads = maybeParse(input);
+    /**
+     * Writes the root of the LDES: one view for every stream, and how each
+     * stream was derived, as far as the pipeline description tells.
+     */
+    async writeRoot(this: Args & this) {
+        const root = df.namedNode("index.trig");
+        const metadataQuads = dedupQuads(
+            this.streams.flatMap((stream) =>
+                this.pipelineGraph.describe(stream),
+            ),
+        );
+        metadataQuads.push(
+            df.quad(root, RDF.terms.type, LDES.terms.EventStream),
+        );
 
-            this.logger.debug(
-                `[metadata] Got input with ${metadataQuads.length} quads`,
+        // The LDES is the dataset of its streams, and its members have their shape.
+        const objectOfStreams = (predicate: Term) =>
+            metadataQuads.find(
+                (q) =>
+                    this.streams.some((s) => s.equals(q.subject)) &&
+                    q.predicate.equals(predicate),
+            )?.object;
+        const datasetId = objectOfStreams(SDS.terms.dataset);
+        if (datasetId) {
+            metadataQuads
+                .filter((q) => q.subject.equals(datasetId))
+                .forEach((q) =>
+                    metadataQuads.push(df.quad(root, q.predicate, q.object)),
+                );
+        }
+        const carries = objectOfStreams(SDS.terms.carries);
+        const shapeId = carries
+            ? metadataQuads.find(
+                  (q) =>
+                      q.subject.equals(carries) &&
+                      q.predicate.equals(SDS.terms.shape),
+              )?.object
+            : undefined;
+        if (
+            shapeId &&
+            !metadataQuads.some(
+                (q) =>
+                    q.subject.equals(root) &&
+                    q.predicate.equals(TREE.terms.shape),
+            )
+        ) {
+            metadataQuads.push(df.quad(root, TREE.terms.shape, shapeId));
+        }
+
+        for (const stream of this.streams) {
+            const viewId = df.namedNode(
+                path.join(this.pathName(stream), "index.trig"),
             );
-
-            const streams = metadataQuads
-                .filter(
-                    (q) =>
-                        q.predicate.equals(RDF.terms.type) &&
-                        q.object.equals(SDS.terms.Stream),
-                )
-                .map((q) => q.subject);
-
+            const viewDescriptionId = df.namedNode(
+                `${viewId.value}#description`,
+            );
             metadataQuads.push(
+                df.quad(root, TREE.terms.view, viewId),
+                df.quad(viewId, RDF.terms.type, TREE.terms.Node),
                 df.quad(
-                    df.namedNode("index.trig"),
+                    viewId,
+                    TREE.terms.custom("viewDescription"),
+                    viewDescriptionId,
+                ),
+                df.quad(
+                    viewDescriptionId,
                     RDF.terms.type,
-                    LDES.terms.EventStream,
+                    TREE.terms.custom("ViewDescription"),
+                ),
+                df.quad(
+                    viewDescriptionId,
+                    df.namedNode("http://www.w3.org/ns/dcat#endpointURL"),
+                    viewId,
+                ),
+                df.quad(
+                    viewDescriptionId,
+                    df.namedNode("http://www.w3.org/ns/dcat#servesDataset"),
+                    root,
+                ),
+                df.quad(
+                    viewDescriptionId,
+                    LDES.terms.custom("managedBy"),
+                    <Quad_Object>stream,
                 ),
             );
 
-            const datasetId = metadataQuads.find(
-                (q) =>
-                    streams.map((q) => q.value).includes(q.subject.value) &&
-                    q.predicate.equals(SDS.terms.dataset),
-            )?.object;
-            if (datasetId) {
-                metadataQuads
-                    .filter((q) => q.subject.equals(datasetId))
-                    .forEach((q) =>
-                        metadataQuads.push(
-                            df.quad(
-                                df.namedNode("index.trig"),
-                                q.predicate,
-                                q.object,
-                            ),
-                        ),
-                    );
-            }
-            const shapeId = metadataQuads.find(
-                (q) =>
-                    streams.map((q) => q.value).includes(q.subject.value) &&
-                    q.predicate.equals(SDS.terms.shape),
-            )?.object;
-            if (shapeId) {
-                metadataQuads.push(
-                    df.quad(
-                        df.namedNode("index.trig"),
-                        TREE.terms.shape,
-                        shapeId,
-                    ),
-                );
-            }
+            // Create the directory and index file for the view
+            const viewPath = path.join(this.directory, this.pathName(stream));
+            await fs.promises.mkdir(viewPath, { recursive: true });
 
-            // Add information about the different views (defined by the streams) in the LDES.
-            for (const stream of streams) {
-                this.logger.debug(
-                    `[metadata] Adding SDS Stream ${stream.value} to LDES`,
-                );
-
-                const viewId = df.namedNode(
-                    path.join(this.pathName(stream), "index.trig"),
-                );
-                metadataQuads.push(
+            const viewIndexPath = path.join(viewPath, "index.trig");
+            if (!fs.existsSync(viewIndexPath)) {
+                const viewQuads = [
                     df.quad(
-                        df.namedNode("index.trig"),
-                        TREE.terms.view,
-                        viewId,
-                    ),
-                );
-                metadataQuads.push(
-                    df.quad(viewId, RDF.terms.type, TREE.terms.Node),
-                );
-                const viewDescriptionId = df.namedNode(
-                    `${viewId.value}#description`,
-                );
-                metadataQuads.push(
-                    df.quad(
-                        viewId,
-                        TREE.terms.custom("viewDescription"),
-                        viewDescriptionId,
-                    ),
-                );
-                metadataQuads.push(
-                    df.quad(
-                        viewDescriptionId,
+                        df.namedNode("../index.trig"),
                         RDF.terms.type,
-                        TREE.terms.custom("ViewDescription"),
+                        LDES.terms.EventStream,
                     ),
-                );
-                metadataQuads.push(
                     df.quad(
-                        viewDescriptionId,
-                        df.namedNode("http://www.w3.org/ns/dcat#endpointURL"),
-                        viewId,
-                    ),
-                );
-                metadataQuads.push(
-                    df.quad(
-                        viewDescriptionId,
-                        df.namedNode("http://www.w3.org/ns/dcat#servesDataset"),
                         df.namedNode("index.trig"),
+                        RDF.terms.type,
+                        TREE.terms.Node,
                     ),
-                );
-                metadataQuads.push(
                     df.quad(
-                        viewDescriptionId,
-                        LDES.terms.custom("managedBy"),
-                        stream,
+                        df.namedNode("index.trig"),
+                        DC.terms.custom("isPartOf"),
+                        df.namedNode("../index.trig"),
                     ),
-                );
-
-                // Create the directory and index file for the view
-                const viewPath = path.join(
-                    this.directory,
-                    this.pathName(stream),
-                );
-                await fs.promises.mkdir(viewPath, { recursive: true });
-
-                const viewIndexPath = path.join(viewPath, "index.trig");
-                if (!fs.existsSync(viewIndexPath)) {
-                    const viewQuads = [
-                        df.quad(
-                            df.namedNode("../index.trig"),
-                            RDF.terms.type,
-                            LDES.terms.EventStream,
-                        ),
-                        df.quad(
-                            df.namedNode("index.trig"),
-                            RDF.terms.type,
-                            TREE.terms.Node,
-                        ),
-                        df.quad(
-                            df.namedNode("index.trig"),
-                            DC.terms.custom("isPartOf"),
-                            df.namedNode("../index.trig"),
-                        ),
-                    ];
-                    const data = await quadsToString(viewQuads);
-                    await fs.promises.writeFile(viewIndexPath, data);
-                }
+                ];
+                const data = await quadsToString(viewQuads);
+                await fs.promises.writeFile(viewIndexPath, data);
             }
-
-            // Always writing the metadata makes sure the metadata is always up-to-date.
-            const metadataString = await quadsToString(metadataQuads);
-            await fs.promises.writeFile(
-                path.join(this.directory, "index.trig"),
-                metadataString,
-            );
-
-            this.logger.debug(
-                `[metadata] LDES entry point written with ${metadataQuads.length} quads`,
-            );
         }
+
+        await fs.promises.mkdir(this.directory, { recursive: true });
+        await fs.promises.writeFile(
+            path.join(this.directory, "index.trig"),
+            await quadsToString(metadataQuads),
+        );
+        this.logger.debug(
+            `[metadata] LDES entry point written with ${this.streams.length} views and ${metadataQuads.length} quads`,
+        );
+    }
+
+    /** A stream that the pipeline description did not show reaching this writer. */
+    async addStream(this: Args & this, stream: string) {
+        if (this.streams.some((s) => s.value === stream)) return;
+        this.logger.info(`[data] Adding a view for stream <${stream}>`);
+        this.streams.push(df.namedNode(stream));
+        await this.writeRoot();
     }
 
     async handleData(this: Args & this) {
@@ -246,6 +227,13 @@ export class LdesDiskWriter extends Processor<Args> {
                 );
                 return false;
             });
+
+            for (const stream of [
+                ...extract.getBuckets().map((b) => b.stream.value),
+                ...records.map((r) => r.stream.value),
+            ]) {
+                await this.addStream(stream);
+            }
 
             const members: Map<string, Quad[]> = new Map<string, Quad[]>(); // member id -> quads
 

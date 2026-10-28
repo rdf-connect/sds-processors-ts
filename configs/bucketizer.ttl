@@ -10,7 +10,7 @@
 rdfc:Bucketize a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Bucketizer processor";
-  rdfs:description "This bucketizer processor is a SDS processor. It takes in SDS records and SDS metadata and bucketizes the incoming records according to some bucketize strategy. The metadata is also transformed to reflect this transformation. Many SDS streams can be present on the incoming data channel, please specify what stream to ingest and what stream to produce.";
+  rdfs:description "This bucketizer processor is a SDS processor. It takes in SDS records and bucketizes them according to some bucketize strategy. The resulting stream is the output channel. Many SDS streams can be present on the incoming data channel; specify the stream to ingest with rdfc:inputStreamId.";
   rdfc:file <../lib/bucketizers.js>;
   rdfc:class "Bucketizer";
   rdfc:entrypoint <../>.
@@ -24,21 +24,9 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:class rdfc:Reader;
-    sh:path rdfc:metadataInput;
-    sh:name "metadataInput";
-    sh:minCount 1;
-    sh:maxCount 1;
-  ], [
     sh:class rdfc:Writer;
     sh:path rdfc:dataOutput;
     sh:name "dataOutput";
-    sh:minCount 1;
-    sh:maxCount 1;
-  ], [
-    sh:class rdfc:Writer;
-    sh:path rdfc:metadataOutput;
-    sh:name "metadataOutput";
     sh:minCount 1;
     sh:maxCount 1;
   ].
@@ -60,12 +48,6 @@ rdfc:Bucketize a owl:Class, rdfs:Class;
     sh:nodeKind sh:IRI;
     sh:path rdfc:inputStreamId;
     sh:name "sourceStream";
-    sh:maxCount 1;
-  ], [
-    sh:nodeKind sh:IRI;
-    sh:path rdfc:outputStreamId;
-    sh:name "resultingStream";
-    sh:minCount 1;
     sh:maxCount 1;
   ], [
     sh:nodeKind sh:IRIOrLiteral;

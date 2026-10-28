@@ -147,20 +147,16 @@ describe("Functional tests for the ldesDiskWriter function", () => {
     test("LdesDiskWriter skips a record with a blank node payload", async () => {
         const runner = createRunner();
         const [inputWriter, inputReader] = channel(runner, "input");
-        const [metaWriter, metaReader] = channel(runner, "meta");
         const directory = "tmp/ldes-disk/";
         const logger = createLogger({
             transports: [new transports.Console()],
         });
 
-        const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
-            {
-                directory,
-                metadata: metaReader,
-                data: inputReader,
-                nameMap: [],
-            },
-            logger,
+        const proc = <FullProc<LdesDiskWriter>>(
+            new LdesDiskWriter(
+                { directory, data: inputReader, nameMap: [] },
+                logger,
+            )
         );
         await proc.init();
         const prom = proc.transform();
@@ -177,7 +173,6 @@ describe("Functional tests for the ldesDiskWriter function", () => {
         }
         _:member <http://example.org/p> "o".
         `);
-        await metaWriter.close();
         await inputWriter.close();
         await prom;
 
