@@ -7,6 +7,7 @@ import { DataFactory } from "rdf-data-factory";
 import { DC, LDES, RDF, SDS, TREE, XSD } from "@treecg/types";
 import { Parser, Writer } from "n3";
 import * as fs from "node:fs";
+import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory({ blankNodePrefix: "df_" + new Date().getTime() });
 
@@ -35,9 +36,7 @@ export class LdesDiskWriter extends Processor<Args> {
     extractor = new Extractor();
 
     async init(this: Args & this): Promise<void> {
-        if (this.directory.startsWith("file://")) {
-            this.directory = this.directory.slice("file://".length);
-        }
+        this.directory = toPath(this.directory);
     }
 
     async transform(this: Args & this): Promise<void> {

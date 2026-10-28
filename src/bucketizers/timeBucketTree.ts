@@ -240,9 +240,6 @@ export default class TimeBucketBucketizer implements Bucketizer {
             );
         }
 
-        if (config["timeBufferMs"] === undefined) {
-            config["timeBufferMs"] = 0;
-        }
         this.config = config;
 
         this.path = config.path.mapAll((x) => ({

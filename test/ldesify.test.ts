@@ -66,8 +66,12 @@ describe("Functional tests for the ldesify function", () => {
                 targetStream: stream,
                 statePath: undefined,
                 sourceStream: undefined,
-                isVersionOfPathM: undefined,
-                modifiedPathM: undefined,
+                isVersionOfPathM: df.namedNode(
+                    "http://purl.org/dc/terms/isVersionOf",
+                ),
+                modifiedPathM: df.namedNode(
+                    "http://purl.org/dc/terms/modified",
+                ),
             },
             logger,
         );
