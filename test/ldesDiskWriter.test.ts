@@ -143,4 +143,50 @@ describe("Functional tests for the ldesDiskWriter function", () => {
             ).length,
         ).toBe(11);
     });
+
+    test("LdesDiskWriter skips a record with a blank node payload", async () => {
+        const runner = createRunner();
+        const [inputWriter, inputReader] = channel(runner, "input");
+        const [metaWriter, metaReader] = channel(runner, "meta");
+        const directory = "tmp/ldes-disk/";
+        const logger = createLogger({
+            transports: [new transports.Console()],
+        });
+
+        const proc = <FullProc<LdesDiskWriter>>new LdesDiskWriter(
+            {
+                directory,
+                metadata: metaReader,
+                data: inputReader,
+                nameMap: [],
+            },
+            logger,
+        );
+        await proc.init();
+        const prom = proc.transform();
+
+        inputWriter.string(`
+        @prefix sds: <https://w3id.org/sds#>.
+        sds:DataDescription {
+            _:record sds:payload _:member;
+                sds:stream <http://example.org/stream>;
+                sds:bucket <root>.
+            <root> a sds:Bucket;
+                sds:isRoot true;
+                sds:stream <http://example.org/stream>.
+        }
+        _:member <http://example.org/p> "o".
+        `);
+        await metaWriter.close();
+        await inputWriter.close();
+        await prom;
+
+        const index = fs.readFileSync(
+            `${directory}http_3A_2F_2Fexample.org_2Fstream/root/index.trig`,
+        );
+        const quads = new Parser().parse(index.toString());
+        expect(quads.some((q) => q.predicate.equals(TREE.terms.member))).toBe(
+            false,
+        );
+    });
 });
