@@ -1,7 +1,7 @@
 import { describe, expect, test } from "vitest";
 import { Shapify } from "../lib/shapify.js";
 import { NamedNode, Parser } from "n3";
-import { CBDShapeExtractor, Extractor } from "../lib";
+import { Extractor } from "../lib";
 import { channel, createRunner } from "@rdfc/js-runner/lib/testUtils";
 import { createLogger, transports } from "winston";
 import { readStrings } from "./utils";
@@ -130,7 +130,7 @@ sds:stream <blabla>.
         await trans;
 
         // Parse the output and check it is correct
-        const extractor = new Extractor(new CBDShapeExtractor());
+        const extractor = new Extractor();
         const records = await extractor.parse_records(
             new Parser().parse(outputData[0]),
         );

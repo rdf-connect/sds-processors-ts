@@ -3,7 +3,7 @@ import { Quad, Term } from "@rdfjs/types";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { Parser, Writer as NWriter } from "n3";
 import { RdfStore } from "rdf-stores";
-import { Extractor } from "./utils";
+import { Extractor } from "./utils/description";
 
 export type Shape = {
     id: Term;
@@ -21,7 +21,7 @@ export class Shapify extends Processor<Args> {
         const shapeStore = RdfStore.createDefault();
         this.shape.quads.forEach((q) => shapeStore.addQuad(q));
         this.cbd_extractor = new CBDShapeExtractor(shapeStore);
-        this.extractor = new Extractor(new CBDShapeExtractor(), undefined);
+        this.extractor = new Extractor();
     }
     async transform(this: Args & this): Promise<void> {
         for await (const x of this.reader.strings()) {
