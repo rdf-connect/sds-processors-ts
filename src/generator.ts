@@ -45,16 +45,12 @@ function generateMember(i: number, timestampPath?: Term) {
 
 type Args = {
     writer: Writer;
-    // Optional in config
     count: number;
-    // Optional in config
     wait: number;
     timestampPath?: Term;
 };
 export class Generator extends Processor<Args> {
     async init(this: Args & this): Promise<void> {
-        this.count = this.count ?? 100000;
-        this.wait = this.wait ?? 50;
         // empty
     }
     async transform(this: Args & this): Promise<void> {

@@ -10,6 +10,7 @@ import { Bucket, BucketRelation, Extractor, Record } from "./utils/index";
 import { CBDShapeExtractor } from "extract-cbd-shape";
 import { cleanUpHandlers, handleExit } from "./exitHandler";
 import { RdfStore } from "rdf-stores";
+import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory();
 
@@ -18,14 +19,7 @@ async function writeState(
     content: string,
 ): Promise<void> {
     if (path) {
-        let p = path;
-        try {
-            const url = new URL(path);
-            p = url.pathname;
-        } catch {
-            // this is fine, the path was already a file path, not a uri
-        }
-        writeFileSync(p, content, { encoding: "utf-8" });
+        writeFileSync(path, content, { encoding: "utf-8" });
     }
 }
 
@@ -284,7 +278,7 @@ export class Bucketizer extends Processor<Args> {
     recordCount: number = 0;
 
     async init(this: Args & this): Promise<void> {
-        this.prefix = this.prefix ?? "root";
+        if (this.savePath) this.savePath = toPath(this.savePath);
         const save = read_save(this.savePath);
         this.orchestrator = new BucketizerOrchestrator(this.config, save);
         this.extractor = new Extractor(

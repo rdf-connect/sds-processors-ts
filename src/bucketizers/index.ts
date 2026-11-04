@@ -60,7 +60,7 @@ export type TimebasedFragmentation = {
 export type HourFragmentation = {
     path: BasicLensM<Cont, Cont>;
     pathQuads: Cont;
-    unorderedRelations?: boolean;
+    unorderedRelations: boolean;
 };
 
 export type DumpFragmentation = {

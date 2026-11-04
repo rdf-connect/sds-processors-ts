@@ -29,14 +29,16 @@ rdfc:Generate a owl:Class, rdfs:Class;
     sh:datatype xsd:integer;
     sh:path rdfc:count;
     sh:name "count";
+    sh:defaultValue 100000;
     sh:maxCount 1;
   ], [
     sh:datatype xsd:integer;
     sh:path rdfc:waitMS;
     sh:name "wait";
+    sh:defaultValue 50;
     sh:maxCount 1;
   ], [
-    sh:datatype xsd:iri;
+    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "timestampPath";
     sh:maxCount 1;
