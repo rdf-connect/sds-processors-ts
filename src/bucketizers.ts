@@ -230,7 +230,6 @@ export class Bucketizer extends Processor<Args> {
                             new Record(
                                 { id: df.namedNode(member), quads: [] },
                                 this.resultingStream,
-                                this.buckets[bucket],
                             ),
                             this.resultingStream,
                             [this.buckets[bucket]],

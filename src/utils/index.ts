@@ -58,12 +58,10 @@ export class Bucket {
 export class Record {
     stream: Term;
     data: RdfThing;
-    bucket?: Bucket;
 
-    constructor(data: RdfThing, stream: Term, bucket?: Bucket) {
+    constructor(data: RdfThing, stream: Term) {
         this.stream = stream;
         this.data = data;
-        this.bucket = bucket;
     }
 }
 
