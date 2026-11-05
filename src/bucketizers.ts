@@ -1,9 +1,7 @@
 import { readFileSync, writeFileSync } from "fs";
 import { Parser, Writer as N3Writer } from "n3";
-import { Quad, Quad_Object, Term } from "@rdfjs/types";
+import { Quad, Term } from "@rdfjs/types";
 import { DataFactory } from "rdf-data-factory";
-import { transformMetadata } from "./core";
-import { LDES, PPLAN, PROV, RDF } from "@treecg/types";
 import { Processor, type Reader, type Writer } from "@rdfc/js-runner";
 import { BucketizerConfig, BucketizerOrchestrator } from "./bucketizers/index";
 import { Bucket, BucketRelation, Record } from "./utils/index";
@@ -14,7 +12,6 @@ import {
     relationToQuads,
 } from "./utils/description";
 import { cleanUpHandlers, handleExit } from "./exitHandler";
-import { RdfStore } from "rdf-stores";
 import { toPath } from "@rdfc/utils-js";
 
 const df = new DataFactory();
@@ -28,78 +25,9 @@ async function writeState(
     }
 }
 
-function addProcess(
-    id: Term | undefined,
-    store: RdfStore,
-    strategies: { id: Term; quads: Quad[] }[],
-): Term {
-    const newId = df.blankNode();
-    const time = new Date().toISOString();
-
-    store.addQuad(df.quad(newId, RDF.terms.type, PPLAN.terms.Activity));
-    store.addQuad(df.quad(newId, RDF.terms.type, LDES.terms.Bucketization));
-
-    const valueTerm = PROV.terms.custom("value");
-    const revisionTerm = PROV.terms.custom("wasRevisionOf");
-    if (strategies.length === 1) {
-        strategies[0].quads.forEach((q) => store.addQuad(q));
-        store.addQuad(
-            df.quad(newId, PROV.terms.used, <Quad_Object>strategies[0].id),
-        );
-    } else {
-        // Push the first strategy to the end
-        let lastCollectionId = df.blankNode();
-        store.addQuad(
-            df.quad(lastCollectionId, valueTerm, <Quad_Object>strategies[0].id),
-        );
-        strategies[0].quads.forEach((q) => store.addQuad(q));
-
-        // Each strategy is prov:value on the config and a derivation from the previous one
-        for (const s of strategies.slice(1)) {
-            const collectionEntry = df.blankNode();
-
-            store.addQuad(
-                df.quad(
-                    collectionEntry,
-                    revisionTerm,
-                    <Quad_Object>lastCollectionId,
-                ),
-            );
-            store.addQuad(
-                df.quad(collectionEntry, valueTerm, <Quad_Object>s.id),
-            );
-            lastCollectionId = collectionEntry;
-        }
-
-        store.addQuad(
-            df.quad(newId, PROV.terms.used, <Quad_Object>lastCollectionId),
-        );
-    }
-
-    store.addQuad(df.quad(newId, PROV.terms.startedAtTime, df.literal(time)));
-    if (id) {
-        store.addQuad(df.quad(newId, PROV.terms.used, <Quad_Object>id));
-    }
-
-    return newId;
-}
-
-function parseQuads(quads: string | Quad[]): Quad[] {
-    if (quads instanceof Array) return <Quad[]>quads;
-    const parser = new Parser();
-    return parser.parse(quads);
-}
-
-function serializeQuads(quads: Quad[]): string {
-    const writer = new N3Writer();
-    return writer.quadsToString(quads);
-}
-
 type Channels = {
     dataInput: Reader;
-    metadataInput: Reader;
     dataOutput: Writer;
-    metadataOutput: Writer;
 };
 
 function read_save(savePath?: string) {
@@ -117,7 +45,6 @@ type Args = {
     config: BucketizerConfig[];
     savePath: string | undefined;
     sourceStream: Term | undefined;
-    resultingStream: Term;
     prefix: string;
 };
 export class Bucketizer extends Processor<Args> {
@@ -125,8 +52,11 @@ export class Bucketizer extends Processor<Args> {
     extractor: Extractor;
     buckets: { [id: string]: Bucket } = {};
     recordCount: number = 0;
+    // The stream is the channel the records are written to.
+    resultingStream: Term;
 
     async init(this: Args & this): Promise<void> {
+        this.resultingStream = df.namedNode(this.channels.dataOutput.uri);
         if (this.savePath) this.savePath = toPath(this.savePath);
         const save = read_save(this.savePath);
         this.orchestrator = new BucketizerOrchestrator(this.config, save);
@@ -140,37 +70,10 @@ export class Bucketizer extends Processor<Args> {
     }
 
     async transform(this: Args & this): Promise<void> {
-        const promises: Promise<unknown>[] = [];
-        promises.push(this.set_metadata());
-        promises.push(this.transformData());
-
-        await Promise.all(promises);
+        await this.transformData();
     }
     async produce(this: Args & this): Promise<void> {
         // nothing
-    }
-
-    async set_metadata(this: Args & this) {
-        const f = transformMetadata(
-            this.resultingStream,
-            this.sourceStream,
-            "https://w3id.org/sds#Member",
-            (x, y) =>
-                addProcess(
-                    x,
-                    y,
-                    this.config.map((x) => x.quads),
-                ),
-        );
-
-        this.logger.info("[set_metadata] Accepting metadata");
-        for await (const quads of this.channels.metadataInput.strings()) {
-            this.logger.verbose("[set_metadata] Got metadata input:\n" + quads);
-            await this.channels.metadataOutput.string(
-                serializeQuads(await f(parseQuads(quads))),
-            );
-        }
-        await this.channels.metadataOutput.close();
     }
 
     async transformData(this: Args & this) {

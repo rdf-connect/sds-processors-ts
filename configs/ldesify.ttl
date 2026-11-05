@@ -93,12 +93,6 @@ rdfc:LdesifySDS a owl:Class, rdfs:Class;
     sh:maxCount 1;
   ], [
     sh:nodeKind sh:IRI;
-    sh:path rdfc:targetStream;
-    sh:name "targetStream";
-    sh:minCount 1;
-    sh:maxCount 1;
-  ], [
-    sh:nodeKind sh:IRI;
     sh:path rdfc:timestampPath;
     sh:name "modifiedPathM";
     sh:defaultValue <http://purl.org/dc/terms/modified>;

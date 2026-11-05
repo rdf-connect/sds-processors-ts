@@ -12,7 +12,7 @@
 rdfc:Sdsify a owl:Class, rdfs:Class;
   rdfc:jsImplementationOf rdfc:Processor;
   rdfs:label "Sdsify processor";
-  rdfs:description "Ingest a stream of RDF dumps and produce a stream of SDS records, based on the provided configuration.";
+  rdfs:description "Ingest a stream of RDF dumps and produce a stream of SDS records, based on the provided configuration. The stream is the output channel; the metadata configuration describes it to the processors that publish it.";
   rdfc:file <../lib/sdsify.js>;
   rdfc:class "Sdsify";
   rdfc:entrypoint <../>.
@@ -32,17 +32,10 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:maxCount 1;
     sh:minCount 1;
   ], [
-    sh:class rdfc:Writer;
-    sh:path rdfc:metadataOutput;
-    sh:name "metadataOutput";
-    sh:maxCount 1;
-    sh:minCount 1;
-  ], [
     sh:class rdfc:MetadataConfig;
     sh:path rdfc:metadataConfig;
     sh:name "metadataConfig";
     sh:maxCount 1;
-    sh:minCount 1;
   ], [
     sh:nodeKind sh:IRI;
     sh:path rdfc:typeFilter;
@@ -65,12 +58,6 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
 [ ] a sh:NodeShape;
   sh:targetClass rdfc:MetadataConfig;
   sh:property [
-    sh:nodeKind sh:IRI;
-    sh:path rdfc:streamId;
-    sh:name "streamId";
-    sh:minCount 1;
-    sh:maxCount 1;
-  ], [
     sh:datatype xsd:string;
     sh:path rdfc:description;
     sh:name "description";
@@ -94,5 +81,10 @@ rdfc:Sdsify a owl:Class, rdfs:Class;
     sh:datatype xsd:string;
     sh:path rdfc:shape;
     sh:name "shape";
+    sh:maxCount 1;
+  ], [
+    sh:nodeKind sh:IRI;
+    sh:path rdfc:dataset;
+    sh:name "dataset";
     sh:maxCount 1;
   ].

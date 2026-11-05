@@ -20,3 +20,4 @@ export * from "./generator";
 export * from "./streamJoin";
 export * from "./ldesDiskWriter";
 export * from "./memberAsNamedGraph";
+export { Pipeline } from "./pipeline";

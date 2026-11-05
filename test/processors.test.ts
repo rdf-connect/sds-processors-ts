@@ -54,9 +54,7 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:SubjectFragmentation;
@@ -66,7 +64,6 @@ describe("SDS processors tests", async () => {
     tree:pageSize 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -87,16 +84,14 @@ describe("SDS processors tests", async () => {
 
         expect(bucketizer.prefix).toBe("root"); // default
         expect(bucketizer.channels.dataInput.uri).toContain("dataInput");
-        expect(bucketizer.channels.metadataInput.uri).toContain(
-            "metadataInput",
-        );
         expect(bucketizer.channels.dataOutput.uri).toContain("dataOutput");
-        expect(bucketizer.channels.metadataOutput.uri).toContain(
-            "metadataOutput",
-        );
         expect(bucketizer.savePath).toBeUndefined();
         expect(bucketizer.sourceStream?.value).toBe("http://testStream");
-        expect(bucketizer.resultingStream?.value).toBe("http://newStream");
+        // The resulting stream is the output channel
+        await bucketizer.init();
+        expect(bucketizer.resultingStream?.value).toBe(
+            bucketizer.channels.dataOutput.uri,
+        );
         expect(bucketizer.config.length).toBe(2);
 
         const subjectConfig = <SubjectFragmentation>bucketizer.config[0].config;
@@ -114,9 +109,7 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:RTreeFragmentation;
@@ -125,7 +118,6 @@ describe("SDS processors tests", async () => {
     tree:pageSize 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -158,16 +150,13 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:ReversedPageFragmentation;
     tree:pageSize 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -195,9 +184,7 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:TimebasedFragmentation;
@@ -207,7 +194,6 @@ describe("SDS processors tests", async () => {
     tree:minBucketSpan 2;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -238,9 +224,7 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:TimeBucketFragmentation;
@@ -251,7 +235,6 @@ describe("SDS processors tests", async () => {
     ];
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -280,16 +263,13 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:HourFragmentation;
     tree:timestampPath <path>;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -317,15 +297,12 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:DumpFragmentation;
   ] );
     rdfc:inputStreamId <http://testStream>;
-    rdfc:outputStreamId <http://newStream>;
     rdfc:prefix "root".
     `;
 
@@ -395,7 +372,6 @@ describe("SDS processors tests", async () => {
           rdfc:checkProps true;
           rdfc:timestampPath <http://example.com/ns#time>;
           rdfc:versionOfPath <http://example.com/ns#ver>;
-          rdfc:targetStream <http://example.com/ns#target>;
           rdfc:sourceStream <http://example.com/ns#source>;
           .
         `;
@@ -420,9 +396,8 @@ describe("SDS processors tests", async () => {
         expect(ldesifySds.isVersionOfPathM?.value).toBe(
             "http://example.com/ns#ver",
         );
-        expect(ldesifySds.targetStream.value).toBe(
-            "http://example.com/ns#target",
-        );
+        await ldesifySds.init();
+        expect(ldesifySds.targetStream.value).toBe(ldesifySds.writer.uri);
         expect(ldesifySds.sourceStream?.value).toBe(
             "http://example.com/ns#source",
         );
@@ -463,10 +438,9 @@ describe("SDS processors tests", async () => {
         <http://example.com/ns#processor> a rdfc:Sdsify;
             rdfc:input <jr>;
             rdfc:output <jw>;
-            rdfc:metadataOutput <jw2>;
             rdfc:metadataConfig [
-                rdfc:streamId <http://me.com/stream>;
                 rdfc:description "My description";
+                rdfc:dataset <http://ex.org/dataset>;
                 rdfc:timestampPath <http://ex.org/timestamp>;
                 rdfc:versionOfPath <http://ex.org/version>;
                 rdfc:shapeIri <http://ex.org/shape>;
@@ -507,20 +481,19 @@ describe("SDS processors tests", async () => {
 
         expect(sdsify.input.uri).toContain("jr");
         expect(sdsify.output.uri).toContain("jw");
-        expect(sdsify.metadataOutput?.uri).toContain("jw2");
-        expect(sdsify.metadataConfig.streamId.value).toBe(
-            "http://me.com/stream",
+        expect(sdsify.metadataConfig?.dataset?.value).toBe(
+            "http://ex.org/dataset",
         );
-        expect(sdsify.metadataConfig.timestampPath?.value).toBe(
+        expect(sdsify.metadataConfig?.timestampPath?.value).toBe(
             "http://ex.org/timestamp",
         );
-        expect(sdsify.metadataConfig.versionOfPath?.value).toBe(
+        expect(sdsify.metadataConfig?.versionOfPath?.value).toBe(
             "http://ex.org/version",
         );
-        expect(sdsify.metadataConfig.shapeIri?.value).toBe(
+        expect(sdsify.metadataConfig?.shapeIri?.value).toBe(
             "http://ex.org/shape",
         );
-        expect(sdsify.metadataConfig.shape).toBeDefined();
+        expect(sdsify.metadataConfig?.shape).toBeDefined();
         expect(sdsify.types?.map((x) => x.value)).toEqual([
             "http://ex.org/Type",
             "http://ex.org/AnotherType",
@@ -581,7 +554,6 @@ describe("SDS processors tests", async () => {
     @prefix rdfc: <https://w3id.org/rdf-connect#>.
             <http://example.com/ns#processor> a rdfc:LdesDiskWriter;
                 rdfc:dataInput <jr1>;
-                rdfc:metadataInput <jr2>;
                 rdfc:directory "/tmp/ldes-disk/".
             `;
 
@@ -596,7 +568,12 @@ describe("SDS processors tests", async () => {
             await procHelper.getProcessor("http://example.com/ns#processor");
 
         expect(ldesDiskWriter.data.uri).toContain("jr1");
-        expect(ldesDiskWriter.metadata.uri).toContain("jr2");
+        // It receives the whole pipeline description, its own declaration included
+        expect(
+            ldesDiskWriter.pipeline.some(
+                (q) => q.subject.value === "http://example.com/ns#processor",
+            ),
+        ).toBe(true);
         expect(ldesDiskWriter.directory).toBe("/tmp/ldes-disk/");
     });
 
@@ -635,9 +612,7 @@ describe("SDS processors tests", async () => {
 <http://example.com/ns#processor> a rdfc:Bucketize;
   rdfc:channels [
     rdfc:dataInput <dataInput>;
-    rdfc:metadataInput <metadataInput>;
     rdfc:dataOutput <dataOutput>;
-    rdfc:metadataOutput <metadataOutput>;
   ];
   rdfc:bucketizeStrategy ( [
     a tree:HourFragmentation;
@@ -649,8 +624,7 @@ describe("SDS processors tests", async () => {
         tree:range "year";
         tree:maxSize 10;
     ];
-  ] );
-  rdfc:outputStreamId <http://newStream>.
+  ] ).
     `;
 
         const configLocation = process.cwd() + "/configs/bucketizer.ttl";
@@ -704,8 +678,7 @@ describe("SDS processors tests", async () => {
 
         <http://example.com/ns#processor> a rdfc:LdesifySDS;
           rdfc:input <jr>;
-          rdfc:output <jw>;
-          rdfc:targetStream <http://example.com/ns#target>.
+          rdfc:output <jw>.
         `;
 
         const configLocation = process.cwd() + "/configs/ldesify.ttl";
@@ -759,12 +732,9 @@ describe("SDS processors tests", async () => {
             `<http://example.com/ns#processor> a rdfc:Bucketize;
                 rdfc:channels [
                     rdfc:dataInput <dataInput>;
-                    rdfc:metadataInput <metadataInput>;
                     rdfc:dataOutput <dataOutput>;
-                    rdfc:metadataOutput <metadataOutput>;
                 ];
                 rdfc:bucketizeStrategy ( [ a tree:DumpFragmentation ] );
-                rdfc:outputStreamId <http://newStream>;
                 rdfc:savePath ${iri("buckets.json")}.`,
         );
         await bucketizer.init();
@@ -776,7 +746,6 @@ describe("SDS processors tests", async () => {
             "LdesDiskWriter",
             `<http://example.com/ns#processor> a rdfc:LdesDiskWriter;
                 rdfc:dataInput <jr1>;
-                rdfc:metadataInput <jr2>;
                 rdfc:directory <./ldes-disk/>.`,
         );
         await diskWriter.init();
@@ -804,7 +773,6 @@ describe("SDS processors tests", async () => {
             `<http://example.com/ns#processor> a rdfc:LdesifySDS;
                 rdfc:input <jr>;
                 rdfc:output <jw>;
-                rdfc:targetStream <http://example.com/ns#target>;
                 rdfc:statePath ${iri("sds.json")}.`,
         );
         await ldesifySds.init();

@@ -219,14 +219,16 @@ type SDSArgs = {
     writer: Writer;
     statePath: string | undefined;
     sourceStream: Term | undefined;
-    targetStream: Term;
     modifiedPathM: Term; // This are the things that are added to the new entities, not necessarily related to the real objects
     isVersionOfPathM: Term;
 };
 export class LdesifySDS extends Processor<SDSArgs> {
     cache: { [key: string]: string } = {};
+    // The stream is the channel the records are written to.
+    targetStream: Term;
 
     async init(this: SDSArgs & this): Promise<void> {
+        this.targetStream = df.namedNode(this.writer.uri);
         if (this.statePath) {
             this.statePath = toPath(this.statePath);
             this.cache = getPrevState(this.statePath);
