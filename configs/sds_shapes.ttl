@@ -1,44 +1,56 @@
-@prefix tree: <https://w3id.org/tree#>.
-@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>.
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>.
 @prefix sds: <https://w3id.org/sds#>.
 @prefix sh: <http://www.w3.org/ns/shacl#>.
 @prefix xsd: <http://www.w3.org/2001/XMLSchema#>.
 @prefix rdfl: <https://w3id.org/rdf-lens/ontology#>.
-@prefix rdfc: <https://w3id.org/rdf-connect#>.
+
+# The SDS data description: the records, buckets and relations that the
+# processors write in the sds:DataDescription graph, and the relations they
+# remove in the sds:RemoveDataDescription graph. src/utils/description.ts
+# reads and writes it.
 
 [ ] a sh:NodeShape;
-  sh:targetClass <RdfThing>;
+  sh:targetClass <#Record>;
   sh:property [
-    sh:name "id";
-    sh:path ( );
-    sh:maxCount 1;
+    sh:name "stream";
+    sh:path sds:stream;
+    sh:nodeKind sh:IRI;
     sh:minCount 1;
-    sh:nodeKind sh:BlankNodeOrIRI;
+    sh:maxCount 1;
   ], [
-    sh:name "quads";
-    sh:path ( );
-    sh:maxCount 1;
+    sh:name "payload";
+    sh:path sds:payload;
+    sh:nodeKind sh:BlankNodeOrIRI;
     sh:minCount 1;
-    sh:class rdfl:CBD;
+    sh:maxCount 1;
+  ], [
+    sh:name "buckets";
+    sh:path sds:bucket;
+    sh:nodeKind sh:IRI;
+  ], [
+    sh:name "dataless";
+    sh:path sds:dataless;
+    sh:datatype xsd:boolean;
+    sh:maxCount 1;
   ].
 
 [ ] a sh:NodeShape;
   sh:targetClass <#Bucket>;
   sh:property [
-    sh:name "links";
-    sh:path sds:relation;
-    sh:class <#Relation>;
-  ], [
     sh:name "id";
     sh:path ( );
     sh:nodeKind sh:IRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:name "parent";
-    sh:path [ sh:inversePath ( sds:relation sds:relationBucket ) ];
-    sh:class <#Bucket>;
+    sh:name "stream";
+    sh:path sds:stream;
+    sh:nodeKind sh:IRI;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "immutable";
+    sh:path sds:immutable;
+    sh:datatype xsd:boolean;
     sh:maxCount 1;
   ], [
     sh:name "root";
@@ -46,8 +58,8 @@
     sh:datatype xsd:boolean;
     sh:maxCount 1;
   ], [
-    sh:name "immutable";
-    sh:path sds:immutable;
+    sh:name "empty";
+    sh:path sds:empty;
     sh:datatype xsd:boolean;
     sh:maxCount 1;
   ].
@@ -61,41 +73,49 @@
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:name "target";
+    sh:name "stream";
+    sh:path ( [ sh:inversePath sds:relation ] sds:stream );
+    sh:nodeKind sh:IRI;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "origin";
+    sh:path [ sh:inversePath sds:relation ];
+    sh:nodeKind sh:IRI;
+    sh:minCount 1;
+    sh:maxCount 1;
+  ], [
+    sh:name "bucket";
     sh:path sds:relationBucket;
     sh:nodeKind sh:IRI;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:name "value";
-    sh:path sds:relationValue;
-    sh:datatype xsd:literal;
-    sh:maxCount 1;
-  ], [
     sh:name "path";
     sh:path sds:relationPath;
-    sh:class <RdfThing>;
+    sh:class <#RdfThing>;
+    sh:maxCount 1;
+  ], [
+    sh:name "value";
+    sh:path sds:relationValue;
+    sh:class <#RdfThing>;
     sh:maxCount 1;
   ].
 
+# A term with its concise bounded description: a blank node or IRI path, or a
+# value, which can be a literal.
 [ ] a sh:NodeShape;
-  sh:targetClass <#Record>;
+  sh:targetClass <#RdfThing>;
   sh:property [
-    sh:name "stream";
-    sh:path sds:stream;
-    sh:nodeKind sh:IRI;
+    sh:name "id";
+    sh:path ( );
+    sh:codeType rdfl:Term;
     sh:minCount 1;
     sh:maxCount 1;
   ], [
-    sh:name "data";
-    sh:path sds:payload;
-    sh:nodeKind sh:BlankNodeOrIRI;
+    sh:name "quads";
+    sh:path ( );
     sh:minCount 1;
     sh:maxCount 1;
-  ], [
-    sh:name "bucket";
-    sh:path sds:bucket;
-    sh:class <#Bucket>;
-    sh:maxCount 1;
+    sh:class rdfl:CBD;
   ].
-
