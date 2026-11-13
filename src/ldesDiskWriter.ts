@@ -624,7 +624,7 @@ async function quadsToString(quads: Quad[]) {
             if (error) {
                 reject(error);
             } else {
-                resolve(result);
+                resolve(result ?? "");
             }
         });
     });

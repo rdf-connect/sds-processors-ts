@@ -52,7 +52,7 @@ export class Shapify extends Processor<Args> {
                 const out_str: string = await new Promise((res, rej) =>
                     n_writer.end((error, result) => {
                         if (error) rej(error);
-                        res(result);
+                        res(result ?? "");
                     }),
                 );
                 await this.writer.string(out_str);
