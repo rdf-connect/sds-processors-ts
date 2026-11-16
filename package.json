@@ -60,7 +60,7 @@
         "globals": "^17.14.0",
         "husky": "^9.1.7",
         "lint-staged": "^17.6.0",
-        "memfs": "^4.80.0",
+        "memfs": "^4.80.1",
         "prettier": "^3.10.1",
         "ts-node": "^10.9.2",
         "ts-patch": "^4.0.1",
@@ -70,6 +70,6 @@
     },
     "optionalDependencies": {
         "@esbuild/darwin-arm64": "^0.28.2",
-        "@rollup/rollup-linux-x64-gnu": "^4.68.2"
+        "@rollup/rollup-linux-x64-gnu": "^4.68.3"
     }
 }
