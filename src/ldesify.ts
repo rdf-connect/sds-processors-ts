@@ -3,8 +3,7 @@ import { Quad, Quad_Predicate, Term } from "@rdfjs/types";
 import { readFileSync, writeFileSync } from "fs";
 import { DataFactory } from "rdf-data-factory";
 import { NamedNode, Parser, Quad_Object, Writer as N3Writer } from "n3";
-import { Extractor } from "./utils";
-import { CBDShapeExtractor } from "extract-cbd-shape";
+import { Extractor } from "./utils/description";
 
 // @ts-expect-error no declaration file found
 import { canonize } from "rdf-canonize";
@@ -244,10 +243,7 @@ export class LdesifySDS extends Processor<SDSArgs> {
     async transform(this: SDSArgs & this): Promise<void> {
         const modifiedPath: Term = this.modifiedPathM;
         const versionPath: Term = this.isVersionOfPathM;
-        const extractor = new Extractor(
-            new CBDShapeExtractor(),
-            this.sourceStream,
-        );
+        const extractor = new Extractor(this.sourceStream);
         for await (const x of this.reader.strings()) {
             const quads = new Parser().parse(x);
 
