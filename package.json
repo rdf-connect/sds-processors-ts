@@ -36,7 +36,7 @@
         "rdf-canonize": "^5.0.0",
         "rdf-data-factory": "^2.1.0",
         "rdf-lens": "^2.2.0",
-        "rdf-stores": "^2.10.0",
+        "rdf-stores": "^2.10.1",
         "winston": "^3.19.0"
     },
     "devDependencies": {
@@ -59,7 +59,7 @@
         "eslint-config-prettier": "^10.1.8",
         "globals": "^17.14.0",
         "husky": "^9.1.7",
-        "lint-staged": "^17.6.0",
+        "lint-staged": "^17.6.1",
         "memfs": "^4.80.1",
         "prettier": "^3.10.1",
         "ts-node": "^10.9.2",
