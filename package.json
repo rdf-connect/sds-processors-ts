@@ -36,7 +36,7 @@
         "rdf-canonize": "^5.0.0",
         "rdf-data-factory": "^2.1.0",
         "rdf-lens": "^2.2.0",
-        "rdf-stores": "^2.10.1",
+        "rdf-stores": "^2.10.3",
         "winston": "^3.19.0"
     },
     "devDependencies": {
@@ -51,8 +51,8 @@
         "@types/node": "^25.9.9",
         "@types/terraformer__spatial": "^2.0.4",
         "@types/terraformer__wkt": "^2.0.3",
-        "@typescript-eslint/eslint-plugin": "^8.72.2",
-        "@typescript-eslint/parser": "^8.72.2",
+        "@typescript-eslint/eslint-plugin": "^8.73.0",
+        "@typescript-eslint/parser": "^8.73.0",
         "@vitest/coverage-v8": "^4.1.12",
         "dotenv": "^17.4.2",
         "eslint": "^10.5.0",
@@ -70,6 +70,6 @@
     },
     "optionalDependencies": {
         "@esbuild/darwin-arm64": "^0.28.2",
-        "@rollup/rollup-linux-x64-gnu": "^4.68.3"
+        "@rollup/rollup-linux-x64-gnu": "^4.68.5"
     }
 }
