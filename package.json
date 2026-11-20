@@ -35,12 +35,12 @@
         "n3": "^2.13.12",
         "rdf-canonize": "^5.0.0",
         "rdf-data-factory": "^2.1.0",
-        "rdf-lens": "^2.2.0",
+        "rdf-lens": "^2.3.0",
         "rdf-stores": "^2.10.3",
         "winston": "^3.19.0"
     },
     "devDependencies": {
-        "@ajuvercr/ts-transformer-inline-file": "^0.2.0",
+        "@ajuvercr/ts-transformer-inline-file": "^0.2.1",
         "@eslint/eslintrc": "^3.3.7",
         "@eslint/js": "^10.0.1",
         "@rdfc/js-runner": "^3.4.2",
@@ -70,6 +70,6 @@
     },
     "optionalDependencies": {
         "@esbuild/darwin-arm64": "^0.28.2",
-        "@rollup/rollup-linux-x64-gnu": "^4.68.5"
+        "@rollup/rollup-linux-x64-gnu": "^4.68.7"
     }
 }
