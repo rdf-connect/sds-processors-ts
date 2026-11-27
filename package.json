@@ -48,7 +48,7 @@
         "@types/geojson": "^7946.0.16",
         "@types/jsonld": "^1.5.15",
         "@types/n3": "^1.26.6",
-        "@types/node": "^25.9.10",
+        "@types/node": "^25.9.12",
         "@types/terraformer__spatial": "^2.0.4",
         "@types/terraformer__wkt": "^2.0.3",
         "@typescript-eslint/eslint-plugin": "^8.74.0",
@@ -64,7 +64,7 @@
         "prettier": "^3.10.1",
         "ts-node": "^10.9.2",
         "ts-patch": "^4.0.1",
-        "tsc-alias": "^1.9.10",
+        "tsc-alias": "^1.9.11",
         "typescript": "^6.0.3",
         "vitest": "^4.1.12"
     },
